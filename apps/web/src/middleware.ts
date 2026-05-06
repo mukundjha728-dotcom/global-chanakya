@@ -5,29 +5,47 @@ import { authConfig } from '@/auth.config';
 
 const { auth } = NextAuth(authConfig);
 
+// ⚠️ SECRET admin path — change this to something only YOU know
+// Update ADMIN_SECRET_PATH in .env too
+const ADMIN_SECRET_PATH = process.env.ADMIN_SECRET_PATH ?? '/gc-control-9x7k';
+
 export default auth((req) => {
   const session = req.auth;
   const { pathname } = req.nextUrl;
 
-  // RBAC & Route Protection
-  if (pathname.startsWith('/admin')) {
-    if (!session || (session.user as any)?.role !== 'admin') {
-      return NextResponse.redirect(new URL('/', req.url));
+  // Block the public /admin path — redirect to 404
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return NextResponse.redirect(new URL('/404', req.url));
+  }
+
+  // Secret admin path — only the admin email can access
+  if (pathname.startsWith(ADMIN_SECRET_PATH)) {
+    if (!session) {
+      // Not logged in — redirect to sign in
+      return NextResponse.redirect(new URL('/auth/signin', req.url));
+    }
+    const role = (session.user as any)?.role;
+    if (role !== 'admin') {
+      // Logged in but not admin — pretend page doesn't exist
+      return NextResponse.redirect(new URL('/404', req.url));
     }
   }
 
+  // Premium route protection
   if (pathname.startsWith('/premium')) {
-    if (!session || ((session.user as any)?.role !== 'premium' && (session.user as any)?.role !== 'admin')) {
+    const role = (session?.user as any)?.role;
+    if (!session || (role !== 'premium' && role !== 'admin')) {
       return NextResponse.redirect(new URL('/subscribe', req.url));
     }
   }
 
-  // Basic Security Headers (Helmet equivalent for Edge)
+  // Security headers on all responses
   const response = NextResponse.next();
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
+  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
   return response;
 });
 

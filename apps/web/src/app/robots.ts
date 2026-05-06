@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://globalchanakya.com';
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://global-chanakya-web.vercel.app';
 
 export default function robots(): MetadataRoute.Robots {
   return {

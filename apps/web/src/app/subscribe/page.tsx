@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
+import { Zap, CheckCircle2, ShieldAlert, ArrowRight, ShieldCheck } from "lucide-react";
 
 export default function SubscribePage() {
   const [loading, setLoading] = useState(false);
@@ -59,40 +60,85 @@ export default function SubscribePage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen pt-32 pb-20 px-6 flex items-center justify-center bg-black selection:bg-amber-900 selection:text-white">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" />
       
-      <div className="max-w-md w-full border rounded-2xl shadow-xl p-8 bg-card text-center">
-        <div className="inline-block px-3 py-1 bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold rounded-full mb-6">PREMIUM PLAN</div>
-        <h1 className="text-3xl font-bold mb-2">Weekly Early Access</h1>
-        <p className="text-muted-foreground mb-6">Get 24-hour early access to our exclusive geopolitical intelligence reports.</p>
+      <div className="w-full max-w-5xl grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
         
-        <div className="text-5xl font-extrabold mb-8">
-          ₹19 <span className="text-lg font-medium text-muted-foreground">/ 7 days</span>
+        {/* Left copy */}
+        <div className="flex flex-col gap-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 text-xs font-semibold uppercase tracking-wider w-fit">
+            <Zap className="w-3.5 h-3.5" />
+            Premium Access
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight text-white">
+            Intelligence,<br/>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-400">
+              Delivered First.
+            </span>
+          </h1>
+          <p className="text-gray-400 text-lg leading-relaxed">
+            Stop reading yesterday's news. Get uncompromising, unvarnished geopolitical analysis 24 hours before it reaches the public domain.
+          </p>
+          
+          <div className="space-y-4 mt-4">
+            {[
+              "Instant 24-hour early access to all new reports.",
+              "Exclusive Premium PRO badge on your profile.",
+              "Ad-free, tracker-free reading experience.",
+              "Priority comment & bookmarking tools."
+            ].map((feature, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0 mt-0.5" />
+                <span className="text-gray-300 text-sm">{feature}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
-        <ul className="text-left space-y-3 mb-8 text-sm">
-          <li className="flex items-center">
-            <span className="text-green-500 mr-2">✓</span> Read latest reports instantly
-          </li>
-          <li className="flex items-center">
-            <span className="text-green-500 mr-2">✓</span> No 24-hour waiting period
-          </li>
-          <li className="flex items-center">
-            <span className="text-green-500 mr-2">✓</span> Exclusive Premium Badge
-          </li>
-          <li className="flex items-center">
-            <span className="text-green-500 mr-2">✓</span> Bookmark & Comment features
-          </li>
-        </ul>
+        {/* Right checkout card */}
+        <div className="relative">
+          {/* background glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[120%] bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
+          
+          <div className="relative border border-white/10 bg-[#080808] p-8 md:p-10 rounded-[2rem] shadow-2xl">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-xl font-bold text-white">Weekly Pass</h3>
+              <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-medium text-gray-300">
+                Auto-expires
+              </div>
+            </div>
 
-        <button 
-          onClick={handlePayment} 
-          disabled={loading}
-          className="w-full bg-primary text-primary-foreground font-bold py-4 rounded-lg hover:bg-primary/90 transition shadow-md disabled:opacity-50"
-        >
-          {loading ? "Processing..." : "Subscribe Now"}
-        </button>
+            <div className="mb-8">
+              <div className="flex items-baseline gap-2">
+                <span className="text-5xl font-extrabold text-white">₹19</span>
+                <span className="text-gray-500 font-medium">/ 7 days</span>
+              </div>
+              <p className="text-sm text-gray-500 mt-2">Zero commitment. Renew manually when needed.</p>
+            </div>
+
+            <button 
+              onClick={handlePayment} 
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-black font-bold py-4 rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-amber-500/20"
+            >
+              {loading ? "Processing Secure Checkout..." : "Unlock Premium Access"}
+              {!loading && <ArrowRight className="w-5 h-5" />}
+            </button>
+
+            <div className="mt-8 pt-8 border-t border-white/[0.06] flex flex-col gap-4">
+              <div className="flex items-center gap-3 text-sm text-gray-500">
+                <ShieldCheck className="w-5 h-5 text-amber-500/60" />
+                <span>Secured by 256-bit encryption.</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-gray-500">
+                <ShieldAlert className="w-5 h-5 text-gray-600" />
+                <span>No automatic deductions or recurring charges.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

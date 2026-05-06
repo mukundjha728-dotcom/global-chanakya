@@ -9,6 +9,9 @@ import { User } from "./lib/models/User";
 import * as argon2 from "argon2";
 import { authConfig } from "./auth.config";
 
+// 🔒 SINGLE ADMIN LOCK — Only this email can ever have admin role
+const ADMIN_EMAIL = "mukundjha728@gmail.com";
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: MongoDBAdapter(clientPromise),
@@ -16,10 +19,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -40,5 +45,35 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
       }
     })
-  ]
+  ],
+  callbacks: {
+    ...authConfig.callbacks,
+    // Override jwt to fetch role from DB for OAuth users (runs in Node.js, not Edge)
+    async jwt({ token, user, account }) {
+      // Credentials provider: role already on user object
+      if (user) {
+        token.role = (user as any).role ?? "free";
+        token.id = user.id;
+      }
+      // For OAuth sign-ins (Google/GitHub), fetch role from DB
+      if (account && (account.provider === "google" || account.provider === "github")) {
+        try {
+          await dbConnect();
+          const dbUser = await User.findOne({ email: token.email }).lean() as any;
+          if (dbUser) {
+            token.role = dbUser.role ?? "free";
+            token.id = dbUser._id.toString();
+          }
+        } catch (e) {
+          token.role = token.role ?? "free";
+        }
+      }
+      // 🔒 FINAL SAFETY: Only the designated admin email can have admin role
+      // No other user can ever have admin, even if DB is modified
+      if (token.role === "admin" && token.email !== ADMIN_EMAIL) {
+        token.role = "free";
+      }
+      return token;
+    },
+  }
 });
