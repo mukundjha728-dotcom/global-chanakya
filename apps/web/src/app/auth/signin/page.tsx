@@ -14,13 +14,14 @@ export default function SignInPage() {
     e.preventDefault();
     try {
       const res = await signIn("credentials", {
-        redirect: true,
+        redirect: false,
         email,
         password,
-        redirectTo: "/"
       });
       if (res?.error) {
         setError("Invalid credentials");
+      } else {
+        window.location.href = "/";
       }
     } catch (err) {
       setError("An error occurred");
