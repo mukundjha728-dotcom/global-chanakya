@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { connectDB } from '@/lib/db';
+import dbConnect from '@/lib/mongoose';
 
 export async function GET() {
   try {
     // Check Database connection as well
-    await connectDB();
+    await dbConnect();
     const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
 
     return NextResponse.json(
