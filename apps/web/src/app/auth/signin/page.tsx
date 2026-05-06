@@ -71,7 +71,7 @@ export default function SignInPage() {
                 <input type="checkbox" className="rounded bg-black border-white/20 text-rose-500 focus:ring-rose-500/50" />
                 Remember me
               </label>
-              <Link href="#" className="text-rose-400 hover:text-rose-300">Forgot password?</Link>
+              <Link href="/auth/forgot-password" className="text-rose-400 hover:text-rose-300">Forgot password?</Link>
             </div>
 
             <button type="submit" className="w-full bg-rose-600 text-white font-semibold py-3 rounded-xl hover:bg-rose-700 transition-colors mt-6">
