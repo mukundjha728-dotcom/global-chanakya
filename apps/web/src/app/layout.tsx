@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "your-google-site-verification-token",
+    google: "G9xLRykmNyLPv9oK0P0fg5A8cyNMl0jB10RuomUHn0w",
   },
   category: "news",
 };
