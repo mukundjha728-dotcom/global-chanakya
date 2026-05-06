@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, ShieldAlert, Zap, Globe, TrendingUp, Lock, ExternalLink, CheckCircle2 } from "lucide-react";
+import { ArrowRight, ShieldAlert, Zap, Globe, TrendingUp, Lock, ExternalLink, CheckCircle2, Flame, Eye, Heart, BookmarkIcon } from "lucide-react";
+import { getTrendingBlogs, getLatestBlogs } from "@/lib/trending";
+import type { TrendingBlog } from "@/lib/trending";
+
+export const revalidate = 300; // Revalidate every 5 minutes (ISR)
 
 const SITE_URL = "https://global-chanakya-web.vercel.app";
 
@@ -19,13 +23,122 @@ const stats = [
   { label: "Avg. SEO Score", value: "98 / 100" },
 ];
 
-export default function Home() {
+function BlogCard({ blog, rank }: { blog: TrendingBlog; rank: number }) {
+  const isPremium = blog.visibility === "premium";
+  const isFeatured = rank === 0;
+
+  return (
+    <Link
+      href={`/blogs/${blog.slug}`}
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+        isFeatured
+          ? "border-rose-500/20 bg-gradient-to-br from-rose-950/30 to-black hover:border-rose-500/40 hover:shadow-rose-900/20"
+          : "border-white/[0.07] bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04] hover:shadow-black/50"
+      }`}
+    >
+      {/* Featured Image */}
+      {blog.featuredImage ? (
+        <div className={`relative overflow-hidden ${isFeatured ? "aspect-video" : "aspect-[16/7]"}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={blog.featuredImage}
+            alt={blog.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          {/* Badges overlay */}
+          <div className="absolute top-3 left-3 flex items-center gap-2">
+            {blog.isTrending && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/90 text-white text-[10px] font-bold uppercase tracking-wide backdrop-blur-sm">
+                <Flame className="w-2.5 h-2.5" /> Trending
+              </span>
+            )}
+            {rank < 3 && (
+              <span className="px-2 py-0.5 rounded-full bg-amber-500/90 text-black text-[10px] font-bold backdrop-blur-sm">
+                #{rank + 1} Top
+              </span>
+            )}
+          </div>
+          {isPremium && (
+            <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
+              <Zap className="w-2.5 h-2.5" /> PREMIUM
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 to-black ${isFeatured ? "aspect-video" : "aspect-[16/7]"}`}>
+          <Globe className="w-12 h-12 text-gray-800" />
+          <div className="absolute top-3 left-3 flex items-center gap-2">
+            {blog.isTrending && (
+              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/90 text-white text-[10px] font-bold uppercase tracking-wide">
+                <Flame className="w-2.5 h-2.5" /> Trending
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="flex flex-col flex-1 p-5 gap-3">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-[10px] font-semibold uppercase tracking-wide">
+            {blog.category}
+          </span>
+          {isPremium && (
+            <span className="flex items-center gap-1 text-amber-400 text-[10px] font-medium">
+              <Lock className="w-2.5 h-2.5" /> Early Access
+            </span>
+          )}
+        </div>
+
+        <h3 className={`font-bold leading-snug text-white group-hover:text-rose-300 transition-colors line-clamp-2 ${isFeatured ? "text-xl" : "text-base"}`}>
+          {blog.title}
+        </h3>
+
+        <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 flex-1">
+          {blog.excerpt}
+        </p>
+
+        {/* Stats */}
+        <div className="flex items-center gap-4 pt-1 border-t border-white/5">
+          <span className="flex items-center gap-1 text-gray-600 text-xs">
+            <Eye className="w-3 h-3" />
+            {(blog.analytics?.views ?? 0).toLocaleString()}
+          </span>
+          <span className="flex items-center gap-1 text-gray-600 text-xs">
+            <Heart className="w-3 h-3" />
+            {blog.analytics?.likes ?? 0}
+          </span>
+          <span className="flex items-center gap-1 text-gray-600 text-xs">
+            <BookmarkIcon className="w-3 h-3" />
+            {blog.analytics?.bookmarks ?? 0}
+          </span>
+          <span className="ml-auto text-gray-600 text-xs">
+            {new Date(blog.publishAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+export default async function Home() {
+  // Fetch trending + latest blogs in parallel
+  const [trendingBlogs, latestBlogs] = await Promise.all([
+    getTrendingBlogs(6),
+    getLatestBlogs(3),
+  ]);
+
+  const hasTrending = trendingBlogs.length > 0;
+  const featuredBlog = trendingBlogs[0];
+  const sideTrending = trendingBlogs.slice(1, 4);
+  const restTrending = trendingBlogs.slice(4);
+
   return (
     <div className="bg-black text-white selection:bg-rose-900 selection:text-white">
 
       {/* ── HERO ── */}
       <section className="relative pt-36 pb-24 px-6 overflow-hidden">
-        {/* background glow */}
         <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-rose-600/10 blur-[120px] rounded-full pointer-events-none" />
         <div className="absolute top-40 right-0 w-[400px] h-[400px] bg-orange-500/5 blur-[100px] rounded-full pointer-events-none" />
 
@@ -95,29 +208,65 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right — hero card */}
-            <div className="relative w-full aspect-[4/3] rounded-3xl border border-white/10 bg-gradient-to-br from-gray-900 to-black overflow-hidden group">
-              <div
-                className="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-35 transition-opacity duration-700 mix-blend-luminosity"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop')" }}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-              {/* Floating premium badge */}
-              <div className="absolute top-5 right-5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold backdrop-blur-sm flex items-center gap-1.5">
-                <Zap className="w-3 h-3" /> PREMIUM EARLY ACCESS
-              </div>
-              <div className="absolute bottom-0 left-0 w-full p-7 flex flex-col gap-3">
-                <div className="flex items-center gap-2 text-rose-400 font-mono text-xs">
-                  <ShieldAlert className="w-3.5 h-3.5" /> RESTRICTED — PREMIUM ONLY
+            {/* Right — Featured trending blog OR static card */}
+            {featuredBlog ? (
+              <Link
+                href={`/blogs/${featuredBlog.slug}`}
+                className="relative w-full aspect-[4/3] rounded-3xl border border-white/10 bg-gradient-to-br from-gray-900 to-black overflow-hidden group"
+              >
+                {featuredBlog.featuredImage && (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-45 transition-opacity duration-700 mix-blend-luminosity"
+                    style={{ backgroundImage: `url('${featuredBlog.featuredImage}')` }}
+                  />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                <div className="absolute top-5 left-5 flex items-center gap-2">
+                  {featuredBlog.isTrending && (
+                    <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-rose-500/90 text-white text-xs font-bold">
+                      <Flame className="w-3 h-3" /> #1 Trending
+                    </span>
+                  )}
+                  {featuredBlog.visibility === "premium" && (
+                    <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold backdrop-blur-sm">
+                      <Zap className="w-3 h-3" /> PREMIUM
+                    </span>
+                  )}
                 </div>
-                <h3 className="text-2xl font-bold leading-tight">The Emerging Indo-Pacific Security Architecture</h3>
-                <p className="text-gray-400 text-sm line-clamp-2">Strategic realignments in the South China Sea and broader implications for global supply chains.</p>
-                <div className="flex items-center gap-3 pt-1">
-                  <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-medium backdrop-blur-sm">24h Early Access</span>
-                  <span className="text-xs text-gray-500">Unlocks for public tomorrow</span>
+                <div className="absolute bottom-0 left-0 w-full p-7 flex flex-col gap-3">
+                  <span className="text-xs text-gray-400 uppercase tracking-wide font-medium">{featuredBlog.category}</span>
+                  <h3 className="text-2xl font-bold leading-tight">{featuredBlog.title}</h3>
+                  <p className="text-gray-400 text-sm line-clamp-2">{featuredBlog.excerpt}</p>
+                  <div className="flex items-center gap-4 pt-1">
+                    <span className="flex items-center gap-1 text-gray-400 text-xs"><Eye className="w-3 h-3" /> {(featuredBlog.analytics?.views ?? 0).toLocaleString()}</span>
+                    <span className="flex items-center gap-1 text-gray-400 text-xs"><Heart className="w-3 h-3" /> {featuredBlog.analytics?.likes ?? 0}</span>
+                    <span className="ml-auto px-3 py-1 bg-white/10 rounded-full text-xs font-medium backdrop-blur-sm">Read Now →</span>
+                  </div>
+                </div>
+              </Link>
+            ) : (
+              <div className="relative w-full aspect-[4/3] rounded-3xl border border-white/10 bg-gradient-to-br from-gray-900 to-black overflow-hidden group">
+                <div
+                  className="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-35 transition-opacity duration-700 mix-blend-luminosity"
+                  style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop')" }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                <div className="absolute top-5 right-5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold backdrop-blur-sm flex items-center gap-1.5">
+                  <Zap className="w-3 h-3" /> PREMIUM EARLY ACCESS
+                </div>
+                <div className="absolute bottom-0 left-0 w-full p-7 flex flex-col gap-3">
+                  <div className="flex items-center gap-2 text-rose-400 font-mono text-xs">
+                    <ShieldAlert className="w-3.5 h-3.5" /> RESTRICTED — PREMIUM ONLY
+                  </div>
+                  <h3 className="text-2xl font-bold leading-tight">The Emerging Indo-Pacific Security Architecture</h3>
+                  <p className="text-gray-400 text-sm line-clamp-2">Strategic realignments in the South China Sea and broader implications for global supply chains.</p>
+                  <div className="flex items-center gap-3 pt-1">
+                    <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-medium backdrop-blur-sm">24h Early Access</span>
+                    <span className="text-xs text-gray-500">Unlocks for public tomorrow</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </section>
@@ -133,6 +282,79 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* ── TRENDING BLOGS SECTION ── */}
+      {hasTrending && (
+        <section className="py-20 px-6" id="trending">
+          <div className="max-w-7xl mx-auto">
+            {/* Section Header */}
+            <div className="flex items-center justify-between mb-10">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Flame className="w-4 h-4 text-rose-500" />
+                  <span className="text-rose-400 text-xs font-semibold uppercase tracking-wider">Trending Now</span>
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white">
+                  What Readers Are Watching
+                </h2>
+                <p className="text-gray-500 text-sm mt-1">
+                  Ranked by views, likes & reader engagement — updated every 5 minutes
+                </p>
+              </div>
+              <Link
+                href="/blogs"
+                className="hidden sm:flex items-center gap-1 text-gray-400 text-sm hover:text-white transition-colors"
+              >
+                View all <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {/* Featured + Side Grid */}
+            <div className="grid lg:grid-cols-3 gap-5 mb-5">
+              {/* Featured card (rank 1) */}
+              {trendingBlogs[0] && (
+                <div className="lg:col-span-2">
+                  <BlogCard blog={trendingBlogs[0]} rank={0} />
+                </div>
+              )}
+              {/* Side cards (rank 2-3) */}
+              <div className="flex flex-col gap-5">
+                {sideTrending.map((blog, i) => (
+                  <BlogCard key={blog._id} blog={blog} rank={i + 1} />
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom row (rank 4-6) */}
+            {restTrending.length > 0 && (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {restTrending.map((blog, i) => (
+                  <BlogCard key={blog._id} blog={blog} rank={i + 4} />
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── LATEST ARTICLES ── */}
+      {latestBlogs.length > 0 && (
+        <section className="py-16 px-6 bg-white/[0.01] border-t border-white/[0.07]" id="latest">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-white">Latest Reports</h2>
+              <Link href="/blogs" className="text-gray-400 text-sm hover:text-white transition-colors flex items-center gap-1">
+                All articles <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {latestBlogs.map((blog, i) => (
+                <BlogCard key={blog._id} blog={blog} rank={i + 10} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── FEATURES ── */}
       <section className="py-24 px-6" id="features">
@@ -211,7 +433,6 @@ export default function Home() {
             <p className="text-xs text-rose-400 font-mono mb-2 flex items-center gap-1"><Lock className="w-3 h-3" /> EARLY ACCESS — 17h 42m remaining</p>
             <h4 className="text-lg font-bold mb-2">China's Dual Circulation Strategy and the Future of Global Trade</h4>
             <p className="text-sm text-gray-600 line-clamp-3">An in-depth look at how Beijing's internal-external economic pivot is reshaping supply chains across Southeast Asia and its implications for Indian exporters...</p>
-            {/* blur overlay */}
             <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-black to-transparent" />
             <div className="mt-6 flex items-center gap-2 text-sm">
               <Lock className="w-4 h-4 text-gray-600" />
