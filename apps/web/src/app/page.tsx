@@ -1,29 +1,9 @@
 import Link from "next/link";
-import { ArrowRight, Globe, Lock, ShieldAlert } from "lucide-react";
+import { ArrowRight, ShieldAlert } from "lucide-react";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-rose-900 selection:text-white font-sans">
-      {/* Navigation */}
-      <nav className="fixed w-full z-50 top-0 border-b border-white/10 bg-black/50 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Globe className="w-8 h-8 text-rose-600" />
-            <span className="text-2xl font-bold tracking-tighter uppercase">
-              Global <span className="text-rose-600">Chanakya</span>
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-300">
-            <Link href="#latest" className="hover:text-white transition-colors">Latest Intel</Link>
-            <Link href="#premium" className="hover:text-white transition-colors flex items-center gap-1">
-              <Lock className="w-4 h-4 text-rose-500" /> Premium
-            </Link>
-            <Link href="/auth/signin" className="px-5 py-2.5 bg-white text-black rounded-full hover:bg-gray-200 transition-colors font-semibold">
-              Sign In
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="bg-black text-white selection:bg-rose-900 selection:text-white font-sans">
 
       {/* Hero Section */}
       <main className="pt-32 pb-20 px-6">

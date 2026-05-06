@@ -1,0 +1,30 @@
+import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
+import { connectDB } from '@/lib/db';
+
+export async function GET() {
+  try {
+    // Check Database connection as well
+    await connectDB();
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+
+    return NextResponse.json(
+      {
+        status: 'ok',
+        database: dbStatus,
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+      },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    return NextResponse.json(
+      {
+        status: 'error',
+        message: 'Health check failed',
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
