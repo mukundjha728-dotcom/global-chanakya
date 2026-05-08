@@ -91,6 +91,24 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
     }
   }, [editId]);
 
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Ctrl+S or Cmd+S -> Save Draft
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        document.getElementById("btn-save-draft")?.click();
+      }
+      // Ctrl+Enter or Cmd+Enter -> Publish
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("btn-publish")?.click();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   function update(field: keyof FormData, value: string | boolean) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
@@ -159,6 +177,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
         </div>
         <div className="flex items-center gap-2">
           <button
+            id="btn-save-draft"
             onClick={() => handleSave(false)}
             disabled={saving}
             className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white text-xs font-medium rounded-lg border border-white/10 transition-all disabled:opacity-50"
@@ -166,6 +185,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
             {saving ? "Saving…" : "💾 Save Draft"}
           </button>
           <button
+            id="btn-publish"
             onClick={() => handleSave(true)}
             disabled={saving}
             className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold rounded-lg transition-all disabled:opacity-50"
@@ -451,8 +471,18 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
           <div className="mt-6 pt-4 border-t border-white/10">
             <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-2">Shortcuts</p>
             <div className="space-y-1 text-xs text-gray-500">
-              <p>Draft → <span className="text-white">Ctrl+S</span></p>
-              <p>Publish → <span className="text-white">Ctrl+Enter</span></p>
+              <p 
+                className="cursor-pointer hover:text-white transition-colors"
+                onClick={() => handleSave(false)}
+              >
+                Draft → <span className="text-white">Ctrl+S</span>
+              </p>
+              <p 
+                className="cursor-pointer hover:text-amber-400 transition-colors"
+                onClick={() => handleSave(true)}
+              >
+                Publish → <span className="text-white">Ctrl+Enter</span>
+              </p>
             </div>
           </div>
         </div>
