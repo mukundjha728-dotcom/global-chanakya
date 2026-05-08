@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Script from "next/script";
 import { ConditionalShell } from "@/components/layout/ConditionalShell";
+import { Providers } from "@/components/layout/Providers";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -111,10 +112,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}>
         <DisableInspect />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          <ConditionalShell navbar={<Navbar />} footer={<Footer />}>
-            {children}
-          </ConditionalShell>
-        </ThemeProvider>
+            <Providers>
+              <ConditionalShell navbar={<Navbar />} footer={<Footer />}>
+                {children}
+              </ConditionalShell>
+            </Providers>
+          </ThemeProvider>
       </body>
     </html>
   );
