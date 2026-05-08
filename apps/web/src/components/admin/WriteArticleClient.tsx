@@ -128,6 +128,10 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
       setSaving(true);
     }
 
+    // AbortController — 45 second hard timeout
+    const controller = new AbortController();
+    const hardTimeout = setTimeout(() => controller.abort(), 45000);
+
     try {
       const payload = {
         ...form,
@@ -142,17 +146,30 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
         status: publishNow ? "published" : form.status,
       };
 
-      // Simulate step 2 halfway through
+      // Move to step 2 after 1.5s (visual feedback)
       let stepTimer: ReturnType<typeof setTimeout> | null = null;
       if (publishNow) {
-        stepTimer = setTimeout(() => setPublishStep(2), 1000);
+        stepTimer = setTimeout(() => setPublishStep(2), 1500);
       }
 
-      const res = await fetch("/api/admin/blogs", {
-        method: editId ? "PATCH" : "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      let res: Response;
+      try {
+        res = await fetch("/api/admin/blogs", {
+          method: editId ? "PATCH" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: controller.signal,
+        });
+      } catch (fetchErr: any) {
+        if (stepTimer) clearTimeout(stepTimer);
+        const msg = fetchErr?.name === "AbortError"
+          ? "Request timed out (45s). MongoDB slow hai. Dobara try karo."
+          : "Network error. Internet check karo aur dobara try karo.";
+        if (publishNow) { setPublishing(false); setPublishStep(0); }
+        else setSaving(false);
+        alert(msg);
+        return;
+      }
 
       if (stepTimer) clearTimeout(stepTimer);
 
@@ -169,11 +186,13 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
           setTimeout(() => setSaved(false), 3000);
         }
       } else {
-        const err = await res.json();
+        let errMsg = "Kuch galat hua, dobara try karo";
+        try { const err = await res.json(); errMsg = err.error ?? errMsg; } catch {}
         if (publishNow) { setPublishing(false); setPublishStep(0); }
-        alert(err.error ?? "Kuch galat hua, dobara try karo");
+        alert(errMsg);
       }
     } finally {
+      clearTimeout(hardTimeout);
       if (!publishNow) setSaving(false);
     }
   }
@@ -189,7 +208,9 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
           <div className="bg-[#0d0d17] border border-white/10 rounded-3xl p-10 max-w-sm w-full mx-6 text-center shadow-2xl">
             <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center text-3xl transition-all ${publishStep === 3 ? "bg-green-500/20 border border-green-500/30" : "bg-amber-500/20 border border-amber-500/30"}`}>
               {publishStep === 1 && "💾"}
-              {publishStep === 2 && "🔍"}
+              {publishStep === 2 && (
+                <span className="animate-spin inline-block">🔄</span>
+              )}
               {publishStep === 3 && "🎉"}
             </div>
             <h3 className="text-lg font-bold text-white mb-2">
@@ -199,10 +220,10 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
             </h3>
             <p className="text-gray-500 text-sm mb-6">
               {publishStep === 1 && "Uploading your article to the database"}
-              {publishStep === 2 && "Indexing for SEO and making it public"}
+              {publishStep === 2 && "Connecting to database and publishing..."}
               {publishStep === 3 && "Your article is now live for everyone to read!"}
             </p>
-            <div className="flex gap-2 items-center justify-center">
+            <div className="flex gap-2 items-center justify-center mb-6">
               {[1, 2, 3].map((step) => (
                 <div
                   key={step}
@@ -216,6 +237,14 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 />
               ))}
             </div>
+            {publishStep < 3 && (
+              <button
+                onClick={() => { setPublishing(false); setPublishStep(0); }}
+                className="text-xs text-gray-600 hover:text-gray-400 transition-colors underline"
+              >
+                Cancel
+              </button>
+            )}
           </div>
         </div>
       )}
