@@ -32,6 +32,8 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
 
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [publishStep, setPublishStep] = useState(0); // 0=idle,1=saving,2=indexing,3=done
   const [activeTab, setActiveTab] = useState<"content" | "seo" | "settings">("content");
   const [form, setForm] = useState<FormData>({
     title: "",
@@ -118,7 +120,14 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
       alert("Title, excerpt aur content required hai!");
       return;
     }
-    setSaving(true);
+
+    if (publishNow) {
+      setPublishing(true);
+      setPublishStep(1);
+    } else {
+      setSaving(true);
+    }
+
     try {
       const payload = {
         ...form,
@@ -133,22 +142,39 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
         status: publishNow ? "published" : form.status,
       };
 
+      // Simulate step 2 halfway through
+      let stepTimer: ReturnType<typeof setTimeout> | null = null;
+      if (publishNow) {
+        stepTimer = setTimeout(() => setPublishStep(2), 1000);
+      }
+
       const res = await fetch("/api/admin/blogs", {
         method: editId ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
 
+      if (stepTimer) clearTimeout(stepTimer);
+
       if (res.ok) {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 3000);
-        if (publishNow) router.push("/gc-control-9x7k/blogs");
+        if (publishNow) {
+          setPublishStep(3);
+          setTimeout(() => {
+            setPublishing(false);
+            setPublishStep(0);
+            router.push("/gc-control-9x7k/blogs");
+          }, 1500);
+        } else {
+          setSaved(true);
+          setTimeout(() => setSaved(false), 3000);
+        }
       } else {
         const err = await res.json();
+        if (publishNow) { setPublishing(false); setPublishStep(0); }
         alert(err.error ?? "Kuch galat hua, dobara try karo");
       }
     } finally {
-      setSaving(false);
+      if (!publishNow) setSaving(false);
     }
   }
 
@@ -156,7 +182,43 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
   const labelClass = "block text-xs text-gray-400 font-medium mb-1.5 uppercase tracking-wider";
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full relative">
+      {/* Publishing Progress Overlay */}
+      {publishing && (
+        <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-[#0d0d17] border border-white/10 rounded-3xl p-10 max-w-sm w-full mx-6 text-center shadow-2xl">
+            <div className={`w-16 h-16 rounded-full mx-auto mb-6 flex items-center justify-center text-3xl transition-all ${publishStep === 3 ? "bg-green-500/20 border border-green-500/30" : "bg-amber-500/20 border border-amber-500/30"}`}>
+              {publishStep === 1 && "💾"}
+              {publishStep === 2 && "🔍"}
+              {publishStep === 3 && "🎉"}
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">
+              {publishStep === 1 && "Saving Article..."}
+              {publishStep === 2 && "Making it Live..."}
+              {publishStep === 3 && "Published!"}
+            </h3>
+            <p className="text-gray-500 text-sm mb-6">
+              {publishStep === 1 && "Uploading your article to the database"}
+              {publishStep === 2 && "Indexing for SEO and making it public"}
+              {publishStep === 3 && "Your article is now live for everyone to read!"}
+            </p>
+            <div className="flex gap-2 items-center justify-center">
+              {[1, 2, 3].map((step) => (
+                <div
+                  key={step}
+                  className={`h-1.5 rounded-full transition-all duration-500 ${
+                    publishStep >= step
+                      ? step === 3
+                        ? "w-8 bg-green-500"
+                        : "w-8 bg-amber-500"
+                      : "w-4 bg-white/10"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
       {/* Top Bar */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#0d0d17] sticky top-0 z-10">
         <div className="flex items-center gap-3">

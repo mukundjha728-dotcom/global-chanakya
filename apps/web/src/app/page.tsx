@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ShieldAlert, Zap, Globe, TrendingUp, Lock, ExternalLink, CheckCircle2, Flame, Eye, Heart, BookmarkIcon } from "lucide-react";
+import { ArrowRight, Zap, Globe, TrendingUp, Lock, ExternalLink, CheckCircle2, Flame, Eye, Heart, BookmarkIcon } from "lucide-react";
 import { getTrendingBlogs, getLatestBlogs } from "@/lib/trending";
 import type { TrendingBlog } from "@/lib/trending";
 
@@ -245,26 +245,15 @@ export default async function Home() {
                 </div>
               </Link>
             ) : (
-              <div className="relative w-full aspect-[4/3] rounded-3xl border border-white/10 bg-gradient-to-br from-gray-900 to-black overflow-hidden group">
-                <div
-                  className="absolute inset-0 bg-cover bg-center opacity-25 group-hover:opacity-35 transition-opacity duration-700 mix-blend-luminosity"
-                  style={{ backgroundImage: "url('https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?q=80&w=2070&auto=format&fit=crop')" }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-                <div className="absolute top-5 right-5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold backdrop-blur-sm flex items-center gap-1.5">
-                  <Zap className="w-3 h-3" /> PREMIUM EARLY ACCESS
+              <div className="relative w-full aspect-[4/3] rounded-3xl border border-white/[0.07] bg-white/[0.02] overflow-hidden flex flex-col items-center justify-center gap-4 p-8 text-center">
+                <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-2">
+                  <Globe className="w-8 h-8 text-rose-500/60" />
                 </div>
-                <div className="absolute bottom-0 left-0 w-full p-7 flex flex-col gap-3">
-                  <div className="flex items-center gap-2 text-rose-400 font-mono text-xs">
-                    <ShieldAlert className="w-3.5 h-3.5" /> RESTRICTED — PREMIUM ONLY
-                  </div>
-                  <h3 className="text-2xl font-bold leading-tight">The Emerging Indo-Pacific Security Architecture</h3>
-                  <p className="text-gray-400 text-sm line-clamp-2">Strategic realignments in the South China Sea and broader implications for global supply chains.</p>
-                  <div className="flex items-center gap-3 pt-1">
-                    <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-medium backdrop-blur-sm">24h Early Access</span>
-                    <span className="text-xs text-gray-500">Unlocks for public tomorrow</span>
-                  </div>
-                </div>
+                <h3 className="text-xl font-bold text-white">First Report Coming Soon</h3>
+                <p className="text-gray-500 text-sm max-w-xs">Our editorial team is preparing the first batch of geopolitical intelligence briefs. Subscribe to get notified.</p>
+                <Link href="/subscribe" className="mt-2 px-5 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium transition-all flex items-center gap-1.5">
+                  <Zap className="w-4 h-4" /> Get Early Access
+                </Link>
               </div>
             )}
           </div>

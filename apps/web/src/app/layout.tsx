@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import Script from "next/script";
+import { headers } from "next/headers";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -94,7 +95,11 @@ const jsonLd = {
 
 import { DisableInspect } from "@/components/DisableInspect";
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-invoke-path") || headersList.get("next-url") || "";
+  const isAdmin = pathname.startsWith("/gc-control-9x7k");
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -110,9 +115,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}>
         <DisableInspect />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
-          <Navbar />
-          <div className="min-h-screen">{children}</div>
-          <Footer />
+          {!isAdmin && <Navbar />}
+          <div className={isAdmin ? "" : "min-h-screen"}>{children}</div>
+          {!isAdmin && <Footer />}
         </ThemeProvider>
       </body>
     </html>
