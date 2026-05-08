@@ -114,7 +114,12 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
         )}
 
         {/* Article Content */}
-        <PremiumLock earlyAccessUntil={blog.earlyAccessUntil} userRole={(session?.user as any)?.role}>
+        <PremiumLock
+          earlyAccessUntil={blog.earlyAccessUntil}
+          userRole={(session?.user as any)?.role}
+          isLoggedIn={!!session}
+          blogSlug={blog.slug}
+        >
           <div
             className="prose prose-lg prose-invert max-w-none
               prose-headings:font-bold prose-headings:text-white
