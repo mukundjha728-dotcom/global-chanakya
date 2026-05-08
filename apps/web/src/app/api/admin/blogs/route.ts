@@ -5,8 +5,12 @@ import { Blog } from "@/lib/models/Blog";
 import { User } from "@/lib/models/User";
 import mongoose from "mongoose";
 
+// Give Vercel 30s before cutting off the function
+export const maxDuration = 30;
+
 async function requireAdmin() {
-  const session = await auth();
+  // Run auth check and DB connection in parallel — saves ~500ms
+  const [session] = await Promise.all([auth(), dbConnect()]);
   if (!session || (session.user as any)?.role !== "admin") return null;
   return session;
 }
@@ -16,7 +20,6 @@ export async function GET(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  await dbConnect();
   const id = req.nextUrl.searchParams.get("id");
 
   if (id) {
@@ -34,7 +37,6 @@ export async function POST(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  await dbConnect();
   const body = await req.json();
 
   const { title, slug, excerpt, content, category, tags, visibility, status,
@@ -85,7 +87,6 @@ export async function PATCH(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  await dbConnect();
   const body = await req.json();
   const { id, status, ...rest } = body;
 
@@ -116,7 +117,6 @@ export async function DELETE(req: NextRequest) {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
-  await dbConnect();
   const id = req.nextUrl.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Blog ID required" }, { status: 400 });
 
