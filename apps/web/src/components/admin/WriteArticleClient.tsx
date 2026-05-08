@@ -186,10 +186,16 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
           setTimeout(() => setSaved(false), 3000);
         }
       } else {
-        let errMsg = "Kuch galat hua, dobara try karo";
-        try { const err = await res.json(); errMsg = err.error ?? errMsg; } catch {}
+        let errMsg = `Server Error (${res.status})`;
+        try {
+          const errBody = await res.json();
+          errMsg = errBody.error ?? errMsg;
+        } catch {
+          // Response body wasn't JSON - show status text
+          errMsg = `Server Error ${res.status}: ${res.statusText || "Unknown error"}`;
+        }
         if (publishNow) { setPublishing(false); setPublishStep(0); }
-        alert(errMsg);
+        alert(`❌ Error: ${errMsg}`);
       }
     } finally {
       clearTimeout(hardTimeout);
