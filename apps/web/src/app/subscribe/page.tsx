@@ -1,5 +1,8 @@
 "use client";
 
+// This page uses useSession — must be dynamic (no static prerender)
+export const dynamic = "force-dynamic";
+
 import { useState, useEffect } from "react";
 import Script from "next/script";
 import { useRouter } from "next/navigation";
