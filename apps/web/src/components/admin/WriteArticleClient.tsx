@@ -35,6 +35,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
   const [publishing, setPublishing] = useState(false);
   const [publishStep, setPublishStep] = useState(0); // 0=idle,1=saving,2=indexing,3=done
   const [activeTab, setActiveTab] = useState<"content" | "seo" | "settings">("content");
+  const [editorMode, setEditorMode] = useState<"code" | "preview">("code");
   const [form, setForm] = useState<FormData>({
     title: "",
     slug: "",
@@ -367,17 +368,78 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
               </div>
 
               <div>
-                <label className={labelClass}>Article Content (HTML/Text) *</label>
-                <textarea
-                  rows={20}
-                  placeholder="Article ka poora content yahan likhein…&#10;&#10;HTML bhi support hai:&#10;&lt;h2&gt;Section Title&lt;/h2&gt;&#10;&lt;p&gt;Paragraph...&lt;/p&gt;"
-                  value={form.content}
-                  onChange={(e) => update("content", e.target.value)}
-                  className={`${inputClass} font-mono leading-relaxed`}
-                />
-                <p className="text-gray-600 text-xs mt-1">
-                  {form.content.length} characters · ~{Math.ceil(form.content.split(" ").length / 200)} min read
-                </p>
+                <div className="flex items-center justify-between mb-2">
+                  <label className={labelClass}>Article Content *</label>
+                  <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setEditorMode("code")}
+                      className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                        editorMode === "code" ? "bg-amber-500 text-black" : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      &lt;/&gt; Code
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditorMode("preview")}
+                      className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                        editorMode === "preview" ? "bg-amber-500 text-black" : "text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      👁 Preview
+                    </button>
+                  </div>
+                </div>
+
+                {editorMode === "code" ? (
+                  <>
+                    <textarea
+                      rows={28}
+                      spellCheck={false}
+                      placeholder={`Write full HTML with embedded CSS & JS:\n\n<style>\n  h2 { color: #f59e0b; }\n</style>\n\n<h2>Section Title</h2>\n<p>Your paragraph here...</p>\n\n<script>\n  console.log('Hello!');\n<\/script>`}
+                      value={form.content}
+                      onChange={(e) => update("content", e.target.value)}
+                      className={`${inputClass} font-mono text-sm leading-relaxed resize-y`}
+                      style={{ minHeight: "520px", tabSize: 2 }}
+                      onKeyDown={(e) => {
+                        // Tab key inserts 2 spaces instead of changing focus
+                        if (e.key === "Tab") {
+                          e.preventDefault();
+                          const start = e.currentTarget.selectionStart;
+                          const end = e.currentTarget.selectionEnd;
+                          const val = e.currentTarget.value;
+                          const newVal = val.substring(0, start) + "  " + val.substring(end);
+                          update("content", newVal);
+                          requestAnimationFrame(() => {
+                            e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2;
+                          });
+                        }
+                      }}
+                    />
+                    <div className="flex items-center gap-4 mt-1">
+                      <p className="text-gray-600 text-xs">
+                        {form.content.length.toLocaleString()} chars · ~{Math.max(1, Math.ceil(form.content.replace(/<[^>]*>/g," ").split(/\s+/).length / 200))} min read
+                      </p>
+                      <p className="text-gray-700 text-xs">Tab = 2 spaces · HTML + CSS + JS all supported</p>
+                    </div>
+                  </>
+                ) : (
+                  <div className="rounded-xl overflow-hidden border border-white/10" style={{ height: "560px" }}>
+                    {form.content ? (
+                      <iframe
+                        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{background:#fff;color:#111;font-family:Georgia,serif;font-size:17px;line-height:1.8;padding:24px 32px;max-width:800px;margin:0 auto;}h1,h2,h3,h4{font-family:-apple-system,sans-serif;font-weight:700;margin-top:1.5em;}a{color:#ef4444;}blockquote{border-left:4px solid #ef4444;margin:1.5em 0;padding:12px 20px;background:#fff5f5;border-radius:0 8px 8px 0;font-style:italic;color:#555;}ul,ol{padding-left:1.5em;}img{max-width:100%;border-radius:8px;}</style></head><body>${form.content}</body></html>`}
+                        className="w-full h-full bg-white"
+                        title="Article Preview"
+                        sandbox="allow-scripts"
+                      />
+                    ) : (
+                      <div className="h-full flex items-center justify-center bg-white/5 text-gray-600 text-sm">
+                        Code tab mein content likhne ke baad preview yahan dikhega
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
