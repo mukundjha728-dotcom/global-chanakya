@@ -101,12 +101,11 @@ const BlogSchema = new Schema<IBlog>(
 );
 
 // Auto-set earlyAccessUntil = publishAt + 24 hours on save
-BlogSchema.pre("save", function (next) {
+BlogSchema.pre("save", async function () {
   if (this.isModified("publishAt") || !this.earlyAccessUntil) {
     const publishDate = this.publishAt || new Date();
     this.earlyAccessUntil = new Date(publishDate.getTime() + 24 * 60 * 60 * 1000);
   }
-  next();
 });
 
 // Compound indexes for performance
