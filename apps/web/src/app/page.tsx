@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Zap, Globe, TrendingUp, Lock, ExternalLink, CheckCircle2, Flame, Eye, Heart, BookmarkIcon } from "lucide-react";
+import { ArrowRight, ShieldAlert, Zap, Globe, TrendingUp, Lock, ExternalLink, CheckCircle2, Flame, Eye, Heart, BookmarkIcon } from "lucide-react";
 import { getTrendingBlogs, getLatestBlogs } from "@/lib/trending";
 import type { TrendingBlog } from "@/lib/trending";
 
