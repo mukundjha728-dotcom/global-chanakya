@@ -21,8 +21,10 @@ export default auth((req) => {
   // Secret admin path — only the admin email can access
   if (pathname.startsWith(ADMIN_SECRET_PATH)) {
     if (!session) {
-      // Not logged in — redirect to sign in
-      return NextResponse.redirect(new URL('/auth/signin', req.url));
+      // Not logged in — redirect to sign in with callbackUrl
+      const url = new URL('/auth/signin', req.url);
+      url.searchParams.set('callbackUrl', req.nextUrl.pathname);
+      return NextResponse.redirect(url);
     }
     const role = (session.user as any)?.role;
     if (role !== 'admin') {
@@ -35,7 +37,9 @@ export default auth((req) => {
   if (pathname.startsWith('/premium')) {
     const role = (session?.user as any)?.role;
     if (!session || (role !== 'premium' && role !== 'admin')) {
-      return NextResponse.redirect(new URL('/subscribe', req.url));
+      const url = new URL('/subscribe', req.url);
+      url.searchParams.set('callbackUrl', req.nextUrl.pathname);
+      return NextResponse.redirect(url);
     }
   }
 

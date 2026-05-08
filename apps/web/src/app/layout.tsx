@@ -92,6 +92,8 @@ const jsonLd = {
   knowsAbout: ["Geopolitics", "Strategic Intelligence", "Foreign Policy", "Defence"],
 };
 
+import { DisableInspect } from "@/components/DisableInspect";
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -106,6 +108,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}>
+        <DisableInspect />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <Navbar />
           <div className="min-h-screen">{children}</div>
