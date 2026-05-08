@@ -2,45 +2,33 @@ import mongoose from "mongoose";
 
 declare global {
   // eslint-disable-next-line no-var
-  var __mongoose: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null };
+  var _mongoose: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null } | undefined;
 }
 
-let cached = global.__mongoose;
-
-if (!cached) {
-  cached = global.__mongoose = { conn: null, promise: null };
-}
+const cached = global._mongoose ?? (global._mongoose = { conn: null, promise: null });
 
 async function dbConnect() {
-  if (cached.conn) {
-    return cached.conn;
-  }
+  if (cached.conn) return cached.conn;
 
   const MONGODB_URI = process.env.MONGODB_URI;
-
-  if (!MONGODB_URI) {
-    throw new Error("Please define the MONGODB_URI environment variable");
-  }
+  if (!MONGODB_URI) throw new Error("MONGODB_URI env variable is not set");
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      bufferCommands: false,
-      maxPoolSize: 10,          // Keep up to 10 connections open
-      minPoolSize: 2,           // Always keep 2 warm
-      socketTimeoutMS: 20000,   // Close sockets after 20s inactivity
-      serverSelectionTimeoutMS: 8000, // Fail fast if server not found in 8s
-      heartbeatFrequencyMS: 10000,    // Check server health every 10s
-      maxConnecting: 3,         // Max concurrent connection attempts
-    });
+    cached.promise = mongoose
+      .connect(MONGODB_URI, {
+        bufferCommands: false,
+        maxPoolSize: 10,
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 30000,
+      })
+      .then((m) => m)
+      .catch((err) => {
+        cached.promise = null; // allow retry on next request
+        throw err;
+      });
   }
 
-  try {
-    cached.conn = await cached.promise;
-  } catch (err) {
-    cached.promise = null; // reset so next request can retry
-    throw err;
-  }
-
+  cached.conn = await cached.promise;
   return cached.conn;
 }
 
