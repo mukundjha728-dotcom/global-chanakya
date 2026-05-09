@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import Navbar from "@/components/layout/Navbar";
@@ -8,18 +8,21 @@ import Script from "next/script";
 import { ConditionalShell } from "@/components/layout/ConditionalShell";
 import { Providers } from "@/components/layout/Providers";
 
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+  display: "swap",
+});
 
 export const SITE_URL = "https://global-chanakya-web.vercel.app";
 export const SITE_NAME = "Global Chanakya";
 export const SITE_DESC =
-  "Premium geopolitics and strategic intelligence media platform. Get 24-hour early access to critical geopolitical reports before they go public.";
+  "India's leading geopolitical intelligence platform. In-depth analysis on foreign policy, defence strategy, and global affairs — with 24-hour premium early access.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} | Enterprise Geopolitics & Strategic Intelligence`,
+    default: `${SITE_NAME} — Geopolitical Intelligence & Strategic Analysis`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESC,
@@ -32,9 +35,13 @@ export const metadata: Metadata = {
   creator: SITE_NAME,
   publisher: SITE_NAME,
   formatDetection: { email: false, address: false, telephone: false },
+  icons: {
+    icon: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
   openGraph: {
-    title: `${SITE_NAME} | Enterprise Geopolitics Media`,
-    description: "Enterprise-grade geopolitical intelligence and strategic media with 24-hour premium early access.",
+    title: `${SITE_NAME} — Geopolitical Intelligence & Strategic Analysis`,
+    description: SITE_DESC,
     url: SITE_URL,
     siteName: SITE_NAME,
     locale: "en_US",
@@ -44,14 +51,14 @@ export const metadata: Metadata = {
         url: `${SITE_URL}/og-image.png`,
         width: 1200,
         height: 630,
-        alt: "Global Chanakya — Geopolitics & Strategic Intelligence",
+        alt: `${SITE_NAME} — Geopolitical Intelligence`,
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
     title: SITE_NAME,
-    description: "Premium geopolitics & strategic intelligence. 24-hour early access journalism.",
+    description: SITE_DESC,
     creator: "@globalchanakya",
     site: "@globalchanakya",
     images: [`${SITE_URL}/og-image.png`],
@@ -83,7 +90,7 @@ const jsonLd = {
   "@type": "NewsMediaOrganization",
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/logo.png`,
+  logo: `${SITE_URL}/logo.svg`,
   description: SITE_DESC,
   sameAs: [
     "https://twitter.com/globalchanakya",
@@ -100,6 +107,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
         <Script
@@ -109,7 +117,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           strategy="beforeInteractive"
         />
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-white`}>
+      <body className={`${inter.variable} antialiased bg-[#060606] text-white`} style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
         <DisableInspect />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
             <Providers>

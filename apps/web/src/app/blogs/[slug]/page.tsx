@@ -6,7 +6,7 @@ import { Blog } from "@/lib/models/Blog";
 import { auth } from "@/auth";
 import PremiumLock from "@/components/blogs/PremiumLock";
 import BlogActions from "@/components/blogs/BlogActions";
-import { ArrowLeft, Clock, Eye, Calendar, Tag, Share2 } from "lucide-react";
+import { ArrowLeft, Clock, Eye, Calendar, Tag, Share2, Crown, TrendingUp } from "lucide-react";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
@@ -106,22 +106,24 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             </span>
             {blog.visibility === "premium" && (
               <span style={{
+                display: "inline-flex", alignItems: "center", gap: "4px",
                 padding: "4px 12px", borderRadius: "999px",
                 background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)",
                 color: "#fbbf24", fontSize: "11px", fontWeight: 700,
                 letterSpacing: "0.08em", textTransform: "uppercase",
               }}>
-                ⚡ Premium
+                <Crown style={{ width: "12px", height: "12px" }} /> Premium
               </span>
             )}
             {blog.isTrending && (
               <span style={{
+                display: "inline-flex", alignItems: "center", gap: "4px",
                 padding: "4px 12px", borderRadius: "999px",
                 background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)",
                 color: "#f87171", fontSize: "11px", fontWeight: 700,
                 letterSpacing: "0.08em", textTransform: "uppercase",
               }}>
-                🔥 Trending
+                <TrendingUp style={{ width: "12px", height: "12px" }} /> Trending
               </span>
             )}
           </div>

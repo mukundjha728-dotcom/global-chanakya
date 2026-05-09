@@ -1,28 +1,28 @@
 import Link from "next/link";
-import { Globe, ExternalLink, Zap, Shield, Rss } from "lucide-react";
+import Image from "next/image";
+import { Crown, Mail, MapPin, ArrowUpRight } from "lucide-react";
 
 const SITE_URL = "https://global-chanakya-web.vercel.app";
 
 const cols = {
-  Intelligence: [
-    { label: "Latest Briefs", href: "/blogs" },
-    { label: "Premium Reports", href: "/subscribe" },
+  Analysis: [
+    { label: "All Reports", href: "/blogs" },
     { label: "Categories", href: "/categories" },
     { label: "Trending", href: "/blogs?trending=true" },
+    { label: "RSS Feed", href: "/feed.xml" },
   ],
-  Platform: [
-    { label: "Subscribe — ₹19/7d", href: "/subscribe" },
+  Account: [
+    { label: "Premium Access", href: "/subscribe" },
     { label: "Sign In", href: "/auth/signin" },
     { label: "Create Account", href: "/auth/signup" },
-    { label: "RSS Feed", href: "/feed.xml" },
   ],
   Company: [
     { label: "About Us", href: "/about" },
-    { label: "Contact Desk", href: "/contact" },
+    { label: "Contact", href: "/contact" },
     { label: "Careers", href: "/careers" },
   ],
   Legal: [
-    { label: "Terms & Conditions", href: "/terms" },
+    { label: "Terms of Service", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Refund Policy", href: "/refund" },
   ],
@@ -30,56 +30,52 @@ const cols = {
 
 export default function Footer() {
   return (
-    <footer className="relative border-t border-white/[0.07] bg-[#050505]">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-px bg-gradient-to-r from-transparent via-rose-500/30 to-transparent" />
-      <div className="max-w-7xl mx-auto px-6 pt-14 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10 mb-12">
+    <footer className="border-t border-white/[0.06] bg-[#050505]">
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-16 pb-8">
+
+        {/* Main grid */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 mb-14">
           {/* Brand */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            <Link href="/" className="flex items-center gap-2.5 w-fit group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-rose-500 to-orange-500 flex items-center justify-center shadow-lg shadow-rose-500/20">
-                <Globe className="w-[18px] h-[18px] text-white" />
+          <div className="col-span-2 flex flex-col gap-5">
+            <Link href="/" className="flex items-center gap-3 w-fit">
+              <Image src="/logo.svg" alt="Global Chanakya" width={36} height={36} />
+              <div>
+                <span className="text-[16px] font-bold tracking-[-0.02em] text-white">
+                  Global Chanakya
+                </span>
+                <p className="text-[10px] font-medium text-neutral-600 tracking-[0.06em] uppercase">
+                  Intelligence Platform
+                </p>
               </div>
-              <span className="text-lg font-bold tracking-tight text-white">
-                Global <span className="text-rose-500">Chanakya</span>
-              </span>
             </Link>
-            <p className="text-sm text-gray-500 leading-relaxed max-w-xs">
-              Enterprise-grade geopolitical intelligence for the modern decision-maker. 24-hour premium early access journalism.
+            <p className="text-[13px] text-neutral-500 leading-relaxed max-w-xs">
+              In-depth geopolitical analysis and strategic intelligence for the modern decision-maker.
             </p>
-            <a
-              href={SITE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-xs font-medium w-fit hover:border-emerald-500/40 transition-all"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            <div className="flex flex-col gap-2 text-[12px] text-neutral-600">
+              <span className="flex items-center gap-2">
+                <Mail className="w-3.5 h-3.5" />
+                editorial@globalchanakya.in
               </span>
-              Live on Vercel
-              <ExternalLink className="w-3 h-3" />
-            </a>
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 text-xs text-gray-600">
-                <Shield className="w-3.5 h-3.5 text-rose-600/60" />
-                256-bit encrypted
-              </span>
-              <span className="flex items-center gap-1.5 text-xs text-gray-600">
-                <Zap className="w-3.5 h-3.5 text-amber-500/60" />
-                Razorpay secured
+              <span className="flex items-center gap-2">
+                <MapPin className="w-3.5 h-3.5" />
+                New Delhi, India
               </span>
             </div>
           </div>
 
-          {/* Link cols */}
+          {/* Link columns */}
           {Object.entries(cols).map(([section, links]) => (
             <div key={section}>
-              <h4 className="text-xs font-semibold uppercase tracking-widest text-gray-500 mb-4">{section}</h4>
+              <h4 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-500 mb-4">
+                {section}
+              </h4>
               <ul className="space-y-2.5">
                 {links.map((l) => (
                   <li key={l.href}>
-                    <Link href={l.href} className="text-sm text-gray-500 hover:text-white transition-colors">
+                    <Link
+                      href={l.href}
+                      className="text-[13px] text-neutral-500 hover:text-white transition-colors duration-200"
+                    >
                       {l.label}
                     </Link>
                   </li>
@@ -89,32 +85,38 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* CTA strip */}
-        <div className="mb-10 p-5 rounded-2xl border border-amber-500/10 bg-gradient-to-r from-amber-500/5 to-orange-500/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        {/* Premium CTA strip */}
+        <div className="mb-10 py-5 px-6 rounded-2xl border border-white/[0.06] bg-gradient-to-r from-white/[0.02] to-white/[0.01] flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <p className="text-sm font-semibold text-white">Get 24-Hour Early Access to Every Report</p>
-            <p className="text-xs text-gray-500 mt-0.5">Premium — ₹19 for 7 days. Auto-expires. No commitment.</p>
+            <p className="text-[14px] font-semibold text-white">
+              Get 24-hour early access to every report
+            </p>
+            <p className="text-[12px] text-neutral-500 mt-0.5">
+              7-day premium access at just ₹19. Auto-expires, no commitment.
+            </p>
           </div>
           <Link
             href="/subscribe"
-            className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-black text-sm font-bold rounded-full hover:opacity-90 transition-opacity shadow-lg shadow-amber-500/20"
+            className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-white text-[#060606] text-[13px] font-semibold rounded-lg hover:bg-neutral-200 transition-colors"
           >
-            <Zap className="w-4 h-4" />
+            <Crown className="w-4 h-4" />
             Subscribe Now
+            <ArrowUpRight className="w-3.5 h-3.5" />
           </Link>
         </div>
 
-        {/* Bottom */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-white/[0.06]">
-          <p className="text-xs text-gray-600">© {new Date().getFullYear()} Global Chanakya. All rights reserved.</p>
-          <div className="flex items-center gap-3 text-xs text-gray-600">
-            <a href={SITE_URL} target="_blank" rel="noopener noreferrer" className="hover:text-gray-400 transition-colors flex items-center gap-1">
-              global-chanakya-web.vercel.app <ExternalLink className="w-3 h-3" />
-            </a>
-            <span>·</span>
-            <span>Next.js 15 + Turborepo</span>
+        {/* Bottom bar */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-white/[0.05]">
+          <p className="text-[11px] text-neutral-600">
+            © {new Date().getFullYear()} Global Chanakya Media Pvt. Ltd. All rights reserved.
+          </p>
+          <div className="flex items-center gap-4 text-[11px] text-neutral-600">
+            <Link href="/terms" className="hover:text-neutral-400 transition-colors">Terms</Link>
+            <Link href="/privacy" className="hover:text-neutral-400 transition-colors">Privacy</Link>
+            <Link href="/refund" className="hover:text-neutral-400 transition-colors">Refunds</Link>
           </div>
         </div>
+
       </div>
     </footer>
   );

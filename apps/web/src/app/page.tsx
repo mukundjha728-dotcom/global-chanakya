@@ -1,120 +1,140 @@
 import Link from "next/link";
-import { ArrowRight, ShieldAlert, Zap, Globe, TrendingUp, Lock, ExternalLink, CheckCircle2, Flame, Eye, Heart, BookmarkIcon } from "lucide-react";
+import Image from "next/image";
+import {
+  ArrowRight, ArrowUpRight, Crown, Globe, Shield, Clock,
+  TrendingUp, Eye, Heart, Bookmark, ChevronRight, Crosshair,
+  Newspaper, BarChart3, Users, Lock, Flame
+} from "lucide-react";
 import { getTrendingBlogs, getLatestBlogs } from "@/lib/trending";
 import type { TrendingBlog } from "@/lib/trending";
 
-export const revalidate = 300; // Revalidate every 5 minutes (ISR)
+export const revalidate = 300;
 
-const SITE_URL = "https://global-chanakya-web.vercel.app";
-
-const features = [
-  { icon: Zap, title: "24-Hour Early Access", desc: "Premium subscribers read every article a full day before public release.", color: "text-amber-400" },
-  { icon: Globe, title: "Global Coverage", desc: "Indo-Pacific, Middle East, Europe, Americas — every strategic theatre covered.", color: "text-blue-400" },
-  { icon: ShieldAlert, title: "Enterprise Security", desc: "Argon2 auth, JWT rotation, session fingerprinting, CSRF protection.", color: "text-rose-400" },
-  { icon: TrendingUp, title: "SEO-First Architecture", desc: "SSR + ISR for Lighthouse 95+ performance and maximum discoverability.", color: "text-emerald-400" },
+const pillars = [
+  {
+    icon: Clock,
+    title: "24-Hour Early Access",
+    desc: "Premium subscribers read every report a full day before it goes public.",
+    accent: "from-amber-500/20 to-amber-600/5",
+    iconColor: "text-amber-400",
+  },
+  {
+    icon: Globe,
+    title: "Global Coverage",
+    desc: "Indo-Pacific, Middle East, Europe, Americas — every strategic theatre.",
+    accent: "from-blue-500/20 to-blue-600/5",
+    iconColor: "text-blue-400",
+  },
+  {
+    icon: Crosshair,
+    title: "Expert Analysis",
+    desc: "Unvarnished, non-partisan intelligence briefs by domain specialists.",
+    accent: "from-red-500/20 to-red-600/5",
+    iconColor: "text-red-400",
+  },
+  {
+    icon: Shield,
+    title: "Trusted Platform",
+    desc: "Enterprise-grade security with Razorpay-powered premium subscriptions.",
+    accent: "from-emerald-500/20 to-emerald-600/5",
+    iconColor: "text-emerald-400",
+  },
 ];
 
-const categories = ["Geopolitics", "Indo-Pacific", "South Asia", "Middle East", "Defence", "China", "Russia", "Economy & Trade"];
-
-const stats = [
-  { label: "Premium Subscribers", value: "12,400+" },
-  { label: "Published Reports", value: "1,800+" },
-  { label: "Monthly Readers", value: "320K+" },
-  { label: "Avg. SEO Score", value: "98 / 100" },
+const theatres = [
+  "Geopolitics", "Indo-Pacific", "South Asia", "Middle East",
+  "Defence", "China", "Russia", "Economy & Trade",
 ];
 
-function BlogCard({ blog, rank }: { blog: TrendingBlog; rank: number }) {
+function BlogCard({ blog, variant = "default" }: { blog: TrendingBlog; variant?: "featured" | "default" }) {
   const isPremium = blog.visibility === "premium";
-  const isFeatured = rank === 0;
+  const isFeatured = variant === "featured";
 
   return (
     <Link
       href={`/blogs/${blog.slug}`}
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${
+      className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 ${
         isFeatured
-          ? "border-rose-500/20 bg-gradient-to-br from-rose-950/30 to-black hover:border-rose-500/40 hover:shadow-rose-900/20"
-          : "border-white/[0.07] bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04] hover:shadow-black/50"
+          ? "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.14] hover:shadow-xl hover:shadow-black/40"
+          : "border-white/[0.06] bg-white/[0.015] hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/30"
       }`}
     >
-      {/* Featured Image */}
+      {/* Image */}
       {blog.featuredImage ? (
-        <div className={`relative overflow-hidden ${isFeatured ? "aspect-video" : "aspect-[16/7]"}`}>
+        <div className={`relative overflow-hidden ${isFeatured ? "aspect-[16/9]" : "aspect-[16/8]"}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={blog.featuredImage}
             alt={blog.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-          {/* Badges overlay */}
-          <div className="absolute top-3 left-3 flex items-center gap-2">
+          <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-[#060606]/30 to-transparent" />
+
+          {/* Badges */}
+          <div className="absolute top-4 left-4 flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-semibold uppercase tracking-wider text-neutral-300 border border-white/10">
+              {blog.category}
+            </span>
+          </div>
+          <div className="absolute top-4 right-4 flex items-center gap-2">
             {blog.isTrending && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/90 text-white text-[10px] font-bold uppercase tracking-wide backdrop-blur-sm">
-                <Flame className="w-2.5 h-2.5" /> Trending
+              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-red-600/90 text-white text-[10px] font-bold uppercase tracking-wide">
+                <TrendingUp className="w-2.5 h-2.5" /> Trending
               </span>
             )}
-            {rank < 3 && (
-              <span className="px-2 py-0.5 rounded-full bg-amber-500/90 text-black text-[10px] font-bold backdrop-blur-sm">
-                #{rank + 1} Top
+            {isPremium && (
+              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
+                <Crown className="w-2.5 h-2.5" /> Premium
               </span>
             )}
           </div>
-          {isPremium && (
-            <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
-              <Zap className="w-2.5 h-2.5" /> PREMIUM
-            </div>
-          )}
         </div>
       ) : (
-        <div className={`relative flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-900 to-black ${isFeatured ? "aspect-video" : "aspect-[16/7]"}`}>
-          <Globe className="w-12 h-12 text-gray-800" />
-          <div className="absolute top-3 left-3 flex items-center gap-2">
-            {blog.isTrending && (
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-500/90 text-white text-[10px] font-bold uppercase tracking-wide">
-                <Flame className="w-2.5 h-2.5" /> Trending
-              </span>
-            )}
+        <div className={`relative flex items-center justify-center bg-gradient-to-br from-neutral-900 to-[#060606] ${isFeatured ? "aspect-[16/9]" : "aspect-[16/8]"}`}>
+          <Newspaper className="w-10 h-10 text-neutral-800" />
+          <div className="absolute top-4 left-4">
+            <span className="px-2.5 py-1 rounded-md bg-white/[0.06] text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+              {blog.category}
+            </span>
           </div>
         </div>
       )}
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-5 gap-3">
-        <div className="flex items-center gap-2">
-          <span className="px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-400 text-[10px] font-semibold uppercase tracking-wide">
-            {blog.category}
-          </span>
-          {isPremium && (
-            <span className="flex items-center gap-1 text-amber-400 text-[10px] font-medium">
-              <Lock className="w-2.5 h-2.5" /> Early Access
-            </span>
-          )}
-        </div>
+        {isPremium && (
+          <div className="flex items-center gap-1 text-amber-400/80 text-[10px] font-medium">
+            <Lock className="w-2.5 h-2.5" />
+            Early Access
+          </div>
+        )}
 
-        <h3 className={`font-bold leading-snug text-white group-hover:text-rose-300 transition-colors line-clamp-2 ${isFeatured ? "text-xl" : "text-base"}`}>
+        <h3 className={`font-semibold leading-snug text-white group-hover:text-neutral-300 transition-colors line-clamp-2 ${
+          isFeatured ? "text-lg" : "text-[15px]"
+        }`}>
           {blog.title}
         </h3>
 
-        <p className="text-gray-500 text-sm leading-relaxed line-clamp-2 flex-1">
+        <p className="text-neutral-500 text-[13px] leading-relaxed line-clamp-2 flex-1">
           {blog.excerpt}
         </p>
 
-        {/* Stats */}
-        <div className="flex items-center gap-4 pt-1 border-t border-white/5">
-          <span className="flex items-center gap-1 text-gray-600 text-xs">
+        {/* Meta */}
+        <div className="flex items-center gap-4 pt-3 border-t border-white/[0.05] text-[11px] text-neutral-600">
+          <span className="flex items-center gap-1">
             <Eye className="w-3 h-3" />
             {(blog.analytics?.views ?? 0).toLocaleString()}
           </span>
-          <span className="flex items-center gap-1 text-gray-600 text-xs">
+          <span className="flex items-center gap-1">
             <Heart className="w-3 h-3" />
             {blog.analytics?.likes ?? 0}
           </span>
-          <span className="flex items-center gap-1 text-gray-600 text-xs">
-            <BookmarkIcon className="w-3 h-3" />
+          <span className="flex items-center gap-1">
+            <Bookmark className="w-3 h-3" />
             {blog.analytics?.bookmarks ?? 0}
           </span>
-          <span className="ml-auto text-gray-600 text-xs">
-            {new Date(blog.publishAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+          <span className="ml-auto">
+            {new Date(blog.publishAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
           </span>
         </div>
       </div>
@@ -123,7 +143,6 @@ function BlogCard({ blog, rank }: { blog: TrendingBlog; rank: number }) {
 }
 
 export default async function Home() {
-  // Fetch trending + latest blogs in parallel
   const [trendingBlogs, latestBlogs] = await Promise.all([
     getTrendingBlogs(6),
     getLatestBlogs(3),
@@ -135,124 +154,135 @@ export default async function Home() {
   const restTrending = trendingBlogs.slice(4);
 
   return (
-    <div className="bg-black text-white selection:bg-rose-900 selection:text-white">
+    <div className="bg-[#060606] text-white">
 
-      {/* ── HERO ── */}
-      <section className="relative pt-36 pb-24 px-6 overflow-hidden">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-rose-600/10 blur-[120px] rounded-full pointer-events-none" />
-        <div className="absolute top-40 right-0 w-[400px] h-[400px] bg-orange-500/5 blur-[100px] rounded-full pointer-events-none" />
+      {/* ─── HERO ─── */}
+      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-6 overflow-hidden">
+        {/* Subtle gradient orb */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-red-600/[0.06] blur-[140px] rounded-full pointer-events-none" />
 
         <div className="max-w-7xl mx-auto">
-          {/* Live badge */}
-          <div className="flex justify-center mb-8">
-            <a
-              href={SITE_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 text-xs font-semibold hover:border-emerald-500/40 transition-all"
-            >
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-              </span>
-              Now live — global-chanakya-web.vercel.app
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
 
-          <div className="grid lg:grid-cols-2 gap-14 items-center">
-            {/* Left copy */}
-            <div className="flex flex-col gap-7">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-rose-500/30 bg-rose-500/10 text-rose-400 text-xs font-semibold uppercase tracking-wider w-fit">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500" />
+            {/* Left */}
+            <div className="flex flex-col gap-8">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-neutral-400 text-[11px] font-medium uppercase tracking-[0.08em] w-fit">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-600" />
                 </span>
-                Live Geopolitics Desk
+                Live Intelligence Desk
               </div>
 
-              <h1 className="text-5xl md:text-6xl xl:text-7xl font-bold leading-[1.08] tracking-tight">
-                Deciphering the{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-orange-400">
-                  Global Chessboard.
+              <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-bold leading-[1.1] tracking-[-0.03em]">
+                Strategic Intelligence,{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-red-400 to-orange-400">
+                  Delivered Daily.
                 </span>
               </h1>
 
-              <p className="text-lg text-gray-400 leading-relaxed max-w-xl">
-                Enterprise-grade geopolitical intelligence, strategy, and unvarnished analysis. Premium subscribers get every report <strong className="text-white">24 hours before</strong> public release.
+              <p className="text-[17px] text-neutral-400 leading-relaxed max-w-lg">
+                In-depth analysis of global geopolitics, defence strategy, and foreign policy. 
+                Premium subscribers receive every report 24 hours before public release.
               </p>
 
-              <ul className="flex flex-col gap-2">
-                {["₹19 for 7-day full premium access", "Auto-expiry — zero long-term commitment", "Instant access the moment we publish"].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-gray-400">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-
-              <div className="flex flex-wrap items-center gap-4 pt-2">
+              <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Link
                   href="/subscribe"
-                  className="px-7 py-3.5 bg-gradient-to-r from-rose-600 to-orange-500 text-white rounded-full font-semibold flex items-center gap-2 group shadow-lg shadow-rose-600/20 hover:shadow-rose-600/40 transition-shadow"
+                  className="group px-6 py-3 bg-white text-[#060606] text-[14px] font-semibold rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2"
                 >
-                  Unlock Premium Intel
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  Start Reading
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
                 <Link
                   href="/blogs"
-                  className="px-7 py-3.5 border border-white/15 rounded-full font-semibold text-gray-300 hover:bg-white/5 hover:text-white transition-all"
+                  className="px-6 py-3 border border-white/[0.1] text-[14px] font-medium text-neutral-300 rounded-lg hover:bg-white/[0.04] hover:border-white/[0.15] transition-all"
                 >
-                  Read Free Reports
+                  Browse Reports
                 </Link>
+              </div>
+
+              {/* Trust indicators */}
+              <div className="flex items-center gap-6 pt-2 text-[12px] text-neutral-600">
+                <span className="flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 text-neutral-500" />
+                  Secure Payments
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-neutral-500" />
+                  Auto-expiry, No Trap
+                </span>
               </div>
             </div>
 
-            {/* Right — Featured trending blog OR static card */}
+            {/* Right — Featured article */}
             {featuredBlog ? (
               <Link
                 href={`/blogs/${featuredBlog.slug}`}
-                className="relative w-full aspect-[4/3] rounded-3xl border border-white/10 bg-gradient-to-br from-gray-900 to-black overflow-hidden group"
+                className="relative w-full aspect-[4/3] rounded-2xl border border-white/[0.08] bg-neutral-900 overflow-hidden group"
               >
                 {featuredBlog.featuredImage && (
                   <div
-                    className="absolute inset-0 bg-cover bg-center opacity-30 group-hover:opacity-45 transition-opacity duration-700 mix-blend-luminosity"
+                    className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-50 transition-opacity duration-700"
                     style={{ backgroundImage: `url('${featuredBlog.featuredImage}')` }}
                   />
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-[#060606]/60 to-transparent" />
+
                 <div className="absolute top-5 left-5 flex items-center gap-2">
                   {featuredBlog.isTrending && (
-                    <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-rose-500/90 text-white text-xs font-bold">
-                      <Flame className="w-3 h-3" /> #1 Trending
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-600/90 text-white text-[10px] font-bold">
+                      <TrendingUp className="w-3 h-3" /> Trending
                     </span>
                   )}
                   {featuredBlog.visibility === "premium" && (
-                    <span className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-amber-500/20 border border-amber-500/30 text-amber-400 text-xs font-bold backdrop-blur-sm">
-                      <Zap className="w-3 h-3" /> PREMIUM
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
+                      <Crown className="w-3 h-3" /> Premium
                     </span>
                   )}
                 </div>
-                <div className="absolute bottom-0 left-0 w-full p-7 flex flex-col gap-3">
-                  <span className="text-xs text-gray-400 uppercase tracking-wide font-medium">{featuredBlog.category}</span>
-                  <h3 className="text-2xl font-bold leading-tight">{featuredBlog.title}</h3>
-                  <p className="text-gray-400 text-sm line-clamp-2">{featuredBlog.excerpt}</p>
-                  <div className="flex items-center gap-4 pt-1">
-                    <span className="flex items-center gap-1 text-gray-400 text-xs"><Eye className="w-3 h-3" /> {(featuredBlog.analytics?.views ?? 0).toLocaleString()}</span>
-                    <span className="flex items-center gap-1 text-gray-400 text-xs"><Heart className="w-3 h-3" /> {featuredBlog.analytics?.likes ?? 0}</span>
-                    <span className="ml-auto px-3 py-1 bg-white/10 rounded-full text-xs font-medium backdrop-blur-sm">Read Now →</span>
+
+                <div className="absolute bottom-0 left-0 w-full p-7 flex flex-col gap-2.5">
+                  <span className="text-[11px] text-neutral-400 uppercase tracking-wider font-medium">
+                    {featuredBlog.category}
+                  </span>
+                  <h3 className="text-xl sm:text-2xl font-bold leading-tight text-white">
+                    {featuredBlog.title}
+                  </h3>
+                  <p className="text-neutral-400 text-[13px] line-clamp-2 max-w-md">
+                    {featuredBlog.excerpt}
+                  </p>
+                  <div className="flex items-center gap-4 pt-2">
+                    <span className="flex items-center gap-1 text-neutral-500 text-[11px]">
+                      <Eye className="w-3 h-3" />
+                      {(featuredBlog.analytics?.views ?? 0).toLocaleString()}
+                    </span>
+                    <span className="flex items-center gap-1 text-neutral-500 text-[11px]">
+                      <Heart className="w-3 h-3" />
+                      {featuredBlog.analytics?.likes ?? 0}
+                    </span>
+                    <span className="ml-auto flex items-center gap-1 px-3 py-1.5 bg-white/10 rounded-md text-[11px] font-medium backdrop-blur-sm text-white group-hover:bg-white/15 transition-colors">
+                      Read Now
+                      <ArrowUpRight className="w-3 h-3" />
+                    </span>
                   </div>
                 </div>
               </Link>
             ) : (
-              <div className="relative w-full aspect-[4/3] rounded-3xl border border-white/[0.07] bg-white/[0.02] overflow-hidden flex flex-col items-center justify-center gap-4 p-8 text-center">
-                <div className="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-2">
-                  <Globe className="w-8 h-8 text-rose-500/60" />
+              <div className="relative w-full aspect-[4/3] rounded-2xl border border-white/[0.06] bg-white/[0.015] overflow-hidden flex flex-col items-center justify-center gap-5 p-10 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-red-500/[0.08] border border-red-500/15 flex items-center justify-center">
+                  <Newspaper className="w-7 h-7 text-red-500/50" />
                 </div>
-                <h3 className="text-xl font-bold text-white">First Report Coming Soon</h3>
-                <p className="text-gray-500 text-sm max-w-xs">Our editorial team is preparing the first batch of geopolitical intelligence briefs. Subscribe to get notified.</p>
-                <Link href="/subscribe" className="mt-2 px-5 py-2.5 rounded-full bg-rose-600 hover:bg-rose-500 text-white text-sm font-medium transition-all flex items-center gap-1.5">
-                  <Zap className="w-4 h-4" /> Get Early Access
+                <h3 className="text-lg font-semibold text-white">First Report Coming Soon</h3>
+                <p className="text-neutral-500 text-[13px] max-w-xs">
+                  Our editorial team is preparing the first batch of intelligence briefs.
+                </p>
+                <Link
+                  href="/subscribe"
+                  className="px-5 py-2.5 rounded-lg bg-white text-[#060606] text-[13px] font-semibold hover:bg-neutral-200 transition-colors flex items-center gap-2"
+                >
+                  <Crown className="w-4 h-4" />
+                  Get Early Access
                 </Link>
               </div>
             )}
@@ -260,65 +290,49 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── STATS ── */}
-      <section className="py-16 px-6 border-y border-white/[0.07]">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <p className="text-3xl md:text-4xl font-bold text-white">{s.value}</p>
-              <p className="text-sm text-gray-500 mt-1">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── TRENDING BLOGS SECTION ── */}
+      {/* ─── TRENDING ─── */}
       {hasTrending && (
         <section className="py-20 px-6" id="trending">
           <div className="max-w-7xl mx-auto">
-            {/* Section Header */}
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-end justify-between mb-10">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <Flame className="w-4 h-4 text-rose-500" />
-                  <span className="text-rose-400 text-xs font-semibold uppercase tracking-wider">Trending Now</span>
+                  <TrendingUp className="w-4 h-4 text-red-500" />
+                  <span className="text-red-400 text-[11px] font-semibold uppercase tracking-[0.08em]">
+                    Trending Now
+                  </span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-white">
-                  What Readers Are Watching
+                <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                  Most Read This Week
                 </h2>
-                <p className="text-gray-500 text-sm mt-1">
-                  Ranked by views, likes & reader engagement — updated every 5 minutes
-                </p>
               </div>
               <Link
                 href="/blogs"
-                className="hidden sm:flex items-center gap-1 text-gray-400 text-sm hover:text-white transition-colors"
+                className="hidden sm:flex items-center gap-1.5 text-neutral-500 text-[13px] font-medium hover:text-white transition-colors"
               >
-                View all <ArrowRight className="w-4 h-4" />
+                All reports
+                <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
 
-            {/* Featured + Side Grid */}
+            {/* Grid */}
             <div className="grid lg:grid-cols-3 gap-5 mb-5">
-              {/* Featured card (rank 1) */}
               {trendingBlogs[0] && (
                 <div className="lg:col-span-2">
-                  <BlogCard blog={trendingBlogs[0]} rank={0} />
+                  <BlogCard blog={trendingBlogs[0]} variant="featured" />
                 </div>
               )}
-              {/* Side cards (rank 2-3) */}
               <div className="flex flex-col gap-5">
-                {sideTrending.map((blog, i) => (
-                  <BlogCard key={blog._id} blog={blog} rank={i + 1} />
+                {sideTrending.map((blog) => (
+                  <BlogCard key={blog._id} blog={blog} />
                 ))}
               </div>
             </div>
 
-            {/* Bottom row (rank 4-6) */}
             {restTrending.length > 0 && (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {restTrending.map((blog, i) => (
-                  <BlogCard key={blog._id} blog={blog} rank={i + 4} />
+                {restTrending.map((blog) => (
+                  <BlogCard key={blog._id} blog={blog} />
                 ))}
               </div>
             )}
@@ -326,59 +340,73 @@ export default async function Home() {
         </section>
       )}
 
-      {/* ── LATEST ARTICLES ── */}
+      {/* ─── LATEST ─── */}
       {latestBlogs.length > 0 && (
-        <section className="py-16 px-6 bg-white/[0.01] border-t border-white/[0.07]" id="latest">
+        <section className="py-16 px-6 border-t border-white/[0.05]" id="latest">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-white">Latest Reports</h2>
-              <Link href="/blogs" className="text-gray-400 text-sm hover:text-white transition-colors flex items-center gap-1">
-                All articles <ArrowRight className="w-4 h-4" />
+              <h2 className="text-xl font-bold text-white">Latest Reports</h2>
+              <Link
+                href="/blogs"
+                className="text-neutral-500 text-[13px] font-medium hover:text-white transition-colors flex items-center gap-1"
+              >
+                View all <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {latestBlogs.map((blog, i) => (
-                <BlogCard key={blog._id} blog={blog} rank={i + 10} />
+              {latestBlogs.map((blog) => (
+                <BlogCard key={blog._id} blog={blog} />
               ))}
             </div>
           </div>
         </section>
       )}
 
-      {/* ── FEATURES ── */}
-      <section className="py-24 px-6" id="features">
+      {/* ─── WHY GLOBAL CHANAKYA ─── */}
+      <section className="py-24 px-6 border-t border-white/[0.05]" id="features">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/5 text-gray-400 text-xs font-semibold uppercase tracking-wider mb-4">
-              Platform Architecture
-            </div>
-            <h2 className="text-4xl md:text-5xl font-bold">Built for the Modern <br />Intelligence Reader</h2>
-            <p className="text-gray-400 mt-4 max-w-2xl mx-auto">Enterprise-grade security, SSR-first SEO, subscription-gated early access — all running on the Vercel edge.</p>
+          <div className="text-center mb-16">
+            <span className="inline-block px-3 py-1 rounded-lg border border-white/[0.08] bg-white/[0.03] text-neutral-400 text-[11px] font-medium uppercase tracking-[0.08em] mb-4">
+              Why Global Chanakya
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+              Intelligence You Can Act On
+            </h2>
+            <p className="text-neutral-500 text-[15px] max-w-xl mx-auto">
+              Built for analysts, policy enthusiasts, and decision-makers who need clarity on a complex world.
+            </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {features.map((f) => (
-              <div key={f.title} className="p-6 rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:border-white/15 hover:bg-white/[0.04] transition-all group">
-                <div className={`w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform ${f.color}`}>
-                  <f.icon className="w-5 h-5" />
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {pillars.map((p) => (
+              <div
+                key={p.title}
+                className="p-6 rounded-2xl border border-white/[0.06] bg-white/[0.015] hover:border-white/[0.1] transition-all group"
+              >
+                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${p.accent} flex items-center justify-center mb-5 ${p.iconColor}`}>
+                  <p.icon className="w-5 h-5" />
                 </div>
-                <h3 className="font-semibold text-white mb-2">{f.title}</h3>
-                <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                <h3 className="text-[15px] font-semibold text-white mb-2">{p.title}</h3>
+                <p className="text-[13px] text-neutral-500 leading-relaxed">{p.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CATEGORIES ── */}
-      <section className="py-16 px-6 bg-white/[0.01] border-y border-white/[0.07]" id="categories">
+      {/* ─── CATEGORIES ─── */}
+      <section className="py-16 px-6 border-t border-white/[0.05]" id="categories">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-2xl font-bold mb-8 text-center">Browse by Category</h2>
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-white mb-2">Browse by Theatre</h2>
+            <p className="text-neutral-500 text-[14px]">Explore reports by strategic region and topic</p>
+          </div>
           <div className="flex flex-wrap justify-center gap-3">
-            {categories.map((cat) => (
+            {theatres.map((cat) => (
               <Link
                 key={cat}
                 href={`/blogs?category=${encodeURIComponent(cat)}`}
-                className="px-5 py-2.5 rounded-full border border-white/10 text-sm text-gray-400 hover:text-white hover:border-rose-500/40 hover:bg-rose-500/5 transition-all"
+                className="px-5 py-2.5 rounded-lg border border-white/[0.08] text-[13px] font-medium text-neutral-400 hover:text-white hover:border-white/[0.15] hover:bg-white/[0.03] transition-all"
               >
                 {cat}
               </Link>
@@ -387,50 +415,69 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ── PREMIUM CTA ── */}
-      <section className="py-24 px-6" id="subscribe">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-400 text-xs font-semibold uppercase tracking-wider mb-6">
-            <Zap className="w-3 h-3" /> Premium Access
+      {/* ─── PREMIUM CTA ─── */}
+      <section className="py-24 px-6 border-t border-white/[0.05]" id="subscribe">
+        <div className="max-w-2xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/15 bg-amber-500/[0.05] text-amber-400 text-[11px] font-semibold uppercase tracking-[0.08em] mb-6">
+            <Crown className="w-3 h-3" />
+            Premium Access
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-5">Read It First. <br />Every Time.</h2>
-          <p className="text-gray-400 text-lg mb-10">
-            For just ₹19, get 7-day premium access to every report — a full 24 hours before public release. Auto-expires. No subscription trap.
+
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-white">
+            Read It First. Every Time.
+          </h2>
+          <p className="text-neutral-400 text-[16px] leading-relaxed mb-10 max-w-lg mx-auto">
+            For just ₹19, unlock 7-day premium access to every report — 24 hours before public release. 
+            Auto-expires. No subscription trap.
           </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
+
+          <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link
               href="/subscribe"
-              className="px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 text-black rounded-full font-bold flex items-center justify-center gap-2 group shadow-lg shadow-amber-500/20 hover:shadow-amber-500/40 transition-shadow"
+              className="group px-7 py-3.5 bg-white text-[#060606] rounded-lg font-semibold text-[14px] flex items-center justify-center gap-2 hover:bg-neutral-200 transition-colors"
             >
-              <Zap className="w-5 h-5" />
-              Get Premium Access — ₹19
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <Crown className="w-4 h-4" />
+              Get Premium — ₹19
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
               href="/blogs"
-              className="px-8 py-4 border border-white/15 rounded-full font-semibold text-gray-300 hover:bg-white/5 transition-all"
+              className="px-7 py-3.5 border border-white/[0.1] rounded-lg font-medium text-[14px] text-neutral-300 hover:bg-white/[0.04] transition-all"
             >
-              Browse Free Articles
+              Browse Free Reports
             </Link>
           </div>
 
-          {/* Access gating preview */}
-          <div className="mt-14 p-6 rounded-2xl border border-white/[0.08] bg-white/[0.02] text-left relative overflow-hidden">
-            <div className="absolute top-5 right-5 px-2.5 py-1 text-[10px] font-bold rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 uppercase tracking-wide">
-              Premium Article
+          {/* Gating preview */}
+          <div className="mt-14 p-6 rounded-2xl border border-white/[0.06] bg-white/[0.015] text-left relative overflow-hidden">
+            <div className="absolute top-5 right-5 flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 uppercase tracking-wider">
+              <Lock className="w-2.5 h-2.5" />
+              Premium
             </div>
-            <p className="text-xs text-rose-400 font-mono mb-2 flex items-center gap-1"><Lock className="w-3 h-3" /> EARLY ACCESS — 17h 42m remaining</p>
-            <h4 className="text-lg font-bold mb-2">China's Dual Circulation Strategy and the Future of Global Trade</h4>
-            <p className="text-sm text-gray-600 line-clamp-3">An in-depth look at how Beijing's internal-external economic pivot is reshaping supply chains across Southeast Asia and its implications for Indian exporters...</p>
-            <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-black to-transparent" />
-            <div className="mt-6 flex items-center gap-2 text-sm">
-              <Lock className="w-4 h-4 text-gray-600" />
-              <span className="text-gray-500">This article becomes public in 17h 42m. </span>
-              <Link href="/subscribe" className="text-amber-400 hover:text-amber-300 font-medium">Unlock now →</Link>
+            <div className="flex items-center gap-1.5 text-[11px] text-red-400 font-mono mb-3">
+              <Lock className="w-3 h-3" />
+              EARLY ACCESS — 17h 42m remaining
+            </div>
+            <h4 className="text-[16px] font-semibold text-white mb-2">
+              China&apos;s Dual Circulation Strategy and the Future of Global Trade
+            </h4>
+            <p className="text-[13px] text-neutral-600 line-clamp-3">
+              An in-depth look at how Beijing&apos;s internal-external economic pivot is reshaping supply chains 
+              across Southeast Asia and its implications for Indian exporters...
+            </p>
+            <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#060606] to-transparent" />
+            <div className="mt-6 flex items-center gap-2 text-[13px]">
+              <Lock className="w-3.5 h-3.5 text-neutral-600" />
+              <span className="text-neutral-500">Unlocks publicly in 17h 42m.</span>
+              <Link href="/subscribe" className="text-amber-400 hover:text-amber-300 font-medium ml-1">
+                Unlock now
+                <ArrowUpRight className="w-3 h-3 inline ml-0.5" />
+              </Link>
             </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 }
