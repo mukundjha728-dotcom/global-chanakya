@@ -8,7 +8,7 @@ import {
 import { getTrendingBlogs, getLatestBlogs } from "@/lib/trending";
 import type { TrendingBlog } from "@/lib/trending";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 const pillars = [
   {
