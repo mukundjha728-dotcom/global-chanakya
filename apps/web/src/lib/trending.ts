@@ -39,7 +39,6 @@ export async function getTrendingBlogs(limit = 6): Promise<TrendingBlog[]> {
       $match: {
         status: "published",
         visibility: { $in: ["public", "premium"] },
-        publishAt: { $lte: now },
       },
     },
     // Compute trending score

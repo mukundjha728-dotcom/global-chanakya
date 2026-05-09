@@ -152,10 +152,15 @@ export default async function Home() {
     getLatestBlogs(6),
   ]);
 
-  const hasTrending = trendingBlogs.length > 0;
-  const featuredBlog = latestBlogs[0] || trendingBlogs[0];
-  const mostViewedBlogId = [...trendingBlogs].reduce((max, blog) => (blog.analytics?.views || 0) > (max?.analytics?.views || 0) ? blog : max, trendingBlogs[0])?._id;
+  const allBlogs = [...trendingBlogs, ...latestBlogs];
+  const mostViewedBlog = allBlogs.length > 0 
+    ? allBlogs.reduce((max, blog) => (blog.analytics?.views || 0) > (max.analytics?.views || 0) ? blog : max, allBlogs[0])
+    : null;
 
+  const mostViewedBlogId = mostViewedBlog?._id;
+  const featuredBlog = mostViewedBlog || latestBlogs[0] || trendingBlogs[0];
+
+  const hasTrending = trendingBlogs.length > 0;
   const sideTrending = trendingBlogs.slice(1, 4);
   const restTrending = trendingBlogs.slice(4);
 
@@ -236,8 +241,8 @@ export default async function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-[#060606]/60 to-transparent" />
 
                 <div className="absolute top-5 left-5 flex items-center gap-2">
-                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-600/90 text-white text-[10px] font-bold uppercase tracking-wide">
-                    <TrendingUp className="w-3 h-3" /> Trending
+                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-orange-600/90 text-white text-[10px] font-bold uppercase tracking-wide">
+                    <Flame className="w-3 h-3" /> Viral
                   </span>
                   {featuredBlog.visibility === "premium" && (
                     <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
