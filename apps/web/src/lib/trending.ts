@@ -38,7 +38,7 @@ export async function getTrendingBlogs(limit = 6): Promise<TrendingBlog[]> {
     {
       $match: {
         status: "published",
-        visibility: { $in: ["public", "premium"] },
+        visibility: { $in: ["public", "premium", "private"] },
       },
     },
     // Compute trending score
@@ -92,7 +92,7 @@ export async function getLatestBlogs(limit = 3): Promise<TrendingBlog[]> {
   await dbConnect();
 
   const blogs = await Blog.find(
-    { status: "published", visibility: { $in: ["public", "premium"] } },
+    { status: "published", visibility: { $in: ["public", "premium", "private"] } },
     {
       title: 1, slug: 1, excerpt: 1, category: 1, visibility: 1,
       featuredImage: 1, isTrending: 1, analytics: 1, publishAt: 1, createdAt: 1,
