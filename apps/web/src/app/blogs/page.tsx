@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Search, Zap, Eye, Filter, BookOpen, ArrowRight } from "lucide-react";
+import { Search, Zap, Eye, Filter, BookOpen, ArrowRight, Heart, MessageCircle } from "lucide-react";
 import { Blog } from "@/lib/models/Blog";
 import dbConnect from "@/lib/mongoose";
 
@@ -171,6 +171,14 @@ export default async function BlogsPage({
                     <span className="flex items-center gap-1">
                       <Eye className="w-3 h-3" />
                       {(blog.analytics?.views || 0).toLocaleString()}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3 h-3" />
+                      {blog.analytics?.likes || 0}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle className="w-3 h-3" />
+                      {blog.analytics?.bookmarks || 0}
                     </span>
                     <span>
                       {new Date(blog.publishAt).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}

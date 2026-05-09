@@ -5,6 +5,7 @@ import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
 import { auth } from "@/auth";
 import PremiumLock from "@/components/blogs/PremiumLock";
+import BlogActions from "@/components/blogs/BlogActions";
 import { ArrowLeft, Clock, Eye, Calendar, Tag, Share2 } from "lucide-react";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -25,6 +26,29 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
+/**
+ * Sanitize blog HTML content:
+ * - Remove <style> tags to prevent style leaking
+ * - Remove <script> tags for security
+ * - Strip class attributes that might conflict with Tailwind
+ * - Convert inline styles to be safe
+ */
+function sanitizeBlogContent(html: string): string {
+  let clean = html;
+
+  // Remove <script> tags completely
+  clean = clean.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+
+  // Remove <style> tags completely (prevents style leaking)
+  clean = clean.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "");
+
+  // Remove any on* event handlers (onclick, onerror, etc.)
+  clean = clean.replace(/\s+on\w+\s*=\s*"[^"]*"/gi, "");
+  clean = clean.replace(/\s+on\w+\s*=\s*'[^']*'/gi, "");
+
+  return clean;
+}
+
 export default async function BlogPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   await dbConnect();
@@ -38,6 +62,8 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
   const publishDate = new Date(blog.publishAt).toLocaleDateString("en-IN", {
     day: "numeric", month: "long", year: "numeric",
   });
+
+  const sanitizedContent = sanitizeBlogContent(blog.content);
 
   return (
     <div className="min-h-screen bg-[#080808]" style={{ color: "#e5e7eb" }}>
@@ -177,17 +203,17 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
       )}
 
       {/* Article body */}
-      <div style={{ maxWidth: "740px", margin: "0 auto", padding: "48px 24px 80px" }}>
+      <div style={{ maxWidth: "740px", margin: "0 auto", padding: "48px 24px 120px" }}>
         <PremiumLock
           earlyAccessUntil={blog.earlyAccessUntil}
           userRole={(session?.user as any)?.role}
           isLoggedIn={!!session}
           blogSlug={blog.slug}
         >
-          {/* Article content with full inline styling */}
+          {/* Article content — sanitized and scoped */}
           <div
             className="article-body"
-            dangerouslySetInnerHTML={{ __html: blog.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
           />
         </PremiumLock>
 
@@ -241,92 +267,165 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
         </div>
       </div>
 
-      {/* Global article body styles */}
+      {/* ── Blog Actions (Like, Comment, Bookmark, Share) ── */}
+      <BlogActions
+        slug={blog.slug}
+        initialLikes={blog.analytics?.likes || 0}
+        initialBookmarks={blog.analytics?.bookmarks || 0}
+        isLoggedIn={!!session}
+        commentsEnabled={blog.commentsEnabled !== false}
+      />
+
+      {/* Global article body styles — comprehensive reset to handle any HTML/CSS from editor */}
       <style>{`
         .article-body {
           font-size: 17px;
           line-height: 1.85;
           color: #d1d5db;
           font-family: Georgia, 'Times New Roman', serif;
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          word-break: break-word;
         }
+
+        /* ── RESET: Normalize all elements inside article-body ── */
+        .article-body * {
+          max-width: 100%;
+          box-sizing: border-box;
+        }
+
         .article-body p {
           margin-bottom: 1.5em;
+          margin-top: 0;
           color: #d1d5db;
+          font-size: inherit;
+          line-height: inherit;
         }
-        .article-body h1, .article-body h2, .article-body h3, .article-body h4 {
+
+        /* Empty paragraphs from TipTap — collapse them */
+        .article-body p:empty,
+        .article-body p br:only-child {
+          margin-bottom: 0.5em;
+        }
+
+        .article-body h1, .article-body h2, .article-body h3, .article-body h4, .article-body h5, .article-body h6 {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-          color: #ffffff;
+          color: #ffffff !important;
           font-weight: 700;
           line-height: 1.3;
           margin-top: 2em;
           margin-bottom: 0.75em;
           letter-spacing: -0.01em;
+          background: none !important;
+          -webkit-text-fill-color: #ffffff !important;
         }
         .article-body h1 { font-size: 2em; }
         .article-body h2 { font-size: 1.5em; border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 0.4em; }
-        .article-body h3 { font-size: 1.25em; color: #f3f4f6; }
-        .article-body h4 { font-size: 1.1em; color: #e5e7eb; }
-        .article-body a { color: #f87171; text-decoration: none; border-bottom: 1px solid rgba(248,113,113,0.3); }
-        .article-body a:hover { color: #fca5a5; border-bottom-color: #fca5a5; }
-        .article-body strong, .article-body b { color: #ffffff; font-weight: 700; }
+        .article-body h3 { font-size: 1.25em; }
+        .article-body h4 { font-size: 1.1em; }
+        .article-body h5 { font-size: 1em; }
+        .article-body h6 { font-size: 0.95em; color: #9ca3af !important; -webkit-text-fill-color: #9ca3af !important; }
+
+        .article-body a { color: #f87171 !important; text-decoration: none; border-bottom: 1px solid rgba(248,113,113,0.3); }
+        .article-body a:hover { color: #fca5a5 !important; border-bottom-color: #fca5a5; }
+
+        .article-body strong, .article-body b { color: #ffffff !important; font-weight: 700; }
         .article-body em, .article-body i { color: #e5e7eb; font-style: italic; }
+
         .article-body blockquote {
           margin: 2em 0;
           padding: 20px 24px;
           border-left: 4px solid #ef4444;
-          background: rgba(239,68,68,0.05);
+          background: rgba(239,68,68,0.05) !important;
           border-radius: 0 12px 12px 0;
-          color: #9ca3af;
+          color: #9ca3af !important;
           font-style: italic;
           font-size: 1.05em;
         }
-        .article-body blockquote p { margin-bottom: 0; color: #9ca3af; }
+        .article-body blockquote * { color: #9ca3af !important; }
+        .article-body blockquote p { margin-bottom: 0; color: #9ca3af !important; }
+
         .article-body ul, .article-body ol {
           margin: 1.5em 0;
           padding-left: 1.75em;
           color: #d1d5db;
         }
-        .article-body li { margin-bottom: 0.6em; }
+        .article-body li {
+          margin-bottom: 0.6em;
+          color: #d1d5db;
+        }
         .article-body ul li::marker { color: #ef4444; }
         .article-body ol li::marker { color: #ef4444; font-weight: 700; }
+
+        /* Nested lists */
+        .article-body li > ul,
+        .article-body li > ol {
+          margin-top: 0.4em;
+          margin-bottom: 0.4em;
+        }
+
         .article-body code {
-          background: rgba(255,255,255,0.07);
-          color: #fca5a5;
+          background: rgba(255,255,255,0.07) !important;
+          color: #fca5a5 !important;
           padding: 2px 7px;
           border-radius: 5px;
           font-size: 0.9em;
-          font-family: 'Fira Code', monospace;
+          font-family: 'Fira Code', 'Consolas', monospace;
         }
         .article-body pre {
-          background: rgba(255,255,255,0.04);
+          background: rgba(255,255,255,0.04) !important;
           border: 1px solid rgba(255,255,255,0.1);
           border-radius: 12px;
           padding: 20px;
           overflow-x: auto;
           margin: 1.5em 0;
         }
-        .article-body pre code { background: transparent; padding: 0; color: #d1d5db; }
+        .article-body pre code {
+          background: transparent !important;
+          padding: 0;
+          color: #d1d5db !important;
+          font-size: 0.9em;
+        }
+
         .article-body hr {
           border: none;
           height: 1px;
           background: rgba(255,255,255,0.08);
           margin: 2.5em 0;
         }
+
         .article-body img {
           width: 100%;
+          height: auto;
           border-radius: 12px;
           margin: 2em 0;
           border: 1px solid rgba(255,255,255,0.08);
+          display: block;
         }
+
+        .article-body figure {
+          margin: 2em 0;
+          padding: 0;
+        }
+        .article-body figcaption {
+          text-align: center;
+          color: #6b7280;
+          font-size: 0.85em;
+          margin-top: 8px;
+          font-style: italic;
+        }
+
         .article-body table {
           width: 100%;
           border-collapse: collapse;
           margin: 2em 0;
           font-size: 0.95em;
+          overflow-x: auto;
+          display: block;
         }
         .article-body th {
-          background: rgba(255,255,255,0.05);
-          color: #e5e7eb;
+          background: rgba(255,255,255,0.05) !important;
+          color: #e5e7eb !important;
           padding: 10px 14px;
           text-align: left;
           border: 1px solid rgba(255,255,255,0.1);
@@ -335,9 +434,100 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
         .article-body td {
           padding: 10px 14px;
           border: 1px solid rgba(255,255,255,0.07);
-          color: #d1d5db;
+          color: #d1d5db !important;
+          background: transparent !important;
         }
-        .article-body tr:hover td { background: rgba(255,255,255,0.02); }
+        .article-body tr:hover td { background: rgba(255,255,255,0.02) !important; }
+
+        /* ── Handle TipTap specific elements ── */
+        .article-body .ProseMirror { outline: none; }
+
+        /* TipTap text alignment */
+        .article-body [style*="text-align: center"] { text-align: center; }
+        .article-body [style*="text-align: right"] { text-align: right; }
+        .article-body [style*="text-align: justify"] { text-align: justify; }
+
+        /* Force dark-mode compatible colors on all inline-styled elements */
+        .article-body [style*="color: rgb(0, 0, 0)"],
+        .article-body [style*="color: black"],
+        .article-body [style*="color:#000"],
+        .article-body [style*="color: #000000"] {
+          color: #d1d5db !important;
+        }
+
+        .article-body [style*="background-color: rgb(255, 255, 255)"],
+        .article-body [style*="background-color: white"],
+        .article-body [style*="background:#fff"],
+        .article-body [style*="background-color: #ffffff"] {
+          background-color: transparent !important;
+        }
+
+        /* Force override any bright backgrounds */
+        .article-body div[style*="background"],
+        .article-body span[style*="background"],
+        .article-body p[style*="background"] {
+          background-color: transparent !important;
+          background: transparent !important;
+        }
+
+        /* Override text colors that would be unreadable on dark bg */
+        .article-body [style*="color: rgb(0,"],
+        .article-body [style*="color: rgb(1,"],
+        .article-body [style*="color: rgb(2,"],
+        .article-body [style*="color: rgb(3,"],
+        .article-body [style*="color: rgb(4,"],
+        .article-body [style*="color: rgb(5,"] {
+          color: #d1d5db !important;
+        }
+
+        /* Handle iframes (embedded videos) */
+        .article-body iframe {
+          width: 100%;
+          max-width: 100%;
+          border-radius: 12px;
+          margin: 2em 0;
+          aspect-ratio: 16 / 9;
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* Handle embedded divs that might have their own styling */
+        .article-body > div {
+          background: transparent !important;
+          color: inherit !important;
+        }
+
+        /* Mark/highlight */
+        .article-body mark {
+          background: rgba(245,158,11,0.2) !important;
+          color: #fbbf24 !important;
+          padding: 1px 4px;
+          border-radius: 3px;
+        }
+
+        /* Sup / Sub */
+        .article-body sup { color: #9ca3af; font-size: 0.75em; }
+        .article-body sub { color: #9ca3af; font-size: 0.75em; }
+
+        /* Details / Summary */
+        .article-body details {
+          margin: 1.5em 0;
+          padding: 16px 20px;
+          border-radius: 12px;
+          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(255,255,255,0.02) !important;
+        }
+        .article-body summary {
+          color: #e5e7eb;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        /* Horizontal scrolling for wide content */
+        .article-body .table-wrapper,
+        .article-body .tableWrapper {
+          overflow-x: auto;
+          margin: 2em 0;
+        }
       `}</style>
     </div>
   );
