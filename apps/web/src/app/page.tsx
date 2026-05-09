@@ -46,7 +46,7 @@ const theatres = [
   "Defence", "China", "Russia", "Economy & Trade",
 ];
 
-function BlogCard({ blog, variant = "default" }: { blog: TrendingBlog; variant?: "featured" | "default" }) {
+function BlogCard({ blog, variant = "default", isViral = false }: { blog: TrendingBlog; variant?: "featured" | "default"; isViral?: boolean }) {
   const isPremium = blog.visibility === "premium";
   const isFeatured = variant === "featured";
 
@@ -77,7 +77,11 @@ function BlogCard({ blog, variant = "default" }: { blog: TrendingBlog; variant?:
             </span>
           </div>
           <div className="absolute top-4 right-4 flex items-center gap-2">
-            {blog.isTrending && (
+            {isViral ? (
+              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-orange-600/90 text-white text-[10px] font-bold uppercase tracking-wide">
+                <Flame className="w-2.5 h-2.5" /> Viral
+              </span>
+            ) : blog.isTrending && (
               <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-red-600/90 text-white text-[10px] font-bold uppercase tracking-wide">
                 <TrendingUp className="w-2.5 h-2.5" /> Trending
               </span>
@@ -145,11 +149,13 @@ function BlogCard({ blog, variant = "default" }: { blog: TrendingBlog; variant?:
 export default async function Home() {
   const [trendingBlogs, latestBlogs] = await Promise.all([
     getTrendingBlogs(6),
-    getLatestBlogs(3),
+    getLatestBlogs(6),
   ]);
 
   const hasTrending = trendingBlogs.length > 0;
-  const featuredBlog = trendingBlogs[0];
+  const featuredBlog = latestBlogs[0] || trendingBlogs[0];
+  const mostViewedBlogId = [...trendingBlogs].reduce((max, blog) => (blog.analytics?.views || 0) > (max?.analytics?.views || 0) ? blog : max, trendingBlogs[0])?._id;
+
   const sideTrending = trendingBlogs.slice(1, 4);
   const restTrending = trendingBlogs.slice(4);
 
@@ -230,11 +236,9 @@ export default async function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-[#060606]/60 to-transparent" />
 
                 <div className="absolute top-5 left-5 flex items-center gap-2">
-                  {featuredBlog.isTrending && (
-                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-600/90 text-white text-[10px] font-bold">
-                      <TrendingUp className="w-3 h-3" /> Trending
-                    </span>
-                  )}
+                  <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-600/90 text-white text-[10px] font-bold uppercase tracking-wide">
+                    <TrendingUp className="w-3 h-3" /> Trending
+                  </span>
                   {featuredBlog.visibility === "premium" && (
                     <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
                       <Crown className="w-3 h-3" /> Premium
@@ -319,12 +323,12 @@ export default async function Home() {
             <div className="grid lg:grid-cols-3 gap-5 mb-5">
               {trendingBlogs[0] && (
                 <div className="lg:col-span-2">
-                  <BlogCard blog={trendingBlogs[0]} variant="featured" />
+                  <BlogCard blog={trendingBlogs[0]} variant="featured" isViral={trendingBlogs[0]._id === mostViewedBlogId} />
                 </div>
               )}
               <div className="flex flex-col gap-5">
                 {sideTrending.map((blog) => (
-                  <BlogCard key={blog._id} blog={blog} />
+                  <BlogCard key={blog._id} blog={blog} isViral={blog._id === mostViewedBlogId} />
                 ))}
               </div>
             </div>
@@ -332,7 +336,7 @@ export default async function Home() {
             {restTrending.length > 0 && (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {restTrending.map((blog) => (
-                  <BlogCard key={blog._id} blog={blog} />
+                  <BlogCard key={blog._id} blog={blog} isViral={blog._id === mostViewedBlogId} />
                 ))}
               </div>
             )}
@@ -355,7 +359,7 @@ export default async function Home() {
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {latestBlogs.map((blog) => (
-                <BlogCard key={blog._id} blog={blog} />
+                <BlogCard key={blog._id} blog={blog} isViral={blog._id === mostViewedBlogId} />
               ))}
             </div>
           </div>
