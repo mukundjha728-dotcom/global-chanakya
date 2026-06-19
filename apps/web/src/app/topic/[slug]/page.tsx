@@ -5,7 +5,7 @@ import { TopicService } from "@/modules/seo/services/topic.service";
 import { RelatedIntelligence } from "@/components/shared/RelatedIntelligence";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { generateSeoMetadata } from "@repo/utils";
-import { SITE_URL } from "@/app/layout";
+import { SITE_URL } from "@/constants";
 
 export const revalidate = 3600;
 

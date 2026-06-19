@@ -15,7 +15,7 @@ import { ILeader } from "@/lib/models/Leader";
 import { ITimeline } from "@/lib/models/Timeline";
 import dbConnect from "@/lib/mongoose";
 import Link from "next/link";
-import { SITE_URL } from "@/app/layout";
+import { SITE_URL } from "@/constants";
 import { auth } from "@/auth";
 import { WatchlistService } from "@/modules/watchlist/services/watchlist.service";
 

@@ -11,7 +11,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { FaqBlock } from "@/components/seo/FaqBlock";
 import { RelatedIntelligence } from "@/components/shared/RelatedIntelligence";
 import { generateSeoMetadata } from "@repo/utils";
-import { SITE_URL } from "@/app/layout";
+import { SITE_URL } from "@/constants";
 import { auth } from "@/auth";
 import { WatchlistService } from "@/modules/watchlist/services/watchlist.service";
 import Link from "next/link";
