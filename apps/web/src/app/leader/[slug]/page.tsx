@@ -39,8 +39,9 @@ async function getLeader(slug: string) {
   return leader as ILeader;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const leader = await getLeader(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const leader = await getLeader(slug);
   if (!leader) return {};
 
   const title = `${leader.name} | Intelligence Analysis | Global Chanakya`;
@@ -57,8 +58,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   });
 }
 
-export default async function LeaderPage({ params }: { params: { slug: string } }) {
-  const leader = await getLeader(params.slug);
+export default async function LeaderPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const leader = await getLeader(slug);
   if (!leader) notFound();
 
   let country: ICountry | { name: string, slug: string } | null = null;

@@ -9,11 +9,12 @@ import { SITE_URL } from "@/app/layout";
 
 export const revalidate = 3600;
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const formattedSlug = params.slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const formattedSlug = slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
   const title = `${formattedSlug} | Intelligence Command Center | Global Chanakya`;
   const description = `Aggregated intelligence, reports, conflicts, and geopolitical relations concerning ${formattedSlug}. Deep-dive into our massive topical authority graph.`;
-  const canonicalUrl = `${SITE_URL}/topic/${params.slug}`;
+  const canonicalUrl = `${SITE_URL}/topic/${slug}`;
 
   return generateSeoMetadata({
     title,
@@ -24,22 +25,23 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   });
 }
 
-export default async function TopicPage({ params }: { params: { slug: string } }) {
-  const data = await TopicService.getTopicHubData(params.slug);
+export default async function TopicPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const data = await TopicService.getTopicHubData(slug);
   
   const totalItems = data.countries.length + data.leaders.length + data.conflicts.length + data.reports.length;
   if (totalItems === 0) {
     notFound();
   }
 
-  const formattedSlug = params.slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  const formattedSlug = slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
 
   return (
     <div className="bg-[#060606] text-white min-h-screen pt-24 pb-20 px-6">
       <div className="max-w-5xl mx-auto">
         <Breadcrumbs items={[
           { name: "Topics", href: "/topic" },
-          { name: formattedSlug, href: `/topic/${params.slug}` }
+          { name: formattedSlug, href: `/topic/${slug}` }
         ]} />
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 mt-4">

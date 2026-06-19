@@ -39,8 +39,9 @@ async function getConflict(slug: string) {
   return conflict as IConflict;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const conflict = await getConflict(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const conflict = await getConflict(slug);
   if (!conflict) return {};
 
   const title = `${conflict.title} | Intelligence Analysis | Global Chanakya`;
@@ -56,8 +57,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   });
 }
 
-export default async function ConflictPage({ params }: { params: { slug: string } }) {
-  const conflict = await getConflict(params.slug);
+export default async function ConflictPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const conflict = await getConflict(slug);
   if (!conflict) notFound();
 
   const session = await auth();

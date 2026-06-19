@@ -48,8 +48,9 @@ async function getCountry(slug: string) {
   return country as ICountry;
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const country = await getCountry(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const country = await getCountry(slug);
   if (!country) return {};
 
   const title = country.seo?.title || `${country.name} | Intelligence Analysis | Global Chanakya`;
@@ -66,8 +67,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   });
 }
 
-export default async function CountryPage({ params }: { params: { slug: string } }) {
-  const country = await getCountry(params.slug);
+export default async function CountryPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const country = await getCountry(slug);
   
   if (!country) {
     notFound();
