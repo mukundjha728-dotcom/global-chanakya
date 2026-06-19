@@ -1,8 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Crown, Mail, MapPin, ArrowUpRight } from "lucide-react";
-
-const SITE_URL = "https://global-chanakya-web.vercel.app";
+import { SITE_URL } from "@/constants";
 
 const cols = {
   Analysis: [

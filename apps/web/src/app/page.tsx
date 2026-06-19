@@ -5,8 +5,8 @@ import {
   TrendingUp, Eye, Heart, Bookmark, ChevronRight, Crosshair,
   Newspaper, BarChart3, Users, Lock, Flame
 } from "lucide-react";
-import { getTrendingBlogs, getLatestBlogs } from "@/lib/trending";
-import type { TrendingBlog } from "@/lib/trending";
+import { BlogService } from "@/modules/blog/services/blog.service";
+import type { TrendingBlog } from "@/lib/trending"; // We will keep this type for now or move it.
 
 export const revalidate = 60;
 
@@ -148,8 +148,8 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
 
 export default async function Home() {
   const [trendingBlogs, latestBlogs] = await Promise.all([
-    getTrendingBlogs(6),
-    getLatestBlogs(6),
+    BlogService.getTrendingBlogs(6),
+    BlogService.getLatestBlogs(6),
   ]);
 
   const allBlogs = [...trendingBlogs, ...latestBlogs];
@@ -436,17 +436,16 @@ export default async function Home() {
             Read It First. Every Time.
           </h2>
           <p className="text-neutral-400 text-[16px] leading-relaxed mb-10 max-w-lg mx-auto">
-            For just ₹19, unlock 7-day premium access to every report — 24 hours before public release. 
-            Auto-expires. No subscription trap.
+            Create a free account to unlock full access to every intelligence report — 24 hours before public release.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link
-              href="/subscribe"
+              href="/auth/signin"
               className="group px-7 py-3.5 bg-white text-[#060606] rounded-lg font-semibold text-[14px] flex items-center justify-center gap-2 hover:bg-neutral-200 transition-colors"
             >
               <Crown className="w-4 h-4" />
-              Get Premium — ₹19
+              Create Free Account
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
             <Link
@@ -478,8 +477,8 @@ export default async function Home() {
             <div className="mt-6 flex items-center gap-2 text-[13px]">
               <Lock className="w-3.5 h-3.5 text-neutral-600" />
               <span className="text-neutral-500">Unlocks publicly in 17h 42m.</span>
-              <Link href="/subscribe" className="text-amber-400 hover:text-amber-300 font-medium ml-1">
-                Unlock now
+              <Link href="/auth/signin" className="text-amber-400 hover:text-amber-300 font-medium ml-1">
+                Sign in to read
                 <ArrowUpRight className="w-3 h-3 inline ml-0.5" />
               </Link>
             </div>

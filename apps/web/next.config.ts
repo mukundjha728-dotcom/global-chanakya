@@ -1,12 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  typescript: {
-    ignoreBuildErrors: true,
-  }
+  // Typescript and ESLint errors will now fail the build (Phase 0 Upgrade)
 };
 
 export default nextConfig;

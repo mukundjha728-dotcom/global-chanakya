@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Search, Crown, Eye, Heart, Bookmark, Newspaper, ArrowRight, TrendingUp } from "lucide-react";
-import { Blog } from "@/lib/models/Blog";
+import { Blog, IBlog } from "@/lib/models/Blog";
+import { formatDate } from "@repo/utils";
 import dbConnect from "@/lib/mongoose";
 
 export const metadata = {
@@ -17,10 +18,10 @@ export default async function BlogsPage({
   const category = resolvedParams.category as string | undefined;
   const trending = resolvedParams.trending === "true";
 
-  let blogs: any[] = [];
+  let blogs: IBlog[] = [];
   try {
     await dbConnect();
-    const query: any = { status: "published" };
+    const query: Record<string, unknown> = { status: "published" };
     if (category) query.category = category;
     if (trending) query.isTrending = true;
 
@@ -192,7 +193,7 @@ export default async function BlogsPage({
                         {(blog.analytics?.views || 0).toLocaleString()}
                       </span>
                       <span>
-                        {new Date(blog.publishAt).toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
+                        {formatDate(blog.publishAt, "short")}
                       </span>
                     </div>
                   </div>

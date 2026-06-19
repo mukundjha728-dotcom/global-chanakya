@@ -4,6 +4,7 @@ import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
 import { User } from "@/lib/models/User";
 import mongoose from "mongoose";
+import { createBlogSchema, updateBlogSchema } from "@/lib/validators/blog.schema";
 
 // Give Vercel 30s before cutting off the function
 export const maxDuration = 30;
@@ -50,15 +51,15 @@ export async function POST(req: NextRequest) {
     if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json();
-    const { title, slug, excerpt, content, category, tags, visibility, status,
-      isTrending, commentsEnabled, seo, featuredImage } = body;
-
-    if (!title || !slug || !excerpt || !content || !category) {
-      return NextResponse.json(
-        { error: "Required fields missing: title, slug, excerpt, content, category" },
-        { status: 400 }
-      );
+    
+    // Validating request body with Zod
+    const validation = createBlogSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.errors[0].message, details: validation.error.format() }, { status: 400 });
     }
+
+    const { title, slug, excerpt, content, category, tags, visibility, status,
+      isTrending, commentsEnabled, seo, featuredImage } = validation.data;
 
     // Get author ObjectId
     let authorObjectId: mongoose.Types.ObjectId;
@@ -133,9 +134,13 @@ export async function PATCH(req: NextRequest) {
     if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json();
-    const { id, status, ...rest } = body;
+    
+    const validation = updateBlogSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 });
+    }
 
-    if (!id) return NextResponse.json({ error: "Blog ID required" }, { status: 400 });
+    const { id, status, ...rest } = validation.data;
 
     const updateData: Record<string, unknown> = {};
     if (status) updateData.status = status;

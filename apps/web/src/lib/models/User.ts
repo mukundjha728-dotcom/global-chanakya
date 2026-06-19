@@ -7,13 +7,6 @@ export interface IUser extends Document {
   avatar?: string;
   role: "guest" | "free" | "premium" | "admin";
   provider: "credentials" | "google" | "github";
-  subscription?: {
-    plan: string;
-    paymentId?: string;
-    expiresAt: Date;
-    status: "active" | "expired";
-  };
-  bookmarks: mongoose.Types.ObjectId[];
   preferences: {
     notifications: {
       email: boolean;
@@ -34,6 +27,8 @@ export interface IUser extends Document {
   isBanned: boolean;
   bannedReason?: string;
   emailVerified?: Date;
+  failedLoginAttempts: number;
+  lockedUntil?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -54,13 +49,6 @@ const UserSchema = new Schema<IUser>(
       enum: ["credentials", "google", "github"],
       default: "credentials",
     },
-    subscription: {
-      plan: { type: String },
-      paymentId: { type: String },
-      expiresAt: { type: Date },
-      status: { type: String, enum: ["active", "expired"] },
-    },
-    bookmarks: [{ type: Schema.Types.ObjectId, ref: "Blog" }],
     preferences: {
       notifications: {
         email: { type: Boolean, default: true },
@@ -83,6 +71,8 @@ const UserSchema = new Schema<IUser>(
     isBanned: { type: Boolean, default: false },
     bannedReason: { type: String },
     emailVerified: { type: Date },
+    failedLoginAttempts: { type: Number, default: 0 },
+    lockedUntil: { type: Date },
   },
   { timestamps: true }
 );

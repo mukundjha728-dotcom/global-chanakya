@@ -1,65 +1,38 @@
 import { NextRequest, NextResponse } from "next/server";
-import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
-import { User } from "@/lib/models/User";
 import { auth } from "@/auth";
+import { BookmarkService } from "@/modules/bookmark/services/bookmark.service";
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const session = await auth();
-  if (!session?.user?.email) {
+  if (!session?.user?.id) {
     return NextResponse.json({ error: "Sign in to save articles" }, { status: 401 });
   }
 
   const { slug } = await params;
-  await dbConnect();
-
   const blog = await Blog.findOne({ slug, status: "published" });
   if (!blog) {
     return NextResponse.json({ error: "Blog not found" }, { status: 404 });
   }
 
-  const user = await User.findOne({ email: session.user.email });
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
-  }
-
   try {
-    const isBookmarked = user.bookmarks?.includes(blog._id);
+    const result = await BookmarkService.toggleBookmark(session.user.id, blog._id.toString());
+    
+    // Update analytics counter (in background)
+    Blog.updateOne(
+      { _id: blog._id },
+      { $inc: { "analytics.bookmarks": result.status === "added" ? 1 : -1 } }
+    ).exec();
 
-    if (isBookmarked) {
-      // Remove bookmark
-      await User.updateOne(
-        { _id: user._id },
-        { $pull: { bookmarks: blog._id } }
-      );
-      await Blog.updateOne(
-        { _id: blog._id },
-        { $inc: { "analytics.bookmarks": -1 } }
-      );
-      const updated = await Blog.findById(blog._id).lean() as any;
-      return NextResponse.json({
-        bookmarked: false,
-        bookmarks: updated.analytics?.bookmarks || 0,
-      });
-    } else {
-      // Add bookmark
-      await User.updateOne(
-        { _id: user._id },
-        { $addToSet: { bookmarks: blog._id } }
-      );
-      await Blog.updateOne(
-        { _id: blog._id },
-        { $inc: { "analytics.bookmarks": 1 } }
-      );
-      const updated = await Blog.findById(blog._id).lean() as any;
-      return NextResponse.json({
-        bookmarked: true,
-        bookmarks: updated.analytics?.bookmarks || 0,
-      });
-    }
+    const updated = await Blog.findById(blog._id).lean() as any;
+    
+    return NextResponse.json({
+      bookmarked: result.status === "added",
+      bookmarks: (updated?.analytics?.bookmarks || 0) + (result.status === "added" ? 1 : -1),
+    });
   } catch (error) {
     return NextResponse.json({ error: "Failed to process bookmark" }, { status: 500 });
   }
@@ -72,7 +45,6 @@ export async function GET(
 ) {
   const session = await auth();
   const { slug } = await params;
-  await dbConnect();
 
   const blog = await Blog.findOne({ slug, status: "published" }).lean() as any;
   if (!blog) {
@@ -80,9 +52,8 @@ export async function GET(
   }
 
   let bookmarked = false;
-  if (session?.user?.email) {
-    const user = await User.findOne({ email: session.user.email }).lean() as any;
-    bookmarked = user?.bookmarks?.some((b: any) => b.toString() === blog._id.toString()) ?? false;
+  if (session?.user?.id) {
+    bookmarked = await BookmarkService.isBookmarked(session.user.id, blog._id.toString());
   }
 
   return NextResponse.json({

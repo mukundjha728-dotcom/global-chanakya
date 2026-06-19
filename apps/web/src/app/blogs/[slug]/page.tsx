@@ -6,24 +6,23 @@ import { Blog } from "@/lib/models/Blog";
 import { auth } from "@/auth";
 import PremiumLock from "@/components/blogs/PremiumLock";
 import BlogActions from "@/components/blogs/BlogActions";
+import { generateSeoMetadata, calculateReadingTime, formatDate } from "@repo/utils";
 import { ArrowLeft, Clock, Eye, Calendar, Tag, Share2, Crown, TrendingUp } from "lucide-react";
+import { SITE_URL } from "@/constants";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   await dbConnect();
   const blog = await Blog.findOne({ slug, status: "published" }).lean() as any;
   if (!blog) return { title: "Not Found" };
-  return {
+  return generateSeoMetadata({
     title: blog.seo?.title || blog.title,
     description: blog.seo?.description || blog.excerpt,
-    keywords: blog.seo?.keywords || blog.tags,
-    openGraph: {
-      title: blog.seo?.title || blog.title,
-      description: blog.seo?.description || blog.excerpt,
-      images: blog.featuredImage ? [blog.featuredImage] : [],
-      type: "article",
-    },
-  };
+    keywords: blog.seo?.keywords || blog.tags?.join(", "),
+    canonicalUrl: `${SITE_URL}/blogs/${blog.slug}`,
+    imageUrl: blog.featuredImage,
+    type: "article",
+  });
 }
 
 /**
@@ -57,11 +56,8 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
   const blog = await Blog.findOne({ slug, status: "published" }).populate("author", "name").lean() as any;
   if (!blog) notFound();
 
-  const wordCount = blog.content.replace(/<[^>]*>/g, "").split(/\s+/).length;
-  const readTime = Math.max(1, Math.ceil(wordCount / 200));
-  const publishDate = new Date(blog.publishAt).toLocaleDateString("en-IN", {
-    day: "numeric", month: "long", year: "numeric",
-  });
+  const readTime = Math.max(1, calculateReadingTime(blog.content.replace(/<[^>]*>/g, "")));
+  const publishDate = formatDate(blog.publishAt, "long");
 
   const sanitizedContent = sanitizeBlogContent(blog.content);
 

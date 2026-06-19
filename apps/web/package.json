@@ -9,6 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@repo/config": "workspace:*",
+    "@repo/constants": "workspace:*",
+    "@repo/hooks": "workspace:*",
+    "@repo/security": "workspace:*",
+    "@repo/types": "workspace:*",
+    "@repo/ui": "workspace:*",
+    "@repo/utils": "workspace:*",
     "@auth/mongodb-adapter": "^3.11.2",
     "@sentry/nextjs": "^10.51.0",
     "@tiptap/extension-image": "^3.22.5",

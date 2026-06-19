@@ -23,7 +23,7 @@ export function SubscribeClient() {
 
   useEffect(() => {
     if (!mounted) return;
-    if (status === "authenticated" && (session?.user as any)?.role === "premium") {
+    if (status === "authenticated" && (session?.user as unknown as { role: string })?.role === "premium") {
       router.replace("/blogs");
     }
   }, [status, session, mounted, router]);
@@ -50,7 +50,7 @@ export function SubscribeClient() {
           name: session.user?.name ?? "User",
           email: session.user?.email ?? "",
         },
-        handler: async function (response: any) {
+        handler: async function (response: { razorpay_payment_id: string; razorpay_order_id: string; razorpay_signature: string }) {
           const verifyRes = await fetch("/api/razorpay/verify", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -66,7 +66,7 @@ export function SubscribeClient() {
         },
         theme: { color: "#f59e0b" },
       };
-      const rzp1 = new (window as any).Razorpay(options);
+      const rzp1 = new (window as unknown as { Razorpay: new (options: unknown) => { open: () => void } }).Razorpay(options);
       rzp1.open();
     } catch (error) {
       console.error(error);

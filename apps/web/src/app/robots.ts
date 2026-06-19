@@ -1,13 +1,13 @@
 import { MetadataRoute } from 'next';
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://global-chanakya-web.vercel.app';
+import { SITE_URL } from "@/constants";
 
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: '/',
-      disallow: ['/admin/', '/api/'],
+      allow: ['/', '/country/', '/leader/', '/conflict/', '/topic/', '/blogs/'],
+      disallow: ['/admin/', '/api/', '/dashboard/', '/auth/', '/settings/'],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };

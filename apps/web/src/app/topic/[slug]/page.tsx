@@ -1,0 +1,70 @@
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Network, Database } from "lucide-react";
+import { TopicService } from "@/modules/seo/services/topic.service";
+import { RelatedIntelligence } from "@/components/shared/RelatedIntelligence";
+import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
+import { generateSeoMetadata } from "@repo/utils";
+import { SITE_URL } from "@/app/layout";
+
+export const revalidate = 3600;
+
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const formattedSlug = params.slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+  const title = `${formattedSlug} | Intelligence Command Center | Global Chanakya`;
+  const description = `Aggregated intelligence, reports, conflicts, and geopolitical relations concerning ${formattedSlug}. Deep-dive into our massive topical authority graph.`;
+  const canonicalUrl = `${SITE_URL}/topic/${params.slug}`;
+
+  return generateSeoMetadata({
+    title,
+    description,
+    canonicalUrl,
+    keywords: `${formattedSlug} intelligence, ${formattedSlug} geopolitics, ${formattedSlug} reports, ${formattedSlug} analysis`,
+    type: "website",
+  });
+}
+
+export default async function TopicPage({ params }: { params: { slug: string } }) {
+  const data = await TopicService.getTopicHubData(params.slug);
+  
+  const totalItems = data.countries.length + data.leaders.length + data.conflicts.length + data.reports.length;
+  if (totalItems === 0) {
+    notFound();
+  }
+
+  const formattedSlug = params.slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+
+  return (
+    <div className="bg-[#060606] text-white min-h-screen pt-24 pb-20 px-6">
+      <div className="max-w-5xl mx-auto">
+        <Breadcrumbs items={[
+          { name: "Topics", href: "/topic" },
+          { name: formattedSlug, href: `/topic/${params.slug}` }
+        ]} />
+
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 mt-4">
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 rounded-2xl bg-indigo-500/[0.04] border border-indigo-500/[0.2] flex items-center justify-center">
+              <Network className="w-8 h-8 text-indigo-400" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 text-indigo-400 text-[12px] font-bold uppercase tracking-wider mb-2">
+                <Database className="w-4 h-4" />
+                Intelligence Hub
+              </div>
+              <h1 className="text-4xl sm:text-5xl font-bold text-white mb-2">{formattedSlug}</h1>
+              <div className="text-neutral-400 font-medium">Aggregated entity graph and geopolitical insights.</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-12">
+          <RelatedIntelligence items={data.countries} title={`Countries Involved with ${formattedSlug}`} />
+          <RelatedIntelligence items={data.leaders} title={`Key Leadership (${formattedSlug})`} />
+          <RelatedIntelligence items={data.conflicts} title={`Related Conflicts & Events`} />
+          <RelatedIntelligence items={data.reports} title={`Intelligence Reports & Briefings`} />
+        </div>
+      </div>
+    </div>
+  );
+}

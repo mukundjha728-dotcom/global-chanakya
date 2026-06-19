@@ -1,41 +1,27 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IAuditLog extends Document {
-  actor: mongoose.Types.ObjectId | null; // null = system action
-  actorEmail?: string;
-  action: string; // e.g. "user.login", "blog.publish", "user.ban"
-  entity: {
-    type: "User" | "Blog" | "Comment" | "Subscription" | "System";
-    id?: string;
-  };
-  metadata?: Record<string, unknown>;
-  ip?: string;
-  userAgent?: string;
-  severity: "info" | "warning" | "critical";
+  actorId: mongoose.Types.ObjectId | string;
+  action: string;
+  targetType: string;
+  targetId?: mongoose.Types.ObjectId | string;
+  metadata?: Record<string, any>;
   createdAt: Date;
 }
 
-const AuditLogSchema = new Schema<IAuditLog>(
-  {
-    actor: { type: Schema.Types.ObjectId, ref: "User", default: null },
-    actorEmail: { type: String },
-    action: { type: String, required: true, index: true },
-    entity: {
-      type: { type: String, enum: ["User", "Blog", "Comment", "Subscription", "System"], required: true },
-      id: { type: String },
-    },
-    metadata: { type: Schema.Types.Mixed },
-    ip: { type: String },
-    userAgent: { type: String },
-    severity: { type: String, enum: ["info", "warning", "critical"], default: "info" },
-  },
-  { timestamps: true }
-);
+const AuditLogSchema = new Schema<IAuditLog>({
+  actorId: { type: Schema.Types.Mixed, required: true }, // Mixed to allow "SYSTEM" or ObjectId
+  action: { type: String, required: true },
+  targetType: { type: String, required: true },
+  targetId: { type: Schema.Types.Mixed },
+  metadata: { type: Schema.Types.Mixed },
+  createdAt: { type: Date, default: Date.now },
+});
 
-// TTL index — auto-delete audit logs older than 90 days
-AuditLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
-AuditLogSchema.index({ actor: 1, action: 1 });
+// Indexes for fast querying in admin dashboards
+AuditLogSchema.index({ createdAt: -1 });
+AuditLogSchema.index({ actorId: 1, createdAt: -1 });
+AuditLogSchema.index({ targetType: 1, targetId: 1 });
+AuditLogSchema.index({ action: 1 });
 
-export const AuditLog =
-  mongoose.models.AuditLog ||
-  mongoose.model<IAuditLog>("AuditLog", AuditLogSchema);
+export const AuditLog = mongoose.models.AuditLog || mongoose.model<IAuditLog>("AuditLog", AuditLogSchema);

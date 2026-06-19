@@ -14,10 +14,7 @@ const inter = Inter({
   display: "swap",
 });
 
-export const SITE_URL = "https://global-chanakya-web.vercel.app";
-export const SITE_NAME = "Global Chanakya";
-export const SITE_DESC =
-  "India's leading geopolitical intelligence platform. In-depth analysis on foreign policy, defence strategy, and global affairs — with 24-hour premium early access.";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION as SITE_DESC } from "@/constants";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

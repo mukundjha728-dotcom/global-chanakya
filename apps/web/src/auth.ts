@@ -39,8 +39,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const user = await User.findOne({ email: credentials.email });
         if (!user || !user.passwordHash) return null;
 
+        // Check if locked
+        if (user.lockedUntil && user.lockedUntil > new Date()) {
+          throw new Error("Account temporarily locked due to too many failed attempts. Try again later.");
+        }
+
         const isValid = await argon2.verify(user.passwordHash, credentials.password as string);
-        if (!isValid) return null;
+        if (!isValid) {
+          // Increment failed attempts
+          user.failedLoginAttempts += 1;
+          if (user.failedLoginAttempts >= 5) {
+            user.lockedUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+          }
+          await user.save();
+          throw new Error("Invalid credentials");
+        }
+
+        // Reset on success
+        user.failedLoginAttempts = 0;
+        user.lockedUntil = undefined;
+        await user.save();
 
         return { id: user._id.toString(), name: user.name, email: user.email, role: user.role };
       }
@@ -68,9 +86,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           token.role = token.role ?? "free";
         }
       }
-      // 🔒 FINAL SAFETY: Only the designated admin email can have admin role
+      // 🔒 FINAL SAFETY: Only the designated admin email can have admin/super_admin role
       // No other user can ever have admin, even if DB is modified
-      if (token.role === "admin" && token.email !== ADMIN_EMAIL) {
+      if ((token.role === "admin" || token.role === "super_admin") && token.email !== ADMIN_EMAIL) {
         token.role = "free";
       }
       return token;

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
-import { Blog } from "@/lib/models/Blog";
+import { Blog, IBlog } from "@/lib/models/Blog";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/constants";
 
 export async function GET() {
@@ -13,7 +13,7 @@ export async function GET() {
       .limit(20)
       .lean();
 
-    const generateRssItem = (blog: any) => `
+    const generateRssItem = (blog: IBlog) => `
       <item>
         <title><![CDATA[${blog.title}]]></title>
         <link>${SITE_URL}/blogs/${blog.slug}</link>
