@@ -94,7 +94,7 @@ export default function UsersTable({ users }: { users: UserRow[] }) {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 min-w-[200px] px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
         />
-        {["all", "admin", "premium", "free", "banned"].map((f) => (
+        {["all", "admin", "free", "banned"].map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -170,7 +170,7 @@ export default function UsersTable({ users }: { users: UserRow[] }) {
                             className="text-xs bg-white/5 border border-white/10 rounded px-2 py-1 text-white focus:outline-none focus:border-amber-500/50 disabled:opacity-50"
                           >
                             <option value="free">Free</option>
-                            <option value="premium">Premium</option>
+
                           </select>
                           <button
                             disabled={loading === u._id}

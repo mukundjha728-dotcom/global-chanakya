@@ -9,7 +9,7 @@ export default async function Navbar() {
         user: {
           name: session.user?.name ?? null,
           email: session.user?.email ?? null,
-          role: (session.user as any)?.role ?? "free",
+          role: session.user.role ?? "free",
         },
       }
     : null;

@@ -6,7 +6,7 @@ interface CacheItem<T> {
 }
 
 export class MemoryCache implements ICacheService {
-  private store: Map<string, CacheItem<any>> = new Map();
+  private store: Map<string, CacheItem<unknown>> = new Map();
 
   async get<T>(key: string): Promise<T | null> {
     const item = this.store.get(key);

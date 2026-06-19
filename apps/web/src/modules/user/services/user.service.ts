@@ -13,4 +13,12 @@ export class UserService {
     // Audit logging can go here in the future
     return UserRepository.updateRole(id, role);
   }
+
+  static async updateUserStatus(id: string, updateData: Record<string, unknown>) {
+    return UserRepository.updateUserStatus(id, updateData);
+  }
+
+  static async getAllUsers() {
+    return UserRepository.getAllUsers();
+  }
 }

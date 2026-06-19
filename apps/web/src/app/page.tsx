@@ -13,8 +13,8 @@ export const revalidate = 60;
 const pillars = [
   {
     icon: Clock,
-    title: "24-Hour Early Access",
-    desc: "Premium subscribers read every report a full day before it goes public.",
+    title: "Real-Time Strategic Reports",
+    desc: "Read every intelligence report in real-time as it's published.",
     accent: "from-amber-500/20 to-amber-600/5",
     iconColor: "text-amber-400",
   },
@@ -35,7 +35,7 @@ const pillars = [
   {
     icon: Shield,
     title: "Trusted Platform",
-    desc: "Enterprise-grade security with Razorpay-powered premium subscriptions.",
+    desc: "Enterprise-grade security architecture for our global readership.",
     accent: "from-emerald-500/20 to-emerald-600/5",
     iconColor: "text-emerald-400",
   },
@@ -47,7 +47,7 @@ const theatres = [
 ];
 
 function BlogCard({ blog, variant = "default", isViral = false }: { blog: TrendingBlog; variant?: "featured" | "default"; isViral?: boolean }) {
-  const isPremium = blog.visibility === "premium";
+  const isPrivate = blog.visibility === "private";
   const isFeatured = variant === "featured";
 
   return (
@@ -86,11 +86,6 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
                 <TrendingUp className="w-2.5 h-2.5" /> Trending
               </span>
             )}
-            {isPremium && (
-              <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
-                <Crown className="w-2.5 h-2.5" /> Premium
-              </span>
-            )}
           </div>
         </div>
       ) : (
@@ -106,12 +101,7 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-5 gap-3">
-        {isPremium && (
-          <div className="flex items-center gap-1 text-amber-400/80 text-[10px] font-medium">
-            <Lock className="w-2.5 h-2.5" />
-            Early Access
-          </div>
-        )}
+
 
         <h3 className={`font-semibold leading-snug text-white group-hover:text-neutral-300 transition-colors line-clamp-2 ${
           isFeatured ? "text-lg" : "text-[15px]"
@@ -194,15 +184,15 @@ export default async function Home() {
 
               <p className="text-[17px] text-neutral-400 leading-relaxed max-w-lg">
                 In-depth analysis of global geopolitics, defence strategy, and foreign policy. 
-                Premium subscribers receive every report 24 hours before public release.
+                Freely accessible to our community to foster informed strategic discourse.
               </p>
 
               <div className="flex flex-wrap items-center gap-3 pt-1">
                 <Link
-                  href="/subscribe"
+                  href="/blogs"
                   className="group px-6 py-3 bg-white text-[#060606] text-[14px] font-semibold rounded-lg hover:bg-neutral-200 transition-colors flex items-center gap-2"
                 >
-                  Start Reading
+                  Explore Reports
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                 </Link>
                 <Link
@@ -216,12 +206,12 @@ export default async function Home() {
               {/* Trust indicators */}
               <div className="flex items-center gap-6 pt-2 text-[12px] text-neutral-600">
                 <span className="flex items-center gap-1.5">
-                  <Shield className="w-3.5 h-3.5 text-neutral-500" />
-                  Secure Payments
+                  <Globe className="w-3.5 h-3.5 text-neutral-500" />
+                  Open Intelligence
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Clock className="w-3.5 h-3.5 text-neutral-500" />
-                  Auto-expiry, No Trap
+                  Real-time Reports
                 </span>
               </div>
             </div>
@@ -244,11 +234,7 @@ export default async function Home() {
                   <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-orange-600/90 text-white text-[10px] font-bold uppercase tracking-wide">
                     <Flame className="w-3 h-3" /> Viral
                   </span>
-                  {featuredBlog.visibility === "premium" && (
-                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-amber-500/20 border border-amber-500/30 text-amber-400 text-[10px] font-bold backdrop-blur-sm">
-                      <Crown className="w-3 h-3" /> Premium
-                    </span>
-                  )}
+
                 </div>
 
                 <div className="absolute bottom-0 left-0 w-full p-7 flex flex-col gap-2.5">
@@ -287,11 +273,10 @@ export default async function Home() {
                   Our editorial team is preparing the first batch of intelligence briefs.
                 </p>
                 <Link
-                  href="/subscribe"
+                  href="/blogs"
                   className="px-5 py-2.5 rounded-lg bg-white text-[#060606] text-[13px] font-semibold hover:bg-neutral-200 transition-colors flex items-center gap-2"
                 >
-                  <Crown className="w-4 h-4" />
-                  Get Early Access
+                  Explore Reports
                 </Link>
               </div>
             )}
@@ -424,27 +409,26 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ─── PREMIUM CTA ─── */}
-      <section className="py-24 px-6 border-t border-white/[0.05]" id="subscribe">
+      {/* ─── OPEN ACCESS CTA ─── */}
+      <section className="py-24 px-6 border-t border-white/[0.05]" id="explore">
         <div className="max-w-2xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/15 bg-amber-500/[0.05] text-amber-400 text-[11px] font-semibold uppercase tracking-[0.08em] mb-6">
-            <Crown className="w-3 h-3" />
-            Premium Access
+            <Globe className="w-3 h-3" />
+            Open Intelligence
           </div>
 
           <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-white">
-            Read It First. Every Time.
+            Global Strategic Intelligence
           </h2>
           <p className="text-neutral-400 text-[16px] leading-relaxed mb-10 max-w-lg mx-auto">
-            Create a free account to unlock full access to every intelligence report — 24 hours before public release.
+            Create a free account to join our community and access in-depth analysis of global geopolitics.
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <Link
-              href="/auth/signin"
+              href="/auth/signup"
               className="group px-7 py-3.5 bg-white text-[#060606] rounded-lg font-semibold text-[14px] flex items-center justify-center gap-2 hover:bg-neutral-200 transition-colors"
             >
-              <Crown className="w-4 h-4" />
               Create Free Account
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
             </Link>
@@ -452,36 +436,8 @@ export default async function Home() {
               href="/blogs"
               className="px-7 py-3.5 border border-white/[0.1] rounded-lg font-medium text-[14px] text-neutral-300 hover:bg-white/[0.04] transition-all"
             >
-              Browse Free Reports
+              Explore Reports
             </Link>
-          </div>
-
-          {/* Gating preview */}
-          <div className="mt-14 p-6 rounded-2xl border border-white/[0.06] bg-white/[0.015] text-left relative overflow-hidden">
-            <div className="absolute top-5 right-5 flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-400 uppercase tracking-wider">
-              <Lock className="w-2.5 h-2.5" />
-              Premium
-            </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-red-400 font-mono mb-3">
-              <Lock className="w-3 h-3" />
-              EARLY ACCESS — 17h 42m remaining
-            </div>
-            <h4 className="text-[16px] font-semibold text-white mb-2">
-              China&apos;s Dual Circulation Strategy and the Future of Global Trade
-            </h4>
-            <p className="text-[13px] text-neutral-600 line-clamp-3">
-              An in-depth look at how Beijing&apos;s internal-external economic pivot is reshaping supply chains 
-              across Southeast Asia and its implications for Indian exporters...
-            </p>
-            <div className="absolute bottom-0 left-0 w-full h-16 bg-gradient-to-t from-[#060606] to-transparent" />
-            <div className="mt-6 flex items-center gap-2 text-[13px]">
-              <Lock className="w-3.5 h-3.5 text-neutral-600" />
-              <span className="text-neutral-500">Unlocks publicly in 17h 42m.</span>
-              <Link href="/auth/signin" className="text-amber-400 hover:text-amber-300 font-medium ml-1">
-                Sign in to read
-                <ArrowUpRight className="w-3 h-3 inline ml-0.5" />
-              </Link>
-            </div>
           </div>
         </div>
       </section>

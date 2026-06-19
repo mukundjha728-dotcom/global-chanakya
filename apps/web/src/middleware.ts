@@ -20,21 +20,13 @@ export default auth((req) => {
       return NextResponse.redirect(url);
     }
 
-    const role = (session.user as any).role;
+    const role = session.user.role;
     if (!ADMIN_ROLES.includes(role)) {
       return NextResponse.redirect(new URL('/404', req.url));
     }
   }
 
-  // 2. Premium Route Protection
-  if (pathname.startsWith('/premium')) {
-    const role = (session?.user as any)?.role;
-    if (!session || (role !== 'premium' && role !== 'admin' && role !== 'super_admin' && role !== 'free')) {
-      const url = new URL('/api/auth/signin', req.url);
-      url.searchParams.set('callbackUrl', req.nextUrl.pathname);
-      return NextResponse.redirect(url);
-    }
-  }
+
 
   // 3. Security Headers
   const response = NextResponse.next();

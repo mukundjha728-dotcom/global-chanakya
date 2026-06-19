@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/gc-control-9x7k", label: "Dashboard", icon: "⚡" },
-  { href: "/gc-control-9x7k/users", label: "Users", icon: "👥" },
-  { href: "/gc-control-9x7k/blogs", label: "Blogs", icon: "📰" },
-  { href: "/gc-control-9x7k/write", label: "Write Article", icon: "✍️" },
-  { href: "/gc-control-9x7k/settings", label: "Settings", icon: "⚙️" },
+  { href: "/admin", label: "Dashboard", icon: "⚡" },
+  { href: "/admin/users", label: "Users", icon: "👥" },
+  { href: "/admin/blogs", label: "Blogs", icon: "📰" },
+  { href: "/admin/write", label: "Write Article", icon: "✍️" },
+  { href: "/admin/settings", label: "Settings", icon: "⚙️" },
 ];
 
 export default function AdminSidebar({ user }: { user: { name?: string; email?: string; image?: string } }) {

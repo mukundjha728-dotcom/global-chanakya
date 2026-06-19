@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Blog } from "@/lib/models/Blog";
+import { BlogService } from "@/modules/blog/services/blog.service";
 import { auth } from "@/auth";
 import { BookmarkService } from "@/modules/bookmark/services/bookmark.service";
 
@@ -13,7 +13,7 @@ export async function POST(
   }
 
   const { slug } = await params;
-  const blog = await Blog.findOne({ slug, status: "published" });
+  const blog = await BlogService.getBlogBySlug(slug);
   if (!blog) {
     return NextResponse.json({ error: "Blog not found" }, { status: 404 });
   }
@@ -22,12 +22,9 @@ export async function POST(
     const result = await BookmarkService.toggleBookmark(session.user.id, blog._id.toString());
     
     // Update analytics counter (in background)
-    Blog.updateOne(
-      { _id: blog._id },
-      { $inc: { "analytics.bookmarks": result.status === "added" ? 1 : -1 } }
-    ).exec();
+    BlogService.incrementAnalytics(blog._id.toString(), "bookmarks", result.status === "added" ? 1 : -1);
 
-    const updated = await Blog.findById(blog._id).lean() as any;
+    const updated = await BlogService.getBlogById(blog._id.toString());
     
     return NextResponse.json({
       bookmarked: result.status === "added",
@@ -46,7 +43,7 @@ export async function GET(
   const session = await auth();
   const { slug } = await params;
 
-  const blog = await Blog.findOne({ slug, status: "published" }).lean() as any;
+  const blog = await BlogService.getBlogBySlug(slug);
   if (!blog) {
     return NextResponse.json({ error: "Blog not found" }, { status: 404 });
   }

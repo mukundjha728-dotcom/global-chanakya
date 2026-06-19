@@ -8,15 +8,15 @@ export const authConfig = {
     async jwt({ token, user }) {
       // On initial sign-in from Credentials provider, user object carries role
       if (user) {
-        token.role = (user as any).role ?? "reader";
-        token.id = user.id;
+        token.role = user.role ?? "free";
+        token.id = user.id!;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as any).role = token.role ?? "reader";
-        (session.user as any).id = token.id;
+        session.user.role = token.role ?? "free";
+        session.user.id = token.id;
       }
       return session;
     }

@@ -16,4 +16,19 @@ export class UserRepository {
     await dbConnect();
     return User.findByIdAndUpdate(id, { $set: { role } }, { new: true }).lean();
   }
+
+  static async updateUserStatus(id: string, updateData: Partial<IUser>): Promise<IUser | null> {
+    await dbConnect();
+    return User.findByIdAndUpdate(id, { $set: updateData }, { new: true }).lean();
+  }
+
+  static async getAllUsers(): Promise<IUser[]> {
+    await dbConnect();
+    return User.find(
+      {},
+      { name: 1, email: 1, role: 1, provider: 1, isBanned: 1, createdAt: 1 }
+    )
+      .sort({ createdAt: -1 })
+      .lean();
+  }
 }

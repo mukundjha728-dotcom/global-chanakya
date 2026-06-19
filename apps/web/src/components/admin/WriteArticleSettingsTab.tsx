@@ -17,7 +17,6 @@ export function WriteArticleSettingsTab({ form, update, inputClass, labelClass }
           <label className={labelClass}>Visibility</label>
           <select value={form.visibility} onChange={(e) => update("visibility", e.target.value)} className={inputClass}>
             <option value="public" className="bg-[#0d0d17]">🌐 Public</option>
-            <option value="premium" className="bg-[#0d0d17]">⭐ Premium</option>
             <option value="private" className="bg-[#0d0d17]">🔒 Private</option>
           </select>
         </div>

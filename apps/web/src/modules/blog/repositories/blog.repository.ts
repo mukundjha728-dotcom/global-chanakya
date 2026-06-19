@@ -12,7 +12,7 @@ export class BlogRepository {
     return Blog.findOne({ slug }).lean();
   }
 
-  static async getTrending(limit: number = 6): Promise<any[]> {
+  static async getTrending(limit: number = 6): Promise<IBlog[]> {
     await dbConnect();
     const now = new Date();
     const fortyEightHoursAgo = new Date(now.getTime() - 48 * 60 * 60 * 1000);
@@ -60,6 +60,23 @@ export class BlogRepository {
       .lean();
   }
 
+  static async getAdminBlogs(limit: number = 100): Promise<IBlog[]> {
+    await dbConnect();
+    return Blog.find({})
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .lean();
+  }
+
+  static async findBlogsByStatus(status: string, limit: number): Promise<IBlog[]> {
+    await dbConnect();
+    return Blog.find({ status })
+      .sort({ publishAt: -1 })
+      .limit(limit)
+      .populate('author', 'name avatar')
+      .lean();
+  }
+
   static async create(data: Partial<IBlog>): Promise<IBlog> {
     await dbConnect();
     return Blog.create(data);
@@ -68,6 +85,14 @@ export class BlogRepository {
   static async update(id: string, data: Partial<IBlog>): Promise<IBlog | null> {
     await dbConnect();
     return Blog.findByIdAndUpdate(id, { $set: data }, { new: true }).lean();
+  }
+
+  static async incrementAnalytics(id: string, field: string, amount: number): Promise<void> {
+    await dbConnect();
+    await Blog.updateOne(
+      { _id: id },
+      { $inc: { [`analytics.${field}`]: amount } }
+    ).exec();
   }
 
   static async delete(id: string): Promise<boolean> {

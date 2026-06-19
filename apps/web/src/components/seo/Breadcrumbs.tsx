@@ -50,7 +50,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           onMouseOut={(e) => (e.currentTarget.style.color = "#9ca3af")}
         >
           <Home style={{ width: "14px", height: "14px" }} />
-          <span style={{ srOnly: true } as any}>Home</span>
+          <span className="sr-only">Home</span>
         </Link>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;

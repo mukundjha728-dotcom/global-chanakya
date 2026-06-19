@@ -4,7 +4,7 @@ import Link from "next/link";
 import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
 import { auth } from "@/auth";
-import PremiumLock from "@/components/blogs/PremiumLock";
+
 import BlogActions from "@/components/blogs/BlogActions";
 import { generateSeoMetadata, calculateReadingTime, formatDate } from "@repo/utils";
 import { ArrowLeft, Clock, Eye, Calendar, Tag, Share2, Crown, TrendingUp } from "lucide-react";
@@ -13,7 +13,7 @@ import { SITE_URL } from "@/constants";
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   await dbConnect();
-  const blog = await Blog.findOne({ slug, status: "published" }).lean() as any;
+  const blog = await Blog.findOne({ slug, status: "published" }).lean();
   if (!blog) return { title: "Not Found" };
   return generateSeoMetadata({
     title: blog.seo?.title || blog.title,
@@ -53,7 +53,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
   await dbConnect();
   const session = await auth();
 
-  const blog = await Blog.findOne({ slug, status: "published" }).populate("author", "name").lean() as any;
+  const blog = await Blog.findOne({ slug, status: "published" }).populate("author", "name").lean();
   if (!blog) notFound();
 
   const readTime = Math.max(1, calculateReadingTime(blog.content.replace(/<[^>]*>/g, "")));
@@ -100,17 +100,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             }}>
               {blog.category}
             </span>
-            {blog.visibility === "premium" && (
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: "4px",
-                padding: "4px 12px", borderRadius: "999px",
-                background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.3)",
-                color: "#fbbf24", fontSize: "11px", fontWeight: 700,
-                letterSpacing: "0.08em", textTransform: "uppercase",
-              }}>
-                <Crown style={{ width: "12px", height: "12px" }} /> Premium
-              </span>
-            )}
+
             {blog.isTrending && (
               <span style={{
                 display: "inline-flex", alignItems: "center", gap: "4px",
@@ -202,18 +192,11 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
 
       {/* Article body */}
       <div style={{ maxWidth: "740px", margin: "0 auto", padding: "48px 24px 120px" }}>
-        <PremiumLock
-          earlyAccessUntil={blog.earlyAccessUntil}
-          userRole={(session?.user as any)?.role}
-          isLoggedIn={!!session}
-          blogSlug={blog.slug}
-        >
           {/* Article content — sanitized and scoped */}
           <div
             className="article-body"
             dangerouslySetInnerHTML={{ __html: sanitizedContent }}
           />
-        </PremiumLock>
 
         {/* Tags */}
         {blog.tags && blog.tags.length > 0 && (

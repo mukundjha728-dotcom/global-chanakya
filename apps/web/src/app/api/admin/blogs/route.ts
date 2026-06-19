@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import dbConnect from "@/lib/mongoose";
-import { Blog } from "@/lib/models/Blog";
-import { User } from "@/lib/models/User";
+import { BlogService } from "@/modules/blog/services/blog.service";
 import mongoose from "mongoose";
 import { createBlogSchema, updateBlogSchema } from "@/lib/validators/blog.schema";
 
@@ -12,7 +11,7 @@ export const maxDuration = 30;
 async function requireAdmin() {
   // Run auth check and DB connection in parallel — saves ~500ms
   const [session] = await Promise.all([auth(), dbConnect()]);
-  if (!session || (session.user as any)?.role !== "admin") return null;
+  if (!session || session.user.role !== "admin") return null;
   return session;
 }
 
@@ -31,12 +30,12 @@ export async function GET(req: NextRequest) {
     const id = req.nextUrl.searchParams.get("id");
 
     if (id) {
-      const blog = await Blog.findById(id).lean();
+      const blog = await BlogService.getBlogById(id);
       if (!blog) return NextResponse.json({ error: "Not found" }, { status: 404 });
       return NextResponse.json(blog);
     }
 
-    const blogs = await Blog.find({}).sort({ createdAt: -1 }).limit(100).lean();
+    const blogs = await BlogService.getAdminBlogs(100);
     return NextResponse.json(blogs);
   } catch (err) {
     console.error("[GET /api/admin/blogs]", err);
@@ -63,16 +62,11 @@ export async function POST(req: NextRequest) {
 
     // Get author ObjectId
     let authorObjectId: mongoose.Types.ObjectId;
-    try {
-      const adminUser = await User.findOne({ email: (session.user as any).email });
-      authorObjectId = adminUser?._id ?? new mongoose.Types.ObjectId();
-    } catch {
-      authorObjectId = new mongoose.Types.ObjectId();
-    }
+    authorObjectId = new mongoose.Types.ObjectId();
 
     // Handle slug conflict: if slug exists, append timestamp suffix
     let finalSlug = slug;
-    const existing = await Blog.findOne({ slug });
+    const existing = await BlogService.getBlogBySlug(slug);
     if (existing) {
       // If it's a draft with same slug, just update it instead of creating duplicate
       if (existing.status === "draft") {
@@ -91,14 +85,14 @@ export async function POST(req: NextRequest) {
           },
           publishAt: new Date(),
         };
-        const updated = await Blog.findByIdAndUpdate(existing._id, { $set: updateData }, { new: true });
+        const updated = await BlogService.updateBlog(existing._id.toString(), updateData);
         return NextResponse.json({ success: true, id: updated!._id.toString(), slug: updated!.slug }, { status: 200 });
       }
       // Otherwise auto-fix slug with timestamp
       finalSlug = `${slug}-${Date.now()}`;
     }
 
-    const blog = await Blog.create({
+    const blog = await BlogService.createBlog({
       title,
       slug: finalSlug,
       excerpt,
@@ -157,7 +151,7 @@ export async function PATCH(req: NextRequest) {
     if (rest.seo) updateData.seo = rest.seo;
     if (status === "published") updateData.publishAt = new Date();
 
-    const updated = await Blog.findByIdAndUpdate(id, { $set: updateData }, { new: true });
+    const updated = await BlogService.updateBlog(id, updateData);
     if (!updated) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
 
     return NextResponse.json({ success: true });
@@ -176,7 +170,7 @@ export async function DELETE(req: NextRequest) {
     const id = req.nextUrl.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Blog ID required" }, { status: 400 });
 
-    const deleted = await Blog.findByIdAndDelete(id);
+    const deleted = await BlogService.deleteBlog(id);
     if (!deleted) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
 
     return NextResponse.json({ success: true });

@@ -11,7 +11,7 @@ const cols = {
     { label: "RSS Feed", href: "/feed.xml" },
   ],
   Account: [
-    { label: "Premium Access", href: "/subscribe" },
+
     { label: "Sign In", href: "/auth/signin" },
     { label: "Create Account", href: "/auth/signup" },
   ],
@@ -23,7 +23,7 @@ const cols = {
   Legal: [
     { label: "Terms of Service", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },
-    { label: "Refund Policy", href: "/refund" },
+
   ],
 };
 
@@ -37,7 +37,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="col-span-2 flex flex-col gap-5">
             <Link href="/" className="flex items-center gap-3 w-fit">
-              <Image src="/logo.svg" alt="Global Chanakya" width={36} height={36} />
+              <Image src="/brand/logo.svg" alt="Global Chanakya" width={36} height={36} />
               <div>
                 <span className="text-[16px] font-bold tracking-[-0.02em] text-white">
                   Global Chanakya
@@ -84,25 +84,7 @@ export default function Footer() {
           ))}
         </div>
 
-        {/* Premium CTA strip */}
-        <div className="mb-10 py-5 px-6 rounded-2xl border border-white/[0.06] bg-gradient-to-r from-white/[0.02] to-white/[0.01] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <p className="text-[14px] font-semibold text-white">
-              Get 24-hour early access to every report
-            </p>
-            <p className="text-[12px] text-neutral-500 mt-0.5">
-              7-day premium access at just ₹19. Auto-expires, no commitment.
-            </p>
-          </div>
-          <Link
-            href="/subscribe"
-            className="shrink-0 flex items-center gap-2 px-5 py-2.5 bg-white text-[#060606] text-[13px] font-semibold rounded-lg hover:bg-neutral-200 transition-colors"
-          >
-            <Crown className="w-4 h-4" />
-            Subscribe Now
-            <ArrowUpRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
+
 
         {/* Bottom bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-white/[0.05]">
@@ -112,7 +94,7 @@ export default function Footer() {
           <div className="flex items-center gap-4 text-[11px] text-neutral-600">
             <Link href="/terms" className="hover:text-neutral-400 transition-colors">Terms</Link>
             <Link href="/privacy" className="hover:text-neutral-400 transition-colors">Privacy</Link>
-            <Link href="/refund" className="hover:text-neutral-400 transition-colors">Refunds</Link>
+
           </div>
         </div>
 

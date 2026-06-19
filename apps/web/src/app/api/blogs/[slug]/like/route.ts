@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
-import { Blog } from "@/lib/models/Blog";
+import { BlogService } from "@/modules/blog/services/blog.service";
 import { auth } from "@/auth";
 import mongoose from "mongoose";
 
@@ -26,7 +26,7 @@ export async function POST(
   const { slug } = await params;
   await dbConnect();
 
-  const blog = await Blog.findOne({ slug, status: "published" });
+  const blog = await BlogService.getBlogBySlug(slug);
   if (!blog) {
     return NextResponse.json({ error: "Blog not found" }, { status: 404 });
   }
@@ -40,8 +40,8 @@ export async function POST(
     if (existingLike) {
       // Unlike
       await Like.deleteOne({ _id: existingLike._id });
-      await Blog.updateOne({ _id: blog._id }, { $inc: { "analytics.likes": -1 } });
-      const updated = await Blog.findById(blog._id).lean() as any;
+      await BlogService.incrementAnalytics(blog._id.toString(), "likes", -1);
+      const updated = await BlogService.getBlogById(blog._id.toString());
       return NextResponse.json({
         liked: false,
         likes: updated.analytics?.likes || 0,
@@ -49,8 +49,8 @@ export async function POST(
     } else {
       // Like
       await Like.create({ user: userId, blog: blog._id });
-      await Blog.updateOne({ _id: blog._id }, { $inc: { "analytics.likes": 1 } });
-      const updated = await Blog.findById(blog._id).lean() as any;
+      await BlogService.incrementAnalytics(blog._id.toString(), "likes", 1);
+      const updated = await BlogService.getBlogById(blog._id.toString());
       return NextResponse.json({
         liked: true,
         likes: updated.analytics?.likes || 0,
@@ -70,7 +70,7 @@ export async function GET(
   const { slug } = await params;
   await dbConnect();
 
-  const blog = await Blog.findOne({ slug, status: "published" }).lean() as any;
+  const blog = await BlogService.getBlogBySlug(slug);
   if (!blog) {
     return NextResponse.json({ error: "Blog not found" }, { status: 404 });
   }

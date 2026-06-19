@@ -22,7 +22,7 @@ export default function PrivacyPage() {
               <li>Corporate email addresses and organizational affiliation</li>
               <li>Authentication credentials (securely hashed via Argon2)</li>
               <li>Reading preferences and intelligence sector interests</li>
-              <li>Payment processing information (handled securely by Stripe/Razorpay)</li>
+
             </ul>
           </section>
 

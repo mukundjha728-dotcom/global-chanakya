@@ -3,8 +3,7 @@
 interface Stats {
   totalUsers: number;
   totalBlogs: number;
-  premiumUsers: number;
-  freeUsers: number;
+
   recentUsers: { _id: string; name: string; email: string; role: string; provider: string; createdAt: string }[];
 }
 
@@ -12,8 +11,6 @@ export default function AdminDashboard({ stats }: { stats: Stats }) {
   const cards = [
     { label: "Total Users", value: stats.totalUsers, icon: "👥", color: "from-blue-500/20 to-blue-600/10 border-blue-500/30", text: "text-blue-300" },
     { label: "Total Articles", value: stats.totalBlogs, icon: "📰", color: "from-purple-500/20 to-purple-600/10 border-purple-500/30", text: "text-purple-300" },
-    { label: "Premium Members", value: stats.premiumUsers, icon: "⭐", color: "from-amber-500/20 to-amber-600/10 border-amber-500/30", text: "text-amber-300" },
-    { label: "Free Members", value: stats.freeUsers, icon: "🆓", color: "from-green-500/20 to-green-600/10 border-green-500/30", text: "text-green-300" },
   ];
 
   const roleColors: Record<string, string> = {
@@ -57,7 +54,7 @@ export default function AdminDashboard({ stats }: { stats: Stats }) {
         <div className="lg:col-span-2 bg-[#0d0d17] border border-white/10 rounded-xl overflow-hidden">
           <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
             <h2 className="text-white font-semibold text-sm">Recent Signups</h2>
-            <a href="/gc-control-9x7k/users" className="text-amber-400 text-xs hover:text-amber-300 transition-colors">
+            <a href="/admin/users" className="text-amber-400 text-xs hover:text-amber-300 transition-colors">
               View all →
             </a>
           </div>
@@ -88,9 +85,9 @@ export default function AdminDashboard({ stats }: { stats: Stats }) {
           <h2 className="text-white font-semibold text-sm mb-4">Quick Actions</h2>
           <div className="space-y-2">
             {[
-              { href: "/gc-control-9x7k/write", label: "✍️ Write New Article", desc: "Create & publish content" },
-              { href: "/gc-control-9x7k/users", label: "👥 Manage Users", desc: "View, ban, upgrade users" },
-              { href: "/gc-control-9x7k/blogs", label: "📰 Manage Blogs", desc: "Edit, delete articles" },
+              { href: "/admin/write", label: "✍️ Write New Article", desc: "Create & publish content" },
+              { href: "/admin/users", label: "👥 Manage Users", desc: "View, ban, upgrade users" },
+              { href: "/admin/blogs", label: "📰 Manage Blogs", desc: "Edit, delete articles" },
               { href: "/", label: "🌐 View Live Site", desc: "Open public-facing site" },
             ].map((action) => (
               <a

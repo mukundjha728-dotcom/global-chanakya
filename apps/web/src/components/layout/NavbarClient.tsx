@@ -28,8 +28,7 @@ export default function NavbarClient({ session }: NavbarClientProps) {
   const [scrolled, setScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const pathname = usePathname();
-  const isPremium = (session?.user as any)?.role === "premium";
-  const isAdmin = (session?.user as any)?.role === "admin";
+  const isAdmin = session?.user?.role === "admin";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -60,7 +59,7 @@ export default function NavbarClient({ session }: NavbarClientProps) {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
             <Image
-              src="/logo.svg"
+              src="/brand/logo.svg"
               alt="Global Chanakya"
               width={34}
               height={34}
@@ -91,17 +90,7 @@ export default function NavbarClient({ session }: NavbarClientProps) {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/subscribe"
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-[13px] font-semibold transition-colors duration-200 ${
-                pathname === "/subscribe"
-                  ? "text-amber-300 bg-amber-500/10"
-                  : "text-amber-400 hover:text-amber-300 hover:bg-amber-500/[0.08]"
-              }`}
-            >
-              <Crown className="w-3.5 h-3.5" />
-              Premium
-            </Link>
+
           </div>
 
           {/* Right */}
@@ -129,13 +118,9 @@ export default function NavbarClient({ session }: NavbarClientProps) {
                   <span className="text-[13px] text-neutral-300 font-medium max-w-[90px] truncate">
                     {session.user?.name?.split(" ")[0] || "User"}
                   </span>
-                  {(isPremium || isAdmin) && (
-                    <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider ${
-                      isAdmin
-                        ? "bg-violet-500/15 text-violet-400 border border-violet-500/25"
-                        : "bg-amber-500/15 text-amber-400 border border-amber-500/25"
-                    }`}>
-                      {isAdmin ? "Admin" : "Pro"}
+                  {isAdmin && (
+                    <span className="px-1.5 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider bg-violet-500/15 text-violet-400 border border-violet-500/25">
+                      Admin
                     </span>
                   )}
                 </button>
@@ -208,14 +193,6 @@ export default function NavbarClient({ session }: NavbarClientProps) {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href="/subscribe"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 px-4 py-3 rounded-xl text-[14px] font-semibold text-amber-400 hover:bg-amber-500/[0.08] transition-colors"
-            >
-              <Crown className="w-4 h-4" />
-              Premium Access
-            </Link>
 
             {isAdmin && (
               <Link

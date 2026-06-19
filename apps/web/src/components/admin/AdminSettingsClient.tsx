@@ -11,14 +11,12 @@ export default function AdminSettingsClient({ user }: { user: AdminUser }) {
   const [saved, setSaved] = useState(false);
   const [siteSettings, setSiteSettings] = useState({
     siteName: "Global Chanakya",
-    siteTagline: "Premium Geopolitics & Strategic Intelligence",
+    siteTagline: "Geopolitics & Strategic Intelligence",
     siteUrl: "https://global-chanakya-web.vercel.app",
     contactEmail: "contact@globalchanakya.in",
     twitterHandle: "@globalchanakya",
     linkedinUrl: "https://linkedin.com/company/globalchanakya",
     articlesPerPage: "10",
-    premiumPrice: "199",
-    earlyAccessHours: "24",
     maintenanceMode: false,
     allowSignups: true,
     commentModeration: true,
@@ -118,19 +116,10 @@ export default function AdminSettingsClient({ user }: { user: AdminUser }) {
           <h2 className="text-white font-semibold text-sm mb-4 flex items-center gap-2">
             📰 Content Settings
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <label className={labelClass}>Articles Per Page</label>
               <input type="number" value={siteSettings.articlesPerPage} onChange={(e) => update("articlesPerPage", e.target.value)} className={inputClass} />
-            </div>
-            <div>
-              <label className={labelClass}>Early Access (hours)</label>
-              <input type="number" value={siteSettings.earlyAccessHours} onChange={(e) => update("earlyAccessHours", e.target.value)} className={inputClass} />
-              <p className="text-gray-600 text-xs mt-1">Premium members get early access for this many hours</p>
-            </div>
-            <div>
-              <label className={labelClass}>Premium Price (₹/month)</label>
-              <input type="number" value={siteSettings.premiumPrice} onChange={(e) => update("premiumPrice", e.target.value)} className={inputClass} />
             </div>
           </div>
         </div>
@@ -183,34 +172,7 @@ export default function AdminSettingsClient({ user }: { user: AdminUser }) {
           </div>
         </div>
 
-        {/* Payment Config */}
-        <div className="bg-[#0d0d17] border border-white/10 rounded-xl p-6">
-          <h2 className="text-white font-semibold text-sm mb-1 flex items-center gap-2">
-            💳 Razorpay Configuration
-          </h2>
-          <p className="text-gray-500 text-xs mb-4">Payment keys .env file mein set hain</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className={labelClass}>Razorpay Key ID</label>
-              <input
-                type="text"
-                value="rzp_••••••••••••"
-                readOnly
-                className={`${inputClass} cursor-not-allowed opacity-60`}
-              />
-            </div>
-            <div>
-              <label className={labelClass}>Mode</label>
-              <div className="flex items-center gap-2 px-3 py-2.5 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                <span className="text-yellow-400 text-xs">⚠️</span>
-                <span className="text-yellow-300 text-xs font-medium">Test Mode Active</span>
-              </div>
-            </div>
-          </div>
-          <p className="text-gray-600 text-xs mt-3">
-            Production keys set karne ke liye .env file mein <code className="text-amber-400">RAZORPAY_KEY_ID</code> aur <code className="text-amber-400">RAZORPAY_KEY_SECRET</code> update karein
-          </p>
-        </div>
+
 
         {/* Danger Zone */}
         <div className="bg-red-950/20 border border-red-500/20 rounded-xl p-6">

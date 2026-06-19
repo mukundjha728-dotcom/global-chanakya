@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   description: SITE_DESC,
   keywords: [
     "geopolitics", "strategic intelligence", "foreign policy", "global affairs",
-    "premium news", "India geopolitics", "Global Chanakya", "Indo-Pacific",
+    "India geopolitics", "Global Chanakya", "Indo-Pacific",
     "defence analysis", "South Asia", "China", "Russia", "BRICS", "NATO",
   ],
   authors: [{ name: SITE_NAME, url: SITE_URL }],
@@ -87,7 +87,7 @@ const jsonLd = {
   "@type": "NewsMediaOrganization",
   name: SITE_NAME,
   url: SITE_URL,
-  logo: `${SITE_URL}/logo.svg`,
+  logo: `${SITE_URL}/brand/logo.svg`,
   description: SITE_DESC,
   sameAs: [
     "https://twitter.com/globalchanakya",
@@ -106,7 +106,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="https://checkout.razorpay.com" />
+
         <Script
           id="json-ld-org"
           type="application/ld+json"

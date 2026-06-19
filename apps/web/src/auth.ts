@@ -70,14 +70,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user, account }) {
       // Credentials provider: role already on user object
       if (user) {
-        token.role = (user as any).role ?? "free";
-        token.id = user.id;
+        token.role = user.role ?? "free";
+        token.id = user.id!;
       }
       // For OAuth sign-ins (Google/GitHub), fetch role from DB
       if (account && (account.provider === "google" || account.provider === "github")) {
         try {
           await dbConnect();
-          const dbUser = await User.findOne({ email: token.email }).lean() as any;
+          const dbUser = await User.findOne({ email: token.email }).lean();
           if (dbUser) {
             token.role = dbUser.role ?? "free";
             token.id = dbUser._id.toString();

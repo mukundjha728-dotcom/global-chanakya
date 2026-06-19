@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import dbConnect from "@/lib/mongoose";
-import { User } from "@/lib/models/User";
+import { UserService } from "@/modules/user/services/user.service";
 
 // ✅ ADMIN EMAIL — only this email can ever be admin
 const ADMIN_EMAIL = "mukundjha728@gmail.com";
 
 export async function PATCH(req: NextRequest) {
   const session = await auth();
-  if (!session || (session.user as any)?.role !== "admin") {
+  if (!session || session.user.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -19,8 +18,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Missing fields" }, { status: 400 });
   }
 
-  await dbConnect();
-  const target = await User.findById(userId);
+  const target = await UserService.getUserProfile(userId);
   if (!target) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
@@ -30,37 +28,33 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: "Admin account is protected" }, { status: 403 });
   }
 
+  const updateData: Record<string, unknown> = {};
+
   // 🔒 Never allow setting role to admin via API
   if (action === "setRole") {
     if (!role || role === "admin") {
       return NextResponse.json({ error: "Cannot set admin role" }, { status: 403 });
     }
-    target.role = role;
+    updateData.role = role;
   } else if (action === "ban") {
-    target.isBanned = true;
+    updateData.isBanned = true;
   } else if (action === "unban") {
-    target.isBanned = false;
+    updateData.isBanned = false;
   } else {
     return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   }
 
-  await target.save();
+  await UserService.updateUserStatus(userId, updateData);
   return NextResponse.json({ success: true });
 }
 
 export async function GET() {
   const session = await auth();
-  if (!session || (session.user as any)?.role !== "admin") {
+  if (!session || session.user.role !== "admin") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  await dbConnect();
-  const users = await User.find(
-    {},
-    { name: 1, email: 1, role: 1, provider: 1, isBanned: 1, createdAt: 1 }
-  )
-    .sort({ createdAt: -1 })
-    .lean();
+  const users = await UserService.getAllUsers();
 
   return NextResponse.json(users);
 }

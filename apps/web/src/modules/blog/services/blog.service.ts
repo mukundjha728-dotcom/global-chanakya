@@ -31,6 +31,14 @@ export class BlogService {
     return data;
   }
 
+  static async getAdminBlogs(limit: number = 100) {
+    return BlogRepository.getAdminBlogs(limit);
+  }
+
+  static async getBlogsByStatus(status: string, limit: number) {
+    return BlogRepository.findBlogsByStatus(status, limit);
+  }
+
   static async createBlog(data: Partial<IBlog>) {
     // Business logic like generating slugs, auto-setting earlyAccess, etc.
     return BlogRepository.create(data);
@@ -38,6 +46,10 @@ export class BlogService {
 
   static async updateBlog(id: string, data: Partial<IBlog>) {
     return BlogRepository.update(id, data);
+  }
+
+  static async incrementAnalytics(id: string, field: string, amount: number) {
+    return BlogRepository.incrementAnalytics(id, field, amount);
   }
 
   static async deleteBlog(id: string) {

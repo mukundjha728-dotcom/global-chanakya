@@ -134,10 +134,10 @@ export default async function BlogsPage({
                 </Link>
               )}
               <Link
-                href="/subscribe"
+                href="/auth/signup"
                 className="px-5 py-2.5 rounded-lg bg-white text-[#060606] hover:bg-neutral-200 transition-colors text-[13px] font-semibold flex items-center gap-1.5"
               >
-                Get notified <ArrowRight className="w-4 h-4" />
+                Join Platform <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
@@ -163,9 +163,9 @@ export default async function BlogsPage({
                       {blog.category}
                     </span>
                   </div>
-                  {blog.visibility === "premium" && (
-                    <div className="absolute top-3 right-3 px-2 py-1 bg-amber-500/20 backdrop-blur-sm rounded-md text-[10px] font-bold uppercase text-amber-400 border border-amber-500/30 flex items-center gap-1">
-                      <Crown className="w-2.5 h-2.5" /> Premium
+                  {blog.visibility === "private" && (
+                    <div className="absolute top-3 right-3 px-2 py-1 bg-zinc-800/90 backdrop-blur-sm rounded-md text-[10px] font-bold uppercase text-white border border-zinc-700 flex items-center gap-1">
+                      Private
                     </div>
                   )}
                 </div>

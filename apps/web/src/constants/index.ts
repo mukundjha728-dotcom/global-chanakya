@@ -6,25 +6,14 @@ export const SITE_URL =
 
 export const SITE_NAME = "Global Chanakya";
 
-export const SITE_DESCRIPTION =
-  "Enterprise-grade geopolitical intelligence and strategic media platform with 24-hour premium early access.";
+export const SITE_DESCRIPTION = "Enterprise-grade geopolitical intelligence and strategic media platform.";
 
-// Subscription pricing
-export const SUBSCRIPTION_PRICE_INR = 19; // ₹19
-export const SUBSCRIPTION_PRICE_PAISE = 1900; // Razorpay expects paise
-export const SUBSCRIPTION_DURATION_DAYS = 7;
-export const SUBSCRIPTION_DURATION_MS =
-  SUBSCRIPTION_DURATION_DAYS * 24 * 60 * 60 * 1000;
-
-// Early access window
-export const EARLY_ACCESS_HOURS = 24;
-export const EARLY_ACCESS_MS = EARLY_ACCESS_HOURS * 60 * 60 * 1000;
+// Subscription and Early Access logic has been deprecated (Free Open Intelligence Tier)
 
 // User roles
 export const USER_ROLES = {
   GUEST: "guest",
   FREE: "free",
-  PREMIUM: "premium",
   ADMIN: "admin",
 } as const;
 
@@ -48,7 +37,6 @@ export const BLOG_CATEGORIES = [
 // Blog visibility
 export const BLOG_VISIBILITY = {
   PUBLIC: "public",
-  PREMIUM: "premium",
   PRIVATE: "private",
 } as const;
 
@@ -67,9 +55,7 @@ export const AUTH_PROVIDERS = {
   GITHUB: "github",
 } as const;
 
-// Razorpay
-export const RAZORPAY_CURRENCY = "INR";
-export const RAZORPAY_PLAN_NAME = "7-Day Premium Early Access";
+
 
 // API routes
 export const API_ROUTES = {
@@ -81,15 +67,15 @@ export const API_ROUTES = {
   ADMIN: "/api/admin",
   ANALYTICS: "/api/analytics",
   NOTIFICATIONS: "/api/notifications",
-  RAZORPAY_CREATE_ORDER: "/api/razorpay/create-order",
-  RAZORPAY_VERIFY: "/api/razorpay/verify",
 } as const;
 
 // Navigation links
 export const NAV_LINKS = [
-  { label: "Latest Intel", href: "/blogs" },
+  { label: "Home", href: "/" },
+  { label: "Reports", href: "/blogs" },
+  { label: "Regions", href: "/categories?type=regions" },
+  { label: "Conflicts", href: "/categories?type=conflicts" },
   { label: "Categories", href: "/categories" },
-  { label: "Premium", href: "/subscribe", premium: true },
   { label: "About", href: "/about" },
 ] as const;
 

@@ -16,13 +16,13 @@ export default async function AdminLayout({
   const session = await auth();
 
   // Double-check: only admin can see this layout
-  if (!session || (session.user as any)?.role !== "admin") {
+  if (!session || session.user.role !== "admin") {
     redirect("/404");
   }
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0a0a0f] text-white">
-      <AdminSidebar user={session.user as any} />
+      <AdminSidebar user={session.user} />
       <main className="flex-1 overflow-y-auto bg-[#0a0a0f]">
         {children}
       </main>

@@ -12,7 +12,7 @@ export default function ContactPage() {
         <div className="mb-16">
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white">Contact Desk</h1>
           <p className="text-gray-400 max-w-xl text-lg">
-            Reach out to our editorial board, report tips, or contact support for your premium subscription.
+            Reach out to our editorial board, report tips, or contact our support team.
           </p>
         </div>
 
@@ -33,14 +33,14 @@ export default function ContactPage() {
             </div>
             
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Premium Support</h3>
+              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Reader Support</h3>
               <div className="flex items-center gap-3 text-white mb-2">
                 <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10">
                   <Mail className="w-4 h-4 text-amber-400" />
                 </div>
                 <div>
                   <p className="font-medium">support@globalchanakya.com</p>
-                  <p className="text-xs text-gray-500">For billing and access issues</p>
+                  <p className="text-xs text-gray-500">For account and access issues</p>
                 </div>
               </div>
             </div>
@@ -79,7 +79,7 @@ export default function ContactPage() {
                   <label className="block text-sm font-medium text-gray-400 mb-2">Subject</label>
                   <select className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white focus:border-rose-500 outline-none appearance-none">
                     <option>Editorial Tip</option>
-                    <option>Premium Support</option>
+                    <option>Reader Support</option>
                     <option>Partnership Inquiry</option>
                     <option>Other</option>
                   </select>

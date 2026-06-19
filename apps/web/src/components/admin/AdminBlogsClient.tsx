@@ -75,7 +75,7 @@ export default function AdminBlogsClient({ blogs }: { blogs: BlogRow[] }) {
           <p className="text-gray-400 text-sm mt-1">{localBlogs.length} total articles</p>
         </div>
         <Link
-          href="/gc-control-9x7k/write"
+          href="/admin/write"
           className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-lg text-sm transition-all"
         >
           ✍️ Write New Article
@@ -113,7 +113,7 @@ export default function AdminBlogsClient({ blogs }: { blogs: BlogRow[] }) {
             <p className="text-5xl mb-4">📭</p>
             <p className="text-gray-400 text-sm">Koi article nahi mila</p>
             <Link
-              href="/gc-control-9x7k/write"
+              href="/admin/write"
               className="inline-block mt-4 px-4 py-2 bg-amber-500 text-black font-semibold rounded-lg text-sm hover:bg-amber-400 transition-all"
             >
               Pehla Article Likho ✍️
@@ -153,7 +153,7 @@ export default function AdminBlogsClient({ blogs }: { blogs: BlogRow[] }) {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium capitalize ${visibilityColors[b.visibility] ?? ""}`}>
-                        {b.visibility === "premium" ? "⭐ Premium" : b.visibility === "private" ? "🔒 Private" : "🌐 Public"}
+                        {b.visibility === "premium" ? "⭐ Open Intel" : b.visibility === "private" ? "🔒 Private" : "🌐 Public"}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-300 text-xs">
@@ -172,7 +172,7 @@ export default function AdminBlogsClient({ blogs }: { blogs: BlogRow[] }) {
                           {b.status === "published" ? "↓ Draft" : "↑ Publish"}
                         </button>
                         <Link
-                          href={`/gc-control-9x7k/write?edit=${b._id}`}
+                          href={`/admin/write?edit=${b._id}`}
                           className="px-2 py-1 rounded text-xs border border-amber-500/30 text-amber-400 hover:bg-amber-500/10 transition-all"
                         >
                           Edit
