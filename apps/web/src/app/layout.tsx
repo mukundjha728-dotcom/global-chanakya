@@ -114,7 +114,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           strategy="beforeInteractive"
         />
       </head>
-      <body className={`${inter.variable} antialiased bg-[#060606] text-white`} style={{ fontFamily: "var(--font-inter), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+      <body className={`${inter.variable} font-sans antialiased leading-[1.8]`}>
         <DisableInspect />
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
             <Providers>

@@ -1,11 +1,21 @@
-<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="40" height="40" rx="10" fill="url(#gc_grad)"/>
-  <path d="M12 20C12 15.58 15.58 12 20 12C22.06 12 23.93 12.78 25.36 14.05L23.24 16.17C22.37 15.45 21.24 15 20 15C17.24 15 15 17.24 15 20C15 22.76 17.24 25 20 25C22.16 25 24 23.6 24.68 21.67H20V18.67H28V19.67C28 24.09 24.42 27.67 20 27.67C15.58 27.67 12 24.09 12 20Z" fill="white"/>
-  <circle cx="30" cy="12" r="3" fill="#F59E0B"/>
-  <defs>
-    <linearGradient id="gc_grad" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#DC2626"/>
-      <stop offset="1" stop-color="#EA580C"/>
-    </linearGradient>
-  </defs>
+<svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg">
+  <g id="mark">
+    <!-- Premium black tactical background -->
+    <rect width="120" height="120" rx="24" fill="#0A0A0A" />
+    
+    <!-- Abstract precise 'G' base structure -->
+    <path d="M 100 30 L 100 10 L 40 10 L 20 30 L 20 90 L 40 110 L 100 110 L 100 55 L 60 55 L 60 75 L 80 75 L 80 90 L 45 90 L 40 85 L 40 35 L 45 30 Z" fill="#FFFFFF" />
+    
+    <!-- Nested tactical 'C' inside negative space -->
+    <path d="M 90 35 L 95 40 L 95 50 L 55 50 L 55 80 L 75 80 L 75 82 L 72 85 L 50 85 L 45 80 L 45 40 L 50 35 Z" fill="#B11226" />
+    
+    <!-- Central intelligence target / diamond -->
+    <path d="M 65 60 L 70 65 L 65 70 L 60 65 Z" fill="#B11226" />
+  </g>
+
+  <!-- Typography -->
+  <g transform="translate(150, 60)">
+    <text x="0" y="-8" font-family="'Inter', 'Helvetica Neue', sans-serif" font-weight="800" font-size="44" fill="#FFFFFF" letter-spacing="-0.5">Global Chanakya</text>
+    <text x="2" y="24" font-family="'Inter', 'Helvetica Neue', sans-serif" font-weight="700" font-size="15" fill="#B11226" letter-spacing="9.5">INTELLIGENCE</text>
+  </g>
 </svg>

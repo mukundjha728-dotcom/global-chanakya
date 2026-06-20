@@ -1,100 +1,88 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Crown, Mail, MapPin, ArrowUpRight } from "lucide-react";
-import { SITE_URL } from "@/constants";
-
-const cols = {
-  Analysis: [
-    { label: "All Reports", href: "/blogs" },
-    { label: "Categories", href: "/categories" },
-    { label: "Trending", href: "/blogs?trending=true" },
-    { label: "RSS Feed", href: "/feed.xml" },
-  ],
-  Account: [
-
-    { label: "Sign In", href: "/auth/signin" },
-    { label: "Create Account", href: "/auth/signup" },
-  ],
-  Company: [
-    { label: "About Us", href: "/about" },
-    { label: "Contact", href: "/contact" },
-    { label: "Careers", href: "/careers" },
-  ],
-  Legal: [
-    { label: "Terms of Service", href: "/terms" },
-    { label: "Privacy Policy", href: "/privacy" },
-
-  ],
-};
 
 export default function Footer() {
-  return (
-    <footer className="border-t border-white/[0.06] bg-[#050505]">
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 pt-16 pb-8">
+  const currentYear = new Date().getFullYear();
 
-        {/* Main grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-10 mb-14">
-          {/* Brand */}
-          <div className="col-span-2 flex flex-col gap-5">
-            <Link href="/" className="flex items-center gap-3 w-fit">
-              <Image src="/brand/logo.svg" alt="Global Chanakya" width={36} height={36} />
-              <div>
-                <span className="text-[16px] font-bold tracking-[-0.02em] text-white">
-                  Global Chanakya
-                </span>
-                <p className="text-[10px] font-medium text-neutral-600 tracking-[0.06em] uppercase">
-                  Intelligence Platform
-                </p>
+  return (
+    <footer className="bg-[#05070F] border-t border-[#0E1A36] pt-20">
+      <div className="max-w-7xl mx-auto px-6">
+        
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-14 mb-20">
+          
+          {/* Column 1: Brand Block */}
+          <div className="lg:col-span-1 flex flex-col">
+            <Link href="/" className="flex items-center gap-3 mb-6 group">
+              <div className="relative w-10 h-10 rounded-xl overflow-hidden intel-border flex-shrink-0 bg-black">
+                <Image
+                  src="/icon.svg"
+                  alt="Global Chanakya Logo"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="flex flex-col leading-none">
+                <span className="text-[22px] font-bold tracking-[-0.03em] text-white">Global Chanakya</span>
+                <span className="text-[9px] uppercase tracking-[0.22em] text-[#D4AF37] font-semibold mt-1">Strategic Intelligence Platform</span>
               </div>
             </Link>
-            <p className="text-[13px] text-neutral-500 leading-relaxed max-w-xs">
-              In-depth geopolitical analysis and strategic intelligence for the modern decision-maker.
+            <p className="text-sm text-[var(--muted)] leading-[1.7]">
+              Independent geopolitical analysis for policymakers, analysts, and strategic thinkers.
             </p>
-            <div className="flex flex-col gap-2 text-[12px] text-neutral-600">
-              <span className="flex items-center gap-2">
-                <Mail className="w-3.5 h-3.5" />
-                editorial@globalchanakya.in
-              </span>
-              <span className="flex items-center gap-2">
-                <MapPin className="w-3.5 h-3.5" />
-                New Delhi, India
-              </span>
-            </div>
           </div>
 
-          {/* Link columns */}
-          {Object.entries(cols).map(([section, links]) => (
-            <div key={section}>
-              <h4 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-neutral-500 mb-4">
-                {section}
-              </h4>
-              <ul className="space-y-2.5">
-                {links.map((l) => (
-                  <li key={l.href}>
-                    <Link
-                      href={l.href}
-                      className="text-[13px] text-neutral-500 hover:text-white transition-colors duration-200"
-                    >
-                      {l.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {/* Column 2: Intelligence */}
+          <div className="flex flex-col gap-5">
+            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Intelligence</h4>
+            <ul className="flex flex-col gap-3">
+              <li><Link href="/reports" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Reports</Link></li>
+              <li><Link href="/categories" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Categories</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 3: Platform */}
+          <div className="flex flex-col gap-5">
+            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Platform</h4>
+            <ul className="flex flex-col gap-3">
+              <li><Link href="/membership" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Membership</Link></li>
+              <li><Link href="/newsletter" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Newsletter</Link></li>
+              <li><Link href="/research" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Research Desk</Link></li>
+              <li><Link href="/archives" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Archives</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 4: Company */}
+          <div className="flex flex-col gap-5">
+            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Company</h4>
+            <ul className="flex flex-col gap-3">
+              <li><Link href="/about" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">About</Link></li>
+              <li><Link href="/contact" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Contact</Link></li>
+              <li><Link href="/careers" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Careers</Link></li>
+              <li><Link href="/editorial-policy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Editorial Policy</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 5: Legal */}
+          <div className="flex flex-col gap-5">
+            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Legal</h4>
+            <ul className="flex flex-col gap-3">
+              <li><Link href="/privacy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Privacy</Link></li>
+              <li><Link href="/terms" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Terms</Link></li>
+              <li><Link href="/disclaimer" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Disclaimer</Link></li>
+            </ul>
+          </div>
+          
         </div>
 
-
-
-        {/* Bottom bar */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-white/[0.05]">
-          <p className="text-[11px] text-neutral-600">
-            © {new Date().getFullYear()} Global Chanakya Media Pvt. Ltd. All rights reserved.
+        {/* Bottom Strip */}
+        <div className="border-t border-[#111827] py-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-[var(--muted)] tracking-wide">
+            © {currentYear} Global Chanakya Intelligence. All rights reserved.
           </p>
-          <div className="flex items-center gap-4 text-[11px] text-neutral-600">
-            <Link href="/terms" className="hover:text-neutral-400 transition-colors">Terms</Link>
-            <Link href="/privacy" className="hover:text-neutral-400 transition-colors">Privacy</Link>
-
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-[#111827]/50 border border-[#111827] text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--cyan)] animate-pulse shadow-[0_0_8px_var(--cyan)]" />
+            LIVE STATUS • OPERATIONAL
           </div>
         </div>
 

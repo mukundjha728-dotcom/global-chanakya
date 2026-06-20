@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Lock, User, LogOut, Menu, X, Crown, ChevronRight, Bookmark, LayoutDashboard } from "lucide-react";
+import { LogOut, Menu, X, LayoutDashboard, Search } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 
@@ -18,25 +18,17 @@ interface NavbarClientProps {
 }
 
 const navLinks = [
-  { label: "Reports", href: "/blogs" },
+  { label: "Reports", href: "/reports" },
   { label: "Categories", href: "/categories" },
   { label: "About", href: "/about" },
 ];
 
 export default function NavbarClient({ session }: NavbarClientProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const pathname = usePathname();
   const isAdmin = session?.user?.role === "admin";
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Close profile dropdown when clicking outside
   useEffect(() => {
     if (!profileOpen) return;
     const close = () => setProfileOpen(false);
@@ -45,201 +37,179 @@ export default function NavbarClient({ session }: NavbarClientProps) {
   }, [profileOpen]);
 
   return (
-    <nav className="fixed w-full z-50 top-0">
-      <div
-        className="transition-all duration-300"
-        style={{
-          borderBottom: scrolled ? "1px solid rgba(255,255,255,0.06)" : "1px solid transparent",
-          background: scrolled ? "rgba(6,6,6,0.85)" : "transparent",
-          backdropFilter: scrolled ? "blur(20px) saturate(1.4)" : "none",
-          WebkitBackdropFilter: scrolled ? "blur(20px) saturate(1.4)" : "none",
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <Image
-              src="/brand/logo.svg"
-              alt="Global Chanakya"
-              width={34}
-              height={34}
-              className="group-hover:scale-105 transition-transform duration-200"
-            />
-            <div className="flex flex-col">
-              <span className="text-[15px] font-bold tracking-[-0.02em] text-white leading-tight">
-                Global Chanakya
-              </span>
-              <span className="text-[10px] font-medium text-neutral-500 tracking-[0.06em] uppercase leading-tight">
-                Intelligence
-              </span>
-            </div>
-          </Link>
+    <nav className="sticky top-0 z-50 w-full h-20 backdrop-blur-xl bg-[var(--bg)]/90 border-b border-[var(--border)] flex items-center transition-all duration-300">
+      <div className="w-full max-w-7xl mx-auto px-8 flex items-center justify-between">
+        
+        {/* Left: Logo */}
+        <Link href="/" className="flex items-center gap-4 min-w-[240px] shrink-0 group">
+          <Image
+            src="/icon.svg"
+            alt="Global Chanakya"
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-xl group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="flex flex-col leading-none gap-1">
+            <span className="text-[28px] font-bold tracking-[-0.03em] text-white">
+              Global Chanakya
+            </span>
+            <span className="text-[11px] font-bold text-[var(--gold)] tracking-[0.22em] uppercase">
+              Intelligence
+            </span>
+          </div>
+        </Link>
 
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
+        {/* Center: Navigation */}
+        <div className="hidden lg:flex items-center gap-10">
+          {navLinks.map((link) => {
+            const isActive = pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href));
+            return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`px-4 py-2 rounded-lg text-[13px] font-medium transition-colors duration-200 ${
-                  pathname === link.href || (link.href !== "/" && pathname.startsWith(link.href))
-                    ? "text-white bg-white/[0.08]"
-                    : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
+                className={`relative inline-flex items-center py-2 text-sm font-semibold tracking-[0.06em] uppercase transition-colors duration-200 group after:absolute after:left-0 after:bottom-[-8px] after:h-[2px] after:w-full after:bg-[#D4AF37] after:scale-x-0 hover:after:scale-x-100 active:after:scale-x-100 after:transition-transform after:origin-left after:duration-300 ${
+                  isActive ? "text-[var(--gold)] after:scale-x-100" : "text-[var(--secondary)] hover:text-white"
                 }`}
               >
                 {link.label}
               </Link>
-            ))}
-
-          </div>
-
-          {/* Right */}
-          <div className="hidden md:flex items-center gap-3">
-            {session ? (
-              <div className="relative flex items-center gap-2">
-                {isAdmin && (
-                  <Link
-                    href="/admin"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-violet-400 bg-violet-500/[0.08] border border-violet-500/20 rounded-lg hover:bg-violet-500/15 transition-colors"
-                  >
-                    <LayoutDashboard className="w-3 h-3" />
-                    Dashboard
-                  </Link>
-                )}
-
-                {/* Profile button */}
-                <button
-                  onClick={(e) => { e.stopPropagation(); setProfileOpen(!profileOpen); }}
-                  className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] transition-colors"
-                >
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-red-600 to-orange-500 flex items-center justify-center text-[11px] font-bold text-white">
-                    {(session.user?.name || "U")[0].toUpperCase()}
-                  </div>
-                  <span className="text-[13px] text-neutral-300 font-medium max-w-[90px] truncate">
-                    {session.user?.name?.split(" ")[0] || "User"}
-                  </span>
-                  {isAdmin && (
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold rounded uppercase tracking-wider bg-violet-500/15 text-violet-400 border border-violet-500/25">
-                      Admin
-                    </span>
-                  )}
-                </button>
-
-                {/* Dropdown */}
-                {profileOpen && (
-                  <div
-                    className="absolute right-0 top-full mt-2 w-52 py-2 rounded-xl bg-[#111111] border border-white/[0.08] shadow-2xl shadow-black/60"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="px-4 py-2 border-b border-white/[0.06]">
-                      <p className="text-[13px] font-medium text-white truncate">{session.user?.name}</p>
-                      <p className="text-[11px] text-neutral-500 truncate">{session.user?.email}</p>
-                    </div>
-                    <div className="py-1">
-                      <button
-                        onClick={() => signOut()}
-                        className="w-full flex items-center gap-2 px-4 py-2 text-[13px] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-colors"
-                      >
-                        <LogOut className="w-3.5 h-3.5" />
-                        Sign Out
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Link
-                  href="/auth/signin"
-                  className="px-4 py-2 text-[13px] font-medium text-neutral-400 hover:text-white transition-colors"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="px-4 py-2 bg-white text-[#060606] text-[13px] font-semibold rounded-lg hover:bg-neutral-200 transition-colors"
-                >
-                  Get Started
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile toggle */}
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 text-neutral-400 hover:text-white rounded-lg transition-colors"
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+            );
+          })}
         </div>
+
+        {/* Right: Search, Status, Auth */}
+        <div className="hidden lg:flex items-center gap-5">
+          {/* Status Pill Removed */}
+
+          <button className="text-[var(--secondary)] hover:text-white transition-colors ml-2">
+            <Search className="w-5 h-5" />
+          </button>
+
+          {session ? (
+            <div className="relative flex items-center gap-5 pl-5 border-l border-[var(--border)]/50">
+              {isAdmin && (
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-[var(--gold)] bg-[var(--gold)]/10 border border-[var(--gold)]/20 rounded-md hover:bg-[var(--gold)]/20 transition-colors uppercase tracking-wider"
+                >
+                  <LayoutDashboard className="w-3 h-3" />
+                  Admin
+                </Link>
+              )}
+
+              {/* Profile button */}
+              <button
+                onClick={(e) => { e.stopPropagation(); setProfileOpen(!profileOpen); }}
+                className="flex items-center gap-2.5 px-2 py-1 rounded-md hover:bg-[var(--surface)] transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-[var(--blue)] flex items-center justify-center text-[12px] font-bold text-white shadow-[0_0_10px_rgba(37,99,235,0.4)]">
+                  {(session.user?.name || "U")[0].toUpperCase()}
+                </div>
+              </button>
+
+              {/* Dropdown */}
+              {profileOpen && (
+                <div
+                  className="absolute right-0 top-full mt-4 w-56 py-2 rounded-xl bg-[var(--elevated)] intel-border shadow-2xl"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="px-4 py-3 border-b border-[var(--border)]">
+                    <p className="text-[13px] font-bold text-white truncate">{session.user?.name}</p>
+                    <p className="text-[11px] text-[var(--muted)] truncate mt-0.5">{session.user?.email}</p>
+                  </div>
+                  <div className="py-1">
+                    <button
+                      onClick={() => signOut()}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-[var(--danger)] hover:bg-[var(--surface)] transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Secure Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-5 pl-5 border-l border-[var(--border)]/50">
+              <Link
+                href="/auth/signin"
+                className="px-5 py-3 text-sm font-bold uppercase tracking-wider text-[var(--secondary)] hover:text-white transition-colors"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/auth/signup"
+                className="px-7 py-3 bg-[var(--gold)] text-[var(--bg)] text-sm font-bold uppercase tracking-wider rounded-xl hover:opacity-90 transition-opacity"
+              >
+                Get Started
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Mobile toggle */}
+        <button
+          onClick={() => setMobileOpen(!mobileOpen)}
+          className="lg:hidden p-2 text-[var(--secondary)] hover:text-white rounded-md transition-colors"
+        >
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
 
       {/* Mobile drawer */}
       {mobileOpen && (
-        <div className="md:hidden border-b border-white/[0.06] bg-[#060606]/98 backdrop-blur-xl">
-          <div className="px-5 py-5 space-y-1">
+        <div className="absolute top-20 left-0 w-full lg:hidden border-b border-[var(--border)] bg-[var(--bg)]/95 backdrop-blur-xl">
+          <div className="px-6 py-6 space-y-2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className={`block px-4 py-3 rounded-xl text-[14px] font-medium transition-colors ${
+                className={`block px-4 py-3 rounded-md text-[14px] font-bold uppercase tracking-wider transition-colors ${
                   pathname === link.href
-                    ? "text-white bg-white/[0.06]"
-                    : "text-neutral-400 hover:text-white hover:bg-white/[0.04]"
+                    ? "text-[var(--gold)] bg-[var(--surface)]"
+                    : "text-[var(--secondary)] hover:text-white hover:bg-[var(--surface)]"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
 
-            {isAdmin && (
-              <Link
-                href="/admin"
-                onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 px-4 py-3 rounded-xl text-[14px] font-medium text-violet-400 hover:bg-violet-500/[0.06] transition-colors"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Admin Dashboard
-              </Link>
-            )}
-
-            <div className="pt-4 border-t border-white/[0.06]">
+            <div className="pt-6 mt-6 border-t border-[var(--border)]">
               {session ? (
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3 px-4 py-2">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-600 to-orange-500 flex items-center justify-center text-xs font-bold text-white">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 px-4">
+                    <div className="w-10 h-10 rounded-full bg-[var(--blue)] flex items-center justify-center text-sm font-bold text-white shadow-[0_0_10px_rgba(37,99,235,0.4)]">
                       {(session.user?.name || "U")[0].toUpperCase()}
                     </div>
                     <div>
-                      <p className="text-[13px] font-medium text-white">{session.user?.name}</p>
-                      <p className="text-[11px] text-neutral-500">{session.user?.email}</p>
+                      <p className="text-[14px] font-bold text-white">{session.user?.name}</p>
+                      <p className="text-[12px] text-[var(--muted)]">{session.user?.email}</p>
                     </div>
                   </div>
                   <button
                     onClick={() => signOut()}
-                    className="w-full flex items-center gap-2 px-4 py-3 rounded-xl text-[14px] text-neutral-400 hover:text-white hover:bg-white/[0.04] transition-colors"
+                    className="w-full flex items-center gap-2 px-4 py-3 rounded-md text-[14px] font-bold uppercase tracking-wider text-[var(--danger)] hover:bg-[var(--surface)] transition-colors"
                   >
                     <LogOut className="w-4 h-4" />
-                    Sign Out
+                    Secure Sign Out
                   </button>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <Link
                     href="/auth/signin"
                     onClick={() => setMobileOpen(false)}
-                    className="block w-full px-4 py-3 text-center rounded-xl border border-white/[0.08] text-[14px] font-medium text-neutral-300 hover:bg-white/[0.04] transition-colors"
+                    className="block w-full px-4 py-3 text-center rounded-md border border-[var(--border)] text-[14px] font-bold uppercase tracking-wider text-[var(--secondary)] hover:text-white hover:bg-[var(--surface)] transition-colors"
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/auth/signup"
                     onClick={() => setMobileOpen(false)}
-                    className="block w-full px-4 py-3 text-center rounded-xl bg-white text-[#060606] text-[14px] font-semibold hover:bg-neutral-100 transition-colors"
+                    className="block w-full px-4 py-3 text-center rounded-xl bg-[var(--gold)] text-[var(--bg)] text-[14px] font-bold uppercase tracking-wider hover:opacity-90 transition-opacity"
                   >
-                    Create Account
+                    Get Started
                   </Link>
                 </div>
               )}
