@@ -18,7 +18,7 @@ interface NavbarClientProps {
 }
 
 const navLinks = [
-  { label: "Reports", href: "/reports" },
+  { label: "Reports", href: "/blogs" },
   { label: "Categories", href: "/categories" },
   { label: "About", href: "/about" },
 ];

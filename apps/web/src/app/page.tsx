@@ -153,7 +153,7 @@ export default async function Home() {
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
-                  href="/reports"
+                  href="/blogs"
                   className="px-8 py-4 intel-border bg-[var(--surface)] text-sm font-bold uppercase tracking-[0.06em] text-white hover:bg-[var(--elevated)] transition-colors rounded-xl"
                 >
                   Explore Reports
@@ -320,7 +320,7 @@ export default async function Home() {
             {theatres.map((cat) => (
               <Link
                 key={cat}
-                href={`/reports?category=${encodeURIComponent(cat)}`}
+                href={`/blogs?category=${encodeURIComponent(cat)}`}
                 className="px-6 py-4 rounded-xl intel-border bg-[var(--surface)] text-sm font-bold uppercase tracking-[0.06em] text-white hover:bg-white hover:text-[var(--bg)] transition-all duration-300"
               >
                 {cat}
