@@ -46,36 +46,74 @@ const theatres = [
   "Defence", "China", "Russia", "Economy & Trade",
 ];
 
-function BlogCard({ blog, variant = "default", isViral = false }: { blog: TrendingBlog; variant?: "featured" | "default"; isViral?: boolean }) {
+function BlogCard({ blog, variant = "default", isViral = false, compact = false }: { blog: TrendingBlog; variant?: "featured" | "default"; isViral?: boolean; compact?: boolean }) {
   const isPrivate = blog.visibility === "private";
   const isFeatured = variant === "featured";
 
+  if (compact) {
+    return (
+      <Link
+        href={`/blogs/${blog.slug}`}
+        className="group relative flex gap-4 w-full h-auto overflow-hidden rounded-2xl border border-white/[0.06] bg-white/[0.015] transition-all duration-300 hover:-translate-y-0.5 hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/30 p-3"
+      >
+        {blog.featuredImage ? (
+          <div className="relative w-[40%] aspect-[16/9] overflow-hidden rounded-2xl shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={blog.featuredImage}
+              alt={blog.title}
+              className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+            />
+          </div>
+        ) : (
+          <div className="relative w-[40%] aspect-[16/9] flex items-center justify-center bg-gradient-to-br from-neutral-900 to-[#060606] rounded-2xl shrink-0">
+            <Newspaper className="w-6 h-6 text-neutral-800" />
+          </div>
+        )}
+        <div className="flex flex-col flex-1 justify-between min-h-full py-1">
+          <div>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-400 mb-1.5 block">
+              {blog.category}
+            </span>
+            <h3 className="font-semibold leading-snug text-white group-hover:text-neutral-300 transition-colors line-clamp-2 text-[14px]">
+              {blog.title}
+            </h3>
+            <p className="text-neutral-500 text-[12px] leading-relaxed line-clamp-2 mt-1">
+              {blog.excerpt}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 pt-2 mt-auto text-[10px] text-neutral-600">
+            <span className="flex items-center gap-1">
+              <Eye className="w-2.5 h-2.5" />
+              {(blog.analytics?.views ?? 0).toLocaleString()}
+            </span>
+            <span className="ml-auto">
+              {new Date(blog.publishAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+            </span>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
   return (
-    <Link
-      href={`/blogs/${blog.slug}`}
-      className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 ${
+    <Link href={`/blogs/${blog.slug}`} className="group block h-full">
+      <article className={`h-full rounded-2xl border overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-0.5 ${
         isFeatured
-          ? "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.14] hover:shadow-xl hover:shadow-black/40"
-          : "border-white/[0.06] bg-white/[0.015] hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/30"
-      }`}
-    >
-      {/* Image */}
-      {blog.featuredImage ? (
-        <div className={`relative overflow-hidden ${isFeatured ? "aspect-[16/9]" : "aspect-[16/8]"}`}>
+          ? "border-white/[0.08] bg-black/40 hover:border-white/[0.14] hover:shadow-xl hover:shadow-black/40"
+          : "border-white/[0.06] bg-black/40 hover:border-white/[0.12] hover:shadow-lg hover:shadow-black/30"
+      }`}>
+        {/* IMAGE */}
+        <div className="relative aspect-[16/9] overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={blog.featuredImage}
+            src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
             alt={blog.title}
             className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#060606] via-[#060606]/30 to-transparent" />
 
           {/* Badges */}
-          <div className="absolute top-4 left-4 flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-semibold uppercase tracking-wider text-neutral-300 border border-white/10">
-              {blog.category}
-            </span>
-          </div>
           <div className="absolute top-4 right-4 flex items-center gap-2">
             {isViral ? (
               <span className="flex items-center gap-1 px-2 py-1 rounded-md bg-orange-600/90 text-white text-[10px] font-bold uppercase tracking-wide">
@@ -88,50 +126,53 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
             )}
           </div>
         </div>
-      ) : (
-        <div className={`relative flex items-center justify-center bg-gradient-to-br from-neutral-900 to-[#060606] ${isFeatured ? "aspect-[16/9]" : "aspect-[16/8]"}`}>
-          <Newspaper className="w-10 h-10 text-neutral-800" />
-          <div className="absolute top-4 left-4">
-            <span className="px-2.5 py-1 rounded-md bg-white/[0.06] text-[10px] font-semibold uppercase tracking-wider text-neutral-400">
+
+        {/* CONTENT */}
+        <div className="flex flex-col flex-1 p-6">
+          
+          {/* Category */}
+          <div className="mb-4">
+            <span className="inline-block px-2.5 py-1 rounded-md bg-white/[0.06] text-[10px] font-semibold uppercase tracking-wider text-neutral-400 border border-white/10">
               {blog.category}
             </span>
           </div>
+
+          {/* Title */}
+          <h3 className="text-xl font-bold text-white leading-tight line-clamp-2 mb-4 group-hover:text-neutral-300 transition-colors">
+            {blog.title}
+          </h3>
+
+          {/* Excerpt */}
+          <p className="text-white/60 text-sm leading-relaxed line-clamp-4 mb-6">
+            {blog.excerpt}
+          </p>
+
+          {/* Spacer */}
+          <div className="flex-1"></div>
+
+          {/* Footer */}
+          <div className="flex items-center justify-between pt-4 border-t border-white/[0.05] text-[11px] text-neutral-500">
+            <div className="flex items-center gap-4">
+              <span className="flex items-center gap-1">
+                <Eye className="w-3 h-3" />
+                {(blog.analytics?.views ?? 0).toLocaleString()}
+              </span>
+              <span className="flex items-center gap-1">
+                <Heart className="w-3 h-3" />
+                {blog.analytics?.likes ?? 0}
+              </span>
+              <span className="flex items-center gap-1">
+                <Bookmark className="w-3 h-3" />
+                {blog.analytics?.bookmarks ?? 0}
+              </span>
+            </div>
+            <span>
+              {new Date(blog.publishAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+            </span>
+          </div>
+
         </div>
-      )}
-
-      {/* Content */}
-      <div className="flex flex-col flex-1 p-5 gap-3">
-
-
-        <h3 className={`font-semibold leading-snug text-white group-hover:text-neutral-300 transition-colors line-clamp-2 ${
-          isFeatured ? "text-lg" : "text-[15px]"
-        }`}>
-          {blog.title}
-        </h3>
-
-        <p className="text-neutral-500 text-[13px] leading-relaxed line-clamp-2 flex-1">
-          {blog.excerpt}
-        </p>
-
-        {/* Meta */}
-        <div className="flex items-center gap-4 pt-3 border-t border-white/[0.05] text-[11px] text-neutral-600">
-          <span className="flex items-center gap-1">
-            <Eye className="w-3 h-3" />
-            {(blog.analytics?.views ?? 0).toLocaleString()}
-          </span>
-          <span className="flex items-center gap-1">
-            <Heart className="w-3 h-3" />
-            {blog.analytics?.likes ?? 0}
-          </span>
-          <span className="flex items-center gap-1">
-            <Bookmark className="w-3 h-3" />
-            {blog.analytics?.bookmarks ?? 0}
-          </span>
-          <span className="ml-auto">
-            {new Date(blog.publishAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-          </span>
-        </div>
-      </div>
+      </article>
     </Link>
   );
 }
@@ -155,18 +196,18 @@ export default async function Home() {
   const restTrending = trendingBlogs.slice(4);
 
   return (
-    <div className="bg-[#060606] text-white">
+    <div className="min-h-screen flex flex-col bg-[#060606] text-white">
 
       {/* ─── HERO ─── */}
-      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 px-6 overflow-hidden">
+      <section className="relative pt-32 pb-20 sm:pt-40 sm:pb-28 overflow-hidden">
         {/* Subtle gradient orb */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-red-600/[0.06] blur-[140px] rounded-full pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="container mx-auto max-w-7xl px-6 md:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
 
             {/* Left */}
-            <div className="flex flex-col gap-8">
+            <div className="w-full flex flex-col justify-center gap-8">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-white/[0.08] bg-white/[0.03] text-neutral-400 text-[11px] font-medium uppercase tracking-[0.08em] w-fit">
                 <span className="relative flex h-1.5 w-1.5">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
@@ -220,7 +261,7 @@ export default async function Home() {
             {featuredBlog ? (
               <Link
                 href={`/blogs/${featuredBlog.slug}`}
-                className="relative w-full aspect-[4/3] rounded-2xl border border-white/[0.08] bg-neutral-900 overflow-hidden group"
+                className="relative w-full h-full aspect-[4/3] rounded-2xl border border-white/[0.08] bg-neutral-900 overflow-hidden group"
               >
                 {featuredBlog.featuredImage && (
                   <div
@@ -264,7 +305,7 @@ export default async function Home() {
                 </div>
               </Link>
             ) : (
-              <div className="relative w-full aspect-[4/3] rounded-2xl border border-white/[0.06] bg-white/[0.015] overflow-hidden flex flex-col items-center justify-center gap-5 p-10 text-center">
+              <div className="relative w-full h-full aspect-[4/3] rounded-2xl border border-white/[0.06] bg-white/[0.015] overflow-hidden flex flex-col items-center justify-center gap-5 p-10 text-center">
                 <div className="w-16 h-16 rounded-2xl bg-red-500/[0.08] border border-red-500/15 flex items-center justify-center">
                   <Newspaper className="w-7 h-7 text-red-500/50" />
                 </div>
@@ -286,45 +327,43 @@ export default async function Home() {
 
       {/* ─── TRENDING ─── */}
       {hasTrending && (
-        <section className="py-20 px-6" id="trending">
-          <div className="max-w-7xl mx-auto">
-            <div className="flex items-end justify-between mb-10">
+        <section className="py-20 border-t border-white/[0.05]" id="trending">
+          <div className="container mx-auto max-w-7xl px-6 md:px-8">
+            <div className="flex items-center justify-between mb-10">
               <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-4 h-4 text-red-500" />
-                  <span className="text-red-400 text-[11px] font-semibold uppercase tracking-[0.08em]">
-                    Trending Now
-                  </span>
-                </div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                <p className="text-red-500 text-sm font-medium tracking-widest uppercase mb-2">
+                  Trending Now
+                </p>
+                <h2 className="text-4xl font-bold text-white">
                   Most Read This Week
                 </h2>
               </div>
               <Link
                 href="/blogs"
-                className="hidden sm:flex items-center gap-1.5 text-neutral-500 text-[13px] font-medium hover:text-white transition-colors"
+                className="text-white/60 hover:text-white transition"
               >
-                All reports
-                <ChevronRight className="w-4 h-4" />
+                All reports →
               </Link>
             </div>
 
-            {/* Grid */}
-            <div className="grid lg:grid-cols-3 gap-5 mb-5">
-              {trendingBlogs[0] && (
-                <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 items-start mb-10">
+              {/* Left Featured */}
+              <div className="xl:col-span-7">
+                {trendingBlogs[0] && (
                   <BlogCard blog={trendingBlogs[0]} variant="featured" isViral={trendingBlogs[0]._id === mostViewedBlogId} />
-                </div>
-              )}
-              <div className="flex flex-col gap-5">
+                )}
+              </div>
+
+              {/* Right Stack */}
+              <div className="xl:col-span-5 flex flex-col gap-8">
                 {sideTrending.map((blog) => (
-                  <BlogCard key={blog._id} blog={blog} isViral={blog._id === mostViewedBlogId} />
+                  <BlogCard key={blog._id} blog={blog} isViral={blog._id === mostViewedBlogId} compact />
                 ))}
               </div>
             </div>
 
             {restTrending.length > 0 && (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {restTrending.map((blog) => (
                   <BlogCard key={blog._id} blog={blog} isViral={blog._id === mostViewedBlogId} />
                 ))}
@@ -336,8 +375,8 @@ export default async function Home() {
 
       {/* ─── LATEST ─── */}
       {latestBlogs.length > 0 && (
-        <section className="py-16 px-6 border-t border-white/[0.05]" id="latest">
-          <div className="max-w-7xl mx-auto">
+        <section className="py-16 md:py-20 border-t border-white/[0.05]" id="latest">
+          <div className="container mx-auto max-w-7xl px-6 md:px-8">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-bold text-white">Latest Reports</h2>
               <Link
@@ -347,7 +386,7 @@ export default async function Home() {
                 View all <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {latestBlogs.map((blog) => (
                 <BlogCard key={blog._id} blog={blog} isViral={blog._id === mostViewedBlogId} />
               ))}
@@ -357,8 +396,8 @@ export default async function Home() {
       )}
 
       {/* ─── WHY GLOBAL CHANAKYA ─── */}
-      <section className="py-24 px-6 border-t border-white/[0.05]" id="features">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-16 md:py-20 border-t border-white/[0.05]" id="features">
+        <div className="container mx-auto max-w-7xl px-6 md:px-8">
           <div className="text-center mb-16">
             <span className="inline-block px-3 py-1 rounded-lg border border-white/[0.08] bg-white/[0.03] text-neutral-400 text-[11px] font-medium uppercase tracking-[0.08em] mb-4">
               Why Global Chanakya
@@ -371,7 +410,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {pillars.map((p) => (
               <div
                 key={p.title}
@@ -389,8 +428,8 @@ export default async function Home() {
       </section>
 
       {/* ─── CATEGORIES ─── */}
-      <section className="py-16 px-6 border-t border-white/[0.05]" id="categories">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-16 md:py-20 border-t border-white/[0.05]" id="categories">
+        <div className="container mx-auto max-w-7xl px-6 md:px-8">
           <div className="text-center mb-10">
             <h2 className="text-2xl font-bold text-white mb-2">Browse by Theatre</h2>
             <p className="text-neutral-500 text-[14px]">Explore reports by strategic region and topic</p>
@@ -410,9 +449,10 @@ export default async function Home() {
       </section>
 
       {/* ─── OPEN ACCESS CTA ─── */}
-      <section className="py-24 px-6 border-t border-white/[0.05]" id="explore">
-        <div className="max-w-2xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/15 bg-amber-500/[0.05] text-amber-400 text-[11px] font-semibold uppercase tracking-[0.08em] mb-6">
+      <section className="py-16 md:py-20 border-t border-white/[0.05]" id="explore">
+        <div className="container mx-auto max-w-7xl px-6 md:px-8 flex flex-col items-center">
+          <div className="max-w-2xl text-center w-full">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-amber-500/15 bg-amber-500/[0.05] text-amber-400 text-[11px] font-semibold uppercase tracking-[0.08em] mb-6">
             <Globe className="w-3 h-3" />
             Open Intelligence
           </div>
@@ -438,6 +478,7 @@ export default async function Home() {
             >
               Explore Reports
             </Link>
+          </div>
           </div>
         </div>
       </section>
