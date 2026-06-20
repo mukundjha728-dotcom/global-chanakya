@@ -37,60 +37,139 @@ const theatres = [
   "Defence", "China", "Russia", "Economy & Trade",
 ];
 
-function BlogCard({ blog, variant = "default", isViral = false }: { blog: TrendingBlog; variant?: "featured" | "default"; isViral?: boolean }) {
-  const isFeatured = variant === "featured";
+function BlogCard({ blog, variant = "default", isViral = false }: { blog: TrendingBlog; variant?: "featured" | "default" | "compact"; isViral?: boolean }) {
+  if (variant === "compact") {
+    return (
+      <Link href={`/blogs/${blog.slug}`} className="group block h-full">
+        <article className="flex items-center gap-4 h-full p-3 glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[var(--gold)]/30 hover:shadow-lg hover:shadow-[var(--gold)]/10 bg-[var(--surface)]/20">
+          <div className="relative w-28 h-28 md:w-32 md:h-32 shrink-0 overflow-hidden rounded-xl border border-[var(--border)]/50">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
+              alt={blog.title}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            {isViral && (
+              <div className="absolute top-2 left-2 bg-[var(--danger)] text-white p-1 rounded-md shadow-sm">
+                 <Flame className="w-3 h-3" />
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col justify-center flex-1 py-1 pr-2">
+            <div className="mb-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)]">
+                {blog.category}
+              </span>
+            </div>
+            <h3 className="font-bold text-white text-sm md:text-base leading-[1.3] mb-2 group-hover:text-[var(--gold)] transition-colors line-clamp-2">
+              {blog.title}
+            </h3>
+            <div className="mt-auto flex items-center justify-between text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
+              <span>{new Date(blog.publishAt).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}</span>
+            </div>
+          </div>
+        </article>
+      </Link>
+    );
+  }
 
+  if (variant === "featured") {
+    return (
+      <Link href={`/blogs/${blog.slug}`} className="group block h-full min-h-[440px]">
+        <article className="relative flex flex-col h-full glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:border-[var(--gold)]/40 hover:shadow-2xl hover:shadow-[var(--gold)]/20">
+          <div className="absolute inset-0 bg-[var(--surface)]">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
+              alt={blog.title}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/80 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
+          </div>
+
+          {/* Badges */}
+          <div className="absolute top-6 right-6 flex items-center gap-2 z-20">
+            {isViral ? (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--danger)]/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-[0.14em] shadow-[0_0_10px_var(--danger)]">
+                <Flame className="w-3.5 h-3.5" /> High Threat
+              </span>
+            ) : blog.isTrending && (
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--cyan)]/20 backdrop-blur-md border border-[var(--cyan)]/30 text-[var(--cyan)] text-[10px] font-bold uppercase tracking-[0.14em]">
+                <TrendingUp className="w-3.5 h-3.5" /> Trending
+              </span>
+            )}
+          </div>
+
+          <div className="relative z-10 mt-auto p-8 lg:p-12 flex flex-col">
+            <div className="mb-5">
+              <span className="inline-block px-3 py-1.5 rounded bg-[var(--cyan)]/10 backdrop-blur-md text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] border border-[var(--cyan)]/20">
+                {blog.category}
+              </span>
+            </div>
+            <h3 className="font-extrabold text-white text-3xl lg:text-4xl leading-[1.2] mb-5 group-hover:text-[var(--gold)] transition-colors line-clamp-3 drop-shadow-lg">
+              {blog.title}
+            </h3>
+            <p className="text-base lg:text-lg text-white/80 leading-[1.6] line-clamp-2 mb-8 max-w-3xl">
+              {blog.excerpt}
+            </p>
+            <div className="pt-6 border-t border-white/10 flex items-center justify-between text-[11px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
+              <div className="flex items-center gap-6">
+                <span className="flex items-center gap-2 text-white/70">
+                  <Eye className="w-4 h-4" />
+                  {(blog.analytics?.views ?? 0).toLocaleString()} Views
+                </span>
+              </div>
+              <span className="text-white/70">
+                {new Date(blog.publishAt).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}
+              </span>
+            </div>
+          </div>
+        </article>
+      </Link>
+    );
+  }
+
+  // Default Variant
   return (
     <Link href={`/blogs/${blog.slug}`} className="group block h-full">
-      <article className="flex flex-col h-full min-h-[540px] glass-card rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-[8px] hover:border-[var(--gold)]/30 hover:shadow-xl hover:shadow-[var(--gold)]/10">
-        {/* IMAGE */}
-        <div className={`relative overflow-hidden rounded-t-2xl border-b border-[var(--border)] ${isFeatured ? 'flex-1 min-h-[300px]' : 'aspect-[16/9]'}`}>
+      <article className="flex flex-col h-full glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:border-[var(--gold)]/30 hover:shadow-xl hover:shadow-[var(--gold)]/10 bg-[var(--surface)]/20">
+        <div className="relative aspect-[16/9] overflow-hidden border-b border-[var(--border)] bg-[var(--surface)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
             alt={blog.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-transparent to-transparent opacity-60" />
-
-          {/* Badges */}
-          <div className="absolute top-4 right-4 flex items-center gap-2">
+          <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
             {isViral ? (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--danger)] text-white text-[10px] font-bold uppercase tracking-[0.14em] shadow-[0_0_10px_var(--danger)]">
-                <Flame className="w-3.5 h-3.5" /> High Threat
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--danger)]/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-[0.14em]">
+                <Flame className="w-3.5 h-3.5" /> Hot
               </span>
             ) : blog.isTrending && (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--cyan)]/20 border border-[var(--cyan)]/30 text-[var(--cyan)] text-[10px] font-bold uppercase tracking-[0.14em]">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--cyan)]/90 backdrop-blur-md text-[var(--bg)] text-[10px] font-bold uppercase tracking-[0.14em]">
                 <TrendingUp className="w-3.5 h-3.5" /> Trending
               </span>
             )}
           </div>
         </div>
-
-        {/* CONTENT */}
-        <div className={`flex flex-col p-[28px] bg-[var(--bg)] ${isFeatured ? 'shrink-0' : 'flex-1'}`}>
-          <div className="mb-5">
-            <span className="inline-block px-3 py-1.5 rounded bg-[var(--surface)] text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] border border-[var(--border)]">
+        <div className="flex flex-col flex-1 p-6 lg:p-7">
+          <div className="mb-4">
+            <span className="inline-block px-2.5 py-1 rounded bg-[var(--surface)] text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] border border-[var(--border)]">
               {blog.category}
             </span>
           </div>
-
-          <h3 className={`font-bold text-white leading-[1.2] mb-4 group-hover:text-[var(--gold)] transition-colors line-clamp-2 ${isFeatured ? 'text-3xl' : 'text-2xl'}`}>
+          <h3 className="font-bold text-white text-xl leading-[1.3] mb-3 group-hover:text-[var(--gold)] transition-colors line-clamp-2">
             {blog.title}
           </h3>
-
-          <p className={`text-base text-white opacity-75 leading-[1.7] ${isFeatured ? 'line-clamp-3 mb-6' : 'line-clamp-4 flex-1'}`}>
+          <p className="text-sm text-white/70 leading-[1.6] line-clamp-3 flex-1 mb-6">
             {blog.excerpt}
           </p>
-
-          <div className="mt-auto pt-6 border-t border-[var(--border)] flex items-center justify-between text-[11px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
-            <div className="flex items-center gap-5">
-              <span className="flex items-center gap-2">
-                <Eye className="w-4 h-4 text-[var(--muted)]" />
-                {(blog.analytics?.views ?? 0).toLocaleString()}
-              </span>
-            </div>
-            <span>
+          <div className="mt-auto pt-5 border-t border-[var(--border)]/50 flex items-center justify-between text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
+            <span className="flex items-center gap-1.5 text-white/60">
+              <Eye className="w-3.5 h-3.5" />
+              {(blog.analytics?.views ?? 0).toLocaleString()}
+            </span>
+            <span className="text-white/60">
               {new Date(blog.publishAt).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}
             </span>
           </div>
@@ -111,7 +190,7 @@ export default async function Home() {
   const featuredBlog = mostViewedBlogGlobal || latestBlogs[0] || trendingBlogs[0];
 
   const hasTrending = trendingBlogs.length > 0;
-  const sideTrending = trendingBlogs.slice(1, 3); // take exactly 2 for perfect side stack
+  const sideTrending = trendingBlogs.slice(1, 4); // take exactly 3 for perfect side stack
 
   return (
     <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)]">
@@ -233,10 +312,10 @@ export default async function Home() {
                   <BlogCard blog={trendingBlogs[0]} variant="featured" isViral={trendingBlogs[0]._id === mostViewedBlogId} />
                 )}
               </div>
-              <div className="lg:col-span-4 flex flex-col gap-8 h-full">
+              <div className="lg:col-span-4 flex flex-col gap-6 h-full">
                 {sideTrending.map((blog) => (
-                  <div key={blog._id} className="flex-1 h-full">
-                    <BlogCard blog={blog} isViral={blog._id === mostViewedBlogId} />
+                  <div key={blog._id} className="flex-1 min-h-[120px]">
+                    <BlogCard blog={blog} variant="compact" isViral={blog._id === mostViewedBlogId} />
                   </div>
                 ))}
               </div>
@@ -266,19 +345,19 @@ export default async function Home() {
                   <BlogCard blog={latestBlogs[0]} variant="featured" isViral={latestBlogs[0]._id === mostViewedBlogId} />
                 )}
               </div>
-              <div className="lg:col-span-4 flex flex-col gap-8 h-full">
-                {latestBlogs.slice(1, 3).map((blog) => (
-                  <div key={blog._id} className="flex-1 h-full">
-                    <BlogCard blog={blog} isViral={blog._id === mostViewedBlogId} />
+              <div className="lg:col-span-4 flex flex-col gap-6 h-full">
+                {latestBlogs.slice(1, 4).map((blog) => (
+                  <div key={blog._id} className="flex-1 min-h-[120px]">
+                    <BlogCard blog={blog} variant="compact" isViral={blog._id === mostViewedBlogId} />
                   </div>
                 ))}
               </div>
             </div>
-            {latestBlogs.length > 3 && (
+            {latestBlogs.length > 4 && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-                {latestBlogs.slice(3).map((blog) => (
+                {latestBlogs.slice(4).map((blog) => (
                   <div key={blog._id} className="h-full">
-                    <BlogCard blog={blog} isViral={blog._id === mostViewedBlogId} />
+                    <BlogCard blog={blog} variant="default" isViral={blog._id === mostViewedBlogId} />
                   </div>
                 ))}
               </div>
