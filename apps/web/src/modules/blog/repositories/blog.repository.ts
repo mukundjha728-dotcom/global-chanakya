@@ -60,6 +60,18 @@ export class BlogRepository {
       .lean();
   }
 
+  static async getMostViewed(): Promise<IBlog | null> {
+    await dbConnect();
+    const result = await Blog.find({ status: "published", visibility: { $in: ["public", "premium", "private"] } }, {
+      title: 1, slug: 1, excerpt: 1, category: 1, visibility: 1,
+      featuredImage: 1, isTrending: 1, analytics: 1, publishAt: 1, createdAt: 1
+    })
+      .sort({ "analytics.views": -1 })
+      .limit(1)
+      .lean();
+    return result[0] || null;
+  }
+
   static async getAdminBlogs(limit: number = 100): Promise<IBlog[]> {
     await dbConnect();
     return Blog.find({})

@@ -44,7 +44,7 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
     <Link href={`/blogs/${blog.slug}`} className="group block h-full">
       <article className="flex flex-col h-full min-h-[540px] glass-card rounded-2xl overflow-hidden transition-all duration-300 hover:-translate-y-[8px] hover:border-[var(--gold)]/30 hover:shadow-xl hover:shadow-[var(--gold)]/10">
         {/* IMAGE */}
-        <div className="relative aspect-[16/9] overflow-hidden rounded-t-2xl border-b border-[var(--border)]">
+        <div className={`relative overflow-hidden rounded-t-2xl border-b border-[var(--border)] ${isFeatured ? 'flex-1 min-h-[300px]' : 'aspect-[16/9]'}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
@@ -68,7 +68,7 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
         </div>
 
         {/* CONTENT */}
-        <div className="flex flex-col flex-1 p-[28px] bg-[var(--bg)]">
+        <div className={`flex flex-col p-[28px] bg-[var(--bg)] ${isFeatured ? 'shrink-0' : 'flex-1'}`}>
           <div className="mb-5">
             <span className="inline-block px-3 py-1.5 rounded bg-[var(--surface)] text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] border border-[var(--border)]">
               {blog.category}
@@ -79,7 +79,7 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
             {blog.title}
           </h3>
 
-          <p className="text-base text-white opacity-75 leading-[1.7] line-clamp-4 flex-1">
+          <p className={`text-base text-white opacity-75 leading-[1.7] ${isFeatured ? 'line-clamp-3 mb-6' : 'line-clamp-4 flex-1'}`}>
             {blog.excerpt}
           </p>
 
@@ -101,18 +101,14 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
 }
 
 export default async function Home() {
-  const [trendingBlogs, latestBlogs] = await Promise.all([
+  const [trendingBlogs, latestBlogs, mostViewedBlogGlobal] = await Promise.all([
     BlogService.getTrendingBlogs(6),
     BlogService.getLatestBlogs(6),
+    BlogService.getMostViewedBlog(),
   ]);
 
-  const allBlogs = [...trendingBlogs, ...latestBlogs];
-  const mostViewedBlog = allBlogs.length > 0 
-    ? allBlogs.reduce((max, blog) => (blog.analytics?.views || 0) > (max.analytics?.views || 0) ? blog : max, allBlogs[0])
-    : null;
-
-  const mostViewedBlogId = mostViewedBlog?._id;
-  const featuredBlog = mostViewedBlog || latestBlogs[0] || trendingBlogs[0];
+  const mostViewedBlogId = mostViewedBlogGlobal?._id;
+  const featuredBlog = mostViewedBlogGlobal || latestBlogs[0] || trendingBlogs[0];
 
   const hasTrending = trendingBlogs.length > 0;
   const sideTrending = trendingBlogs.slice(1, 3); // take exactly 2 for perfect side stack
@@ -189,12 +185,10 @@ export default async function Home() {
                     <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Clearance: Open</span>
                   </div>
                   <Link href={`/blogs/${featuredBlog.slug}`} className="flex-1 relative flex flex-col p-8 justify-end">
-                    {featuredBlog.featuredImage && (
-                      <div
-                        className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-50 transition-all duration-500 group-hover:scale-105"
-                        style={{ backgroundImage: `url('${featuredBlog.featuredImage}')` }}
-                      />
-                    )}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-50 transition-all duration-500 group-hover:scale-105"
+                      style={{ backgroundImage: `url('${featuredBlog.featuredImage || "/images/fallback-geopolitics.jpg"}')` }}
+                    />
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/80 to-[var(--bg)]/10" />
                     
                     <div className="relative z-10 flex flex-col">
@@ -266,13 +260,29 @@ export default async function Home() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-              {latestBlogs.map((blog) => (
-                <div key={blog._id} className="h-full">
-                  <BlogCard blog={blog} isViral={blog._id === mostViewedBlogId} />
-                </div>
-              ))}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-8">
+              <div className="lg:col-span-8 h-full">
+                {latestBlogs[0] && (
+                  <BlogCard blog={latestBlogs[0]} variant="featured" isViral={latestBlogs[0]._id === mostViewedBlogId} />
+                )}
+              </div>
+              <div className="lg:col-span-4 flex flex-col gap-8 h-full">
+                {latestBlogs.slice(1, 3).map((blog) => (
+                  <div key={blog._id} className="flex-1 h-full">
+                    <BlogCard blog={blog} isViral={blog._id === mostViewedBlogId} />
+                  </div>
+                ))}
+              </div>
             </div>
+            {latestBlogs.length > 3 && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                {latestBlogs.slice(3).map((blog) => (
+                  <div key={blog._id} className="h-full">
+                    <BlogCard blog={blog} isViral={blog._id === mostViewedBlogId} />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </section>
       )}
