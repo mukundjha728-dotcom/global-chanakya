@@ -11,6 +11,10 @@ export class BlogService {
     return BlogRepository.findBySlug(slug);
   }
 
+  static async searchBlogs(query: string, limit?: number) {
+    return BlogRepository.searchBlogs(query, limit);
+  }
+
   static async getTrendingBlogs(limit: number = 6) {
     const cacheKey = `blogs:trending:${limit}`;
     const cached = await memoryCache.get<any[]>(cacheKey);

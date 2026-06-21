@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { LogOut, Menu, X, LayoutDashboard, Search } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
+import SearchModal from "../shared/SearchModal";
 
 interface NavbarClientProps {
   session: {
@@ -26,6 +27,7 @@ const navLinks = [
 export default function NavbarClient({ session }: NavbarClientProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
   const isAdmin = session?.user?.role === "admin";
 
@@ -81,7 +83,10 @@ export default function NavbarClient({ session }: NavbarClientProps) {
         <div className="hidden lg:flex items-center gap-5">
           {/* Status Pill Removed */}
 
-          <button className="text-[var(--secondary)] hover:text-white transition-colors ml-2">
+          <button 
+            onClick={() => setIsSearchOpen(true)}
+            className="text-[var(--secondary)] hover:text-white transition-colors ml-2"
+          >
             <Search className="w-5 h-5" />
           </button>
 
@@ -147,13 +152,20 @@ export default function NavbarClient({ session }: NavbarClientProps) {
           )}
         </div>
 
-        {/* Mobile toggle */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="lg:hidden p-2 text-[var(--secondary)] hover:text-white rounded-md transition-colors"
-        >
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <button 
+            onClick={() => setIsSearchOpen(true)}
+            className="p-2 text-[var(--secondary)] hover:text-white rounded-md transition-colors"
+          >
+            <Search className="w-6 h-6" />
+          </button>
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="p-2 text-[var(--secondary)] hover:text-white rounded-md transition-colors"
+          >
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile drawer */}
@@ -217,6 +229,12 @@ export default function NavbarClient({ session }: NavbarClientProps) {
           </div>
         </div>
       )}
+
+      {/* Search Modal */}
+      <SearchModal 
+        isOpen={isSearchOpen} 
+        onClose={() => setIsSearchOpen(false)} 
+      />
     </nav>
   );
 }

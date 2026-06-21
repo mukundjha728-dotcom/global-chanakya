@@ -13,6 +13,28 @@ export class BlogRepository {
     return Blog.findOne({ slug: decodedSlug }).lean();
   }
 
+  static async searchBlogs(query: string, limit: number = 5): Promise<IBlog[]> {
+    await dbConnect();
+    return Blog.find(
+      {
+        status: "published",
+        visibility: { $in: ["public", "premium", "private"] },
+        $or: [
+          { title: { $regex: query, $options: "i" } },
+          { excerpt: { $regex: query, $options: "i" } },
+          { category: { $regex: query, $options: "i" } },
+        ]
+      },
+      {
+        title: 1, slug: 1, excerpt: 1, category: 1,
+        featuredImage: 1, publishAt: 1
+      }
+    )
+      .sort({ publishAt: -1 })
+      .limit(limit)
+      .lean();
+  }
+
   static async getTrending(limit: number = 6): Promise<IBlog[]> {
     await dbConnect();
     const now = new Date();
