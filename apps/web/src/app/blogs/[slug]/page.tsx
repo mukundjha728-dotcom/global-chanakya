@@ -151,6 +151,28 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
               isLoggedIn={!!session}
               commentsEnabled={blog.commentsEnabled !== false}
             />
+
+            {/* Bottom Suggestions / Related Blogs */}
+            {relatedBlogs.length > 0 && (
+              <div className="mt-16 pt-12 border-t border-[var(--border)]">
+                <h3 className="text-[18px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-8">
+                  <Newspaper className="w-5 h-5 text-[var(--cyan)]" /> Suggested Intelligence
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {relatedBlogs.map((rb: any) => (
+                    <Link key={rb._id} href={`/blogs/${rb.slug}`} className="glass-card p-5 rounded-sm hover:-translate-y-1 transition-transform group flex flex-col gap-3 border border-[var(--border)] hover:border-[var(--gold)]/50">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--cyan)]">{rb.category}</span>
+                      <h4 className="text-[16px] font-bold text-white leading-snug group-hover:text-[var(--gold)] transition-colors line-clamp-2">
+                        {rb.title}
+                      </h4>
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--muted)] flex items-center gap-2 mt-auto pt-2">
+                        <Clock className="w-3.5 h-3.5" /> {formatDate(rb.publishAt, "short")}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </article>
 
           {/* Sidebar */}
