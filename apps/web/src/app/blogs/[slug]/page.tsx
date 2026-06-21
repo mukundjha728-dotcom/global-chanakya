@@ -13,8 +13,9 @@ import { SITE_URL } from "@/constants";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
   await dbConnect();
-  const blog = await Blog.findOne({ slug, status: "published" }).lean();
+  const blog = await Blog.findOne({ slug: decodedSlug, status: "published" }).lean();
   if (!blog) return { title: "Not Found" };
   return generateSeoMetadata({
     title: blog.seo?.title || blog.title,
@@ -37,10 +38,11 @@ function sanitizeBlogContent(html: string): string {
 
 export default async function BlogPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
   await dbConnect();
   const session = await auth();
 
-  const blog = await Blog.findOne({ slug, status: "published" }).populate("author", "name").lean();
+  const blog = await Blog.findOne({ slug: decodedSlug, status: "published" }).populate("author", "name").lean();
   if (!blog) notFound();
 
   // Get related blogs

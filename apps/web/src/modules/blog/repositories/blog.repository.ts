@@ -9,7 +9,8 @@ export class BlogRepository {
 
   static async findBySlug(slug: string): Promise<IBlog | null> {
     await dbConnect();
-    return Blog.findOne({ slug }).lean();
+    const decodedSlug = decodeURIComponent(slug);
+    return Blog.findOne({ slug: decodedSlug }).lean();
   }
 
   static async getTrending(limit: number = 6): Promise<IBlog[]> {
