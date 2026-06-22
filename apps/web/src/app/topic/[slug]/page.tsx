@@ -36,8 +36,43 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
 
   const formattedSlug = slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: formattedSlug,
+    description: `Aggregated intelligence, reports, conflicts, and geopolitical relations concerning ${formattedSlug}.`,
+    url: `${SITE_URL}/topic/${slug}`,
+    publisher: {
+      "@type": "Organization",
+      name: "Global Chanakya",
+      logo: {
+        "@type": "ImageObject",
+        url: `${SITE_URL}/brand/logo.svg`,
+      },
+    },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: [
+        ...data.countries.map((c: any, index: number) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          url: `${SITE_URL}/country/${c.slug || c._id}`,
+        })),
+        ...data.reports.map((r: any, index: number) => ({
+          "@type": "ListItem",
+          position: data.countries.length + index + 1,
+          url: `${SITE_URL}/blogs/${r.slug || r._id}`,
+        })),
+      ]
+    }
+  };
+
   return (
     <div className="bg-[#060606] text-white min-h-screen pt-24 pb-20 px-6">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-5xl mx-auto">
         <Breadcrumbs items={[
           { name: "Topics", href: "/topic" },

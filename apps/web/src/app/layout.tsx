@@ -82,21 +82,37 @@ export const metadata: Metadata = {
 };
 
 // JSON-LD structured data for Google rich results
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "NewsMediaOrganization",
-  name: SITE_NAME,
-  url: SITE_URL,
-  logo: `${SITE_URL}/brand/logo.svg`,
-  description: SITE_DESC,
-  sameAs: [
-    "https://twitter.com/globalchanakya",
-    "https://linkedin.com/company/globalchanakya",
-  ],
-  foundingDate: "2024",
-  areaServed: "Worldwide",
-  knowsAbout: ["Geopolitics", "Strategic Intelligence", "Foreign Policy", "Defence"],
-};
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "NewsMediaOrganization",
+    name: SITE_NAME,
+    url: SITE_URL,
+    logo: `${SITE_URL}/brand/logo.svg`,
+    description: SITE_DESC,
+    sameAs: [
+      "https://twitter.com/globalchanakya",
+      "https://linkedin.com/company/globalchanakya",
+    ],
+    foundingDate: "2024",
+    areaServed: "Worldwide",
+    knowsAbout: ["Geopolitics", "Strategic Intelligence", "Foreign Policy", "Defence"],
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `${SITE_URL}/blogs?search={search_term_string}`
+      },
+      "query-input": "required name=search_term_string"
+    }
+  }
+];
 
 import { DisableInspect } from "@/components/DisableInspect";
 

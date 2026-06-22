@@ -7,6 +7,9 @@ export interface SeoOptions {
   keywords?: string;
   imageUrl?: string;
   type?: "website" | "article" | "profile";
+  authorName?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
 }
 
 export function generateSeoMetadata({
@@ -15,8 +18,25 @@ export function generateSeoMetadata({
   canonicalUrl,
   keywords,
   imageUrl,
-  type = "website"
+  type = "website",
+  authorName,
+  publishedTime,
+  modifiedTime
 }: SeoOptions): Metadata {
+  const openGraph: any = {
+    title,
+    description,
+    url: canonicalUrl,
+    type,
+    ...(imageUrl ? { images: [{ url: imageUrl }] } : {}),
+  };
+
+  if (type === "article") {
+    if (publishedTime) openGraph.publishedTime = publishedTime;
+    if (modifiedTime) openGraph.modifiedTime = modifiedTime;
+    if (authorName) openGraph.authors = [authorName];
+  }
+
   return {
     title,
     description,
@@ -24,13 +44,7 @@ export function generateSeoMetadata({
     alternates: {
       canonical: canonicalUrl,
     },
-    openGraph: {
-      title,
-      description,
-      url: canonicalUrl,
-      type,
-      ...(imageUrl ? { images: [{ url: imageUrl }] } : {}),
-    },
+    openGraph,
     twitter: {
       card: "summary_large_image",
       title,
