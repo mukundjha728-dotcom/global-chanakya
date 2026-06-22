@@ -10,7 +10,7 @@ export async function getBlogSitemaps(): Promise<MetadataRoute.Sitemap> {
   const blogs = await Blog.find({ status: 'published' }).select('slug updatedAt').lean<IBlog[]>();
 
   return blogs.map((b: IBlog) => ({
-    url: `${SITE_URL}/blogs/${b.slug}`,
+    url: `${SITE_URL}/blogs/${encodeURIComponent(b.slug || "")}`,
     lastModified: b.updatedAt,
     changeFrequency: 'daily',
     priority: 0.9,
