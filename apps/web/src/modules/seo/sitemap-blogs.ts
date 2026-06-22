@@ -12,7 +12,7 @@ export async function getBlogSitemaps(): Promise<MetadataRoute.Sitemap> {
   return blogs.map((b: IBlog) => ({
     url: `${SITE_URL}/blogs/${b.slug}`,
     lastModified: b.updatedAt,
-    changeFrequency: 'weekly',
-    priority: 0.7,
+    changeFrequency: 'daily',
+    priority: 0.9,
   }));
 }
