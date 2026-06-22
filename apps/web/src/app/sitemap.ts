@@ -5,6 +5,8 @@ import { getBlogSitemaps } from '@/modules/seo/sitemap-blogs';
 import { getTopicSitemaps } from '@/modules/seo/sitemap-topics';
 import { getPlatformSeoSitemaps } from '@/modules/seo/sitemap-platformseo';
 
+export const revalidate = 3600; // Update sitemap every hour for new blogs
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const [staticMaps, entities, blogs, topics, platformSeo] = await Promise.all([
