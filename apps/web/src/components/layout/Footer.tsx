@@ -9,7 +9,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-14 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-14 mb-20">
           
           {/* Column 1: Brand Block */}
           <div className="lg:col-span-1 flex flex-col">
@@ -41,35 +41,22 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Column 3: Platform */}
-          <div className="flex flex-col gap-5">
-            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Platform</h4>
-            <ul className="flex flex-col gap-3">
-              <li><Link href="/membership" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Membership</Link></li>
-              <li><Link href="/newsletter" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Newsletter</Link></li>
-              <li><Link href="/research" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Research Desk</Link></li>
-              <li><Link href="/archives" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Archives</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 4: Company */}
+          {/* Column 3: Company */}
           <div className="flex flex-col gap-5">
             <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Company</h4>
             <ul className="flex flex-col gap-3">
               <li><Link href="/about" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">About</Link></li>
               <li><Link href="/contact" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Contact</Link></li>
               <li><Link href="/careers" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Careers</Link></li>
-              <li><Link href="/editorial-policy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Editorial Policy</Link></li>
             </ul>
           </div>
 
-          {/* Column 5: Legal */}
+          {/* Column 4: Legal */}
           <div className="flex flex-col gap-5">
             <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Legal</h4>
             <ul className="flex flex-col gap-3">
               <li><Link href="/privacy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Privacy</Link></li>
               <li><Link href="/terms" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Terms</Link></li>
-              <li><Link href="/disclaimer" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Disclaimer</Link></li>
             </ul>
           </div>
           

@@ -41,8 +41,8 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
   if (variant === "compact") {
     return (
       <Link href={`/blogs/${blog.slug}`} className="group block h-full">
-        <article className="flex items-center gap-4 h-full p-3 glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[var(--gold)]/30 hover:shadow-lg hover:shadow-[var(--gold)]/10 bg-[var(--surface)]/20">
-          <div className="relative w-28 h-28 md:w-32 md:h-32 shrink-0 overflow-hidden rounded-xl border border-[var(--border)]/50">
+        <article className="flex flex-row items-center sm:items-stretch gap-4 h-full p-3 glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[var(--gold)]/40 hover:shadow-lg hover:shadow-[var(--gold)]/10 bg-[var(--surface)]/20">
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 shrink-0 overflow-hidden rounded-xl border border-[var(--border)]/50">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
@@ -50,21 +50,21 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
             {isViral && (
-              <div className="absolute top-2 left-2 bg-[var(--danger)] text-white p-1 rounded-md shadow-sm">
+              <div className="absolute top-1.5 left-1.5 bg-[var(--danger)] text-white p-1 rounded shadow-sm">
                  <Flame className="w-3 h-3" />
               </div>
             )}
           </div>
           <div className="flex flex-col justify-center flex-1 py-1 pr-2">
-            <div className="mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)]">
+            <div className="mb-1.5">
+              <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)]">
                 {blog.category}
               </span>
             </div>
-            <h3 className="font-bold text-white text-sm md:text-base leading-[1.3] mb-2 group-hover:text-[var(--gold)] transition-colors line-clamp-2">
+            <h3 className="font-bold text-white text-xs sm:text-sm md:text-base leading-[1.3] mb-2 group-hover:text-[var(--gold)] transition-colors line-clamp-2">
               {blog.title}
             </h3>
-            <div className="mt-auto flex items-center justify-between text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
+            <div className="mt-auto flex items-center justify-between text-[9px] sm:text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
               <span>{new Date(blog.publishAt).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}</span>
             </div>
           </div>
@@ -75,8 +75,8 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
 
   if (variant === "featured") {
     return (
-      <Link href={`/blogs/${blog.slug}`} className="group block h-full min-h-[440px]">
-        <article className="relative flex flex-col h-full glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:border-[var(--gold)]/40 hover:shadow-2xl hover:shadow-[var(--gold)]/20">
+      <Link href={`/blogs/${blog.slug}`} className="group block h-full min-h-[360px] md:min-h-[440px]">
+        <article className="relative flex flex-col h-full glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:border-[var(--gold)]/50 hover:shadow-2xl hover:shadow-[var(--gold)]/20">
           <div className="absolute inset-0 bg-[var(--surface)]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -88,38 +88,38 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
           </div>
 
           {/* Badges */}
-          <div className="absolute top-6 right-6 flex items-center gap-2 z-20">
+          <div className="absolute top-4 right-4 md:top-6 md:right-6 flex items-center gap-2 z-20">
             {isViral ? (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--danger)]/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-[0.14em] shadow-[0_0_10px_var(--danger)]">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--danger)]/90 backdrop-blur-md text-white text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] shadow-[0_0_10px_var(--danger)]">
                 <Flame className="w-3.5 h-3.5" /> High Threat
               </span>
             ) : blog.isTrending && (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--cyan)]/20 backdrop-blur-md border border-[var(--cyan)]/30 text-[var(--cyan)] text-[10px] font-bold uppercase tracking-[0.14em]">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--cyan)]/20 backdrop-blur-md border border-[var(--cyan)]/30 text-[var(--cyan)] text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em]">
                 <TrendingUp className="w-3.5 h-3.5" /> Trending
               </span>
             )}
           </div>
 
-          <div className="relative z-10 mt-auto p-8 lg:p-12 flex flex-col">
-            <div className="mb-5">
-              <span className="inline-block px-3 py-1.5 rounded bg-[var(--cyan)]/10 backdrop-blur-md text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] border border-[var(--cyan)]/20">
+          <div className="relative z-10 mt-auto p-6 md:p-8 lg:p-12 flex flex-col">
+            <div className="mb-4 md:mb-5">
+              <span className="inline-block px-3 py-1.5 rounded bg-[var(--cyan)]/10 backdrop-blur-md text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] border border-[var(--cyan)]/20">
                 {blog.category}
               </span>
             </div>
-            <h3 className="font-extrabold text-white text-3xl lg:text-4xl leading-[1.2] mb-5 group-hover:text-[var(--gold)] transition-colors line-clamp-3 drop-shadow-lg">
+            <h3 className="font-extrabold text-white text-2xl md:text-3xl lg:text-4xl leading-[1.2] mb-4 md:mb-5 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-[var(--gold)] group-hover:to-yellow-200 transition-all duration-300 line-clamp-3 drop-shadow-lg">
               {blog.title}
             </h3>
-            <p className="text-base lg:text-lg text-white/80 leading-[1.6] line-clamp-2 mb-8 max-w-3xl">
+            <p className="text-sm md:text-base lg:text-lg text-white/85 leading-[1.6] line-clamp-2 mb-6 md:mb-8 max-w-3xl drop-shadow-md">
               {blog.excerpt}
             </p>
-            <div className="pt-6 border-t border-white/10 flex items-center justify-between text-[11px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
-              <div className="flex items-center gap-6">
-                <span className="flex items-center gap-2 text-white/70">
+            <div className="pt-5 md:pt-6 border-t border-white/20 flex items-center justify-between text-[10px] md:text-[11px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
+              <div className="flex items-center gap-4 md:gap-6">
+                <span className="flex items-center gap-1.5 text-white/80">
                   <Eye className="w-4 h-4" />
                   {(blog.analytics?.views ?? 0).toLocaleString()} Views
                 </span>
               </div>
-              <span className="text-white/70">
+              <span className="text-white/80">
                 {new Date(blog.publishAt).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}
               </span>
             </div>
@@ -132,7 +132,7 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
   // Default Variant
   return (
     <Link href={`/blogs/${blog.slug}`} className="group block h-full">
-      <article className="flex flex-col h-full glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:border-[var(--gold)]/30 hover:shadow-xl hover:shadow-[var(--gold)]/10 bg-[var(--surface)]/20">
+      <article className="flex flex-col h-full glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:border-[var(--gold)]/40 hover:shadow-xl hover:shadow-[var(--gold)]/10 bg-[var(--surface)]/20">
         <div className="relative aspect-[16/9] overflow-hidden border-b border-[var(--border)] bg-[var(--surface)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -140,31 +140,31 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
             alt={blog.title}
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+          <div className="absolute top-3 right-3 md:top-4 md:right-4 flex items-center gap-2 z-10">
             {isViral ? (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--danger)]/90 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-[0.14em]">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--danger)]/90 backdrop-blur-md text-white text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em]">
                 <Flame className="w-3.5 h-3.5" /> Hot
               </span>
             ) : blog.isTrending && (
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--cyan)]/90 backdrop-blur-md text-[var(--bg)] text-[10px] font-bold uppercase tracking-[0.14em]">
+              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-[var(--cyan)]/90 backdrop-blur-md text-[var(--bg)] text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em]">
                 <TrendingUp className="w-3.5 h-3.5" /> Trending
               </span>
             )}
           </div>
         </div>
-        <div className="flex flex-col flex-1 p-6 lg:p-7">
-          <div className="mb-4">
-            <span className="inline-block px-2.5 py-1 rounded bg-[var(--surface)] text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] border border-[var(--border)]">
+        <div className="flex flex-col flex-1 p-5 md:p-6 lg:p-7">
+          <div className="mb-3 md:mb-4">
+            <span className="inline-block px-2.5 py-1 rounded bg-[var(--surface)] text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] border border-[var(--border)]">
               {blog.category}
             </span>
           </div>
-          <h3 className="font-bold text-white text-xl leading-[1.3] mb-3 group-hover:text-[var(--gold)] transition-colors line-clamp-2">
+          <h3 className="font-bold text-white text-lg md:text-xl leading-[1.3] mb-3 group-hover:text-[var(--gold)] transition-colors line-clamp-2">
             {blog.title}
           </h3>
-          <p className="text-sm text-white/70 leading-[1.6] line-clamp-3 flex-1 mb-6">
+          <p className="text-xs md:text-sm text-white/75 leading-[1.6] line-clamp-3 flex-1 mb-5 md:mb-6">
             {blog.excerpt}
           </p>
-          <div className="mt-auto pt-5 border-t border-[var(--border)]/50 flex items-center justify-between text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
+          <div className="mt-auto pt-4 md:pt-5 border-t border-[var(--border)]/50 flex items-center justify-between text-[9px] md:text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
             <span className="flex items-center gap-1.5 text-white/60">
               <Eye className="w-3.5 h-3.5" />
               {(blog.analytics?.views ?? 0).toLocaleString()}
@@ -196,88 +196,90 @@ export default async function Home() {
     <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)]">
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden border-b border-[var(--border)] strategic-grid h-[720px] flex items-center">
-        <div className="absolute top-1/2 right-1/4 translate-x-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--surface)] blur-[100px] rounded-full pointer-events-none" />
+      <section className="relative overflow-hidden border-b border-[var(--border)] strategic-grid min-h-[100dvh] md:min-h-[800px] flex items-center py-24 md:py-32">
+        {/* Background glow effects */}
+        <div className="absolute top-1/4 -left-1/4 w-[500px] h-[500px] bg-[var(--cyan)]/10 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-1/2 right-0 translate-x-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--surface)] blur-[100px] rounded-full pointer-events-none" />
 
-        <div className="container mx-auto max-w-7xl px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div className="container mx-auto max-w-7xl px-6 md:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-10 items-center">
             
             {/* Left */}
             <div className="lg:col-span-7 flex flex-col justify-center">
-              <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded intel-border bg-[var(--surface)] text-[var(--cyan)] text-[11px] font-bold uppercase tracking-[0.14em] w-fit mb-8 shadow-sm">
-                <div className="w-1.5 h-1.5 rounded-full bg-[var(--cyan)] animate-pulse" />
+              <div className="inline-flex items-center gap-2.5 px-3 py-1.5 md:px-4 md:py-2 rounded intel-border bg-[var(--surface)] text-[var(--cyan)] text-[10px] md:text-[11px] font-bold uppercase tracking-[0.14em] w-fit mb-6 md:mb-8 shadow-[0_0_15px_rgba(6,182,212,0.1)]">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--cyan)] animate-pulse shadow-[0_0_8px_rgba(6,182,212,0.8)]" />
                 Real-Time Strategic Intelligence Network
               </div>
 
-              <h1 className="text-5xl lg:text-7xl font-extrabold leading-[0.95] tracking-[-0.03em] text-white max-w-[760px] mb-8">
-                Intelligence That <br />
-                <span className="text-[var(--gold)]">Shapes The World.</span>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] md:leading-[0.95] tracking-[-0.03em] text-white max-w-[760px] mb-6 md:mb-8">
+                Intelligence That <br className="hidden sm:block" />
+                <span className="bg-gradient-to-r from-[var(--gold)] via-yellow-200 to-[var(--gold)] text-transparent bg-clip-text drop-shadow-sm">Shapes The World.</span>
               </h1>
 
-              <p className="text-xl text-white opacity-85 leading-[1.8] max-w-[620px] font-medium mb-10">
+              <p className="text-lg md:text-xl text-white/90 leading-[1.7] md:leading-[1.8] max-w-[620px] font-medium mb-8 md:mb-10">
                 Unvarnished geopolitical analysis, defence strategy, and global power shifts. 
                 Built for leaders, analysts, and decision-makers.
               </p>
 
-              <div className="flex flex-wrap items-center gap-5">
+              <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 w-full sm:w-auto">
                 <Link
                   href="/auth/signup"
-                  className="px-8 py-4 bg-[var(--gold)] text-[var(--bg)] text-sm font-extrabold uppercase tracking-[0.06em] rounded-xl hover:opacity-90 transition-opacity flex items-center gap-3"
+                  className="w-full sm:w-auto px-8 py-4 bg-[var(--gold)] text-[var(--bg)] text-sm font-extrabold uppercase tracking-[0.06em] rounded-xl hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(212,175,55,0.3)]"
                 >
                   Create Free Account
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 <Link
                   href="/blogs"
-                  className="px-8 py-4 intel-border bg-[var(--surface)] text-sm font-bold uppercase tracking-[0.06em] text-white hover:bg-[var(--elevated)] transition-colors rounded-xl"
+                  className="w-full sm:w-auto px-8 py-4 intel-border bg-[var(--surface)] text-sm font-bold uppercase tracking-[0.06em] text-white hover:bg-[var(--elevated)] hover:scale-[1.02] active:scale-[0.98] transition-all rounded-xl text-center"
                 >
                   Explore Reports
                 </Link>
               </div>
 
-              <div className="grid grid-cols-3 gap-10 mt-14 pt-8 border-t border-[var(--border)]">
-                <div className="flex flex-col gap-2">
-                  <div className="text-5xl font-bold text-white leading-none">67+</div>
-                  <div className="text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Strategic Reports</div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-10 mt-12 md:mt-14 pt-8 border-t border-[var(--border)]">
+                <div className="flex flex-col gap-1 md:gap-2">
+                  <div className="text-4xl md:text-5xl font-bold text-white leading-none">67+</div>
+                  <div className="text-[10px] md:text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Strategic Reports</div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <div className="text-5xl font-bold text-white leading-none flex items-center gap-2">
-                    24 <span className="w-2.5 h-2.5 rounded-full bg-[var(--cyan)] animate-pulse" />
+                <div className="flex flex-col gap-1 md:gap-2">
+                  <div className="text-4xl md:text-5xl font-bold text-white leading-none flex items-center gap-2">
+                    24 <span className="w-2.5 h-2.5 rounded-full bg-[var(--danger)] animate-pulse shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
                   </div>
-                  <div className="text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Live Conflicts</div>
+                  <div className="text-[10px] md:text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Live Conflicts</div>
                 </div>
-                <div className="flex flex-col gap-2">
-                  <div className="text-5xl font-bold text-white leading-none">192</div>
-                  <div className="text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Countries Tracked</div>
+                <div className="flex flex-col gap-1 md:gap-2 col-span-2 md:col-span-1">
+                  <div className="text-4xl md:text-5xl font-bold text-white leading-none">192</div>
+                  <div className="text-[10px] md:text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Countries Tracked</div>
                 </div>
               </div>
             </div>
 
             {/* Right */}
-            <div className="lg:col-span-5 hidden lg:block">
+            <div className="lg:col-span-5 w-full">
               {featuredBlog && (
-                <div className="relative w-full aspect-[4/5] max-h-[600px] glass-card rounded-2xl overflow-hidden flex flex-col group border border-[var(--border)] hover:border-[var(--gold)]/30 hover:-translate-y-2 transition-all duration-300">
-                  <div className="px-6 py-4 border-b border-[var(--border)] bg-[var(--bg)] flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-white flex items-center gap-2">
-                      <Crosshair className="w-4 h-4 text-[var(--cyan)]" /> Intel Brief
+                <div className="relative w-full aspect-square sm:aspect-[4/5] max-h-[500px] md:max-h-[600px] glass-card rounded-2xl overflow-hidden flex flex-col group border border-[var(--border)] hover:border-[var(--gold)]/40 hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(212,175,55,0.2)] transition-all duration-500">
+                  <div className="px-5 py-3 md:px-6 md:py-4 border-b border-[var(--border)] bg-[var(--bg)] flex items-center justify-between">
+                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] text-white flex items-center gap-2">
+                      <Crosshair className="w-3.5 h-3.5 md:w-4 md:h-4 text-[var(--cyan)]" /> Intel Brief
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Clearance: Open</span>
+                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Clearance: Open</span>
                   </div>
-                  <Link href={`/blogs/${featuredBlog.slug}`} className="flex-1 relative flex flex-col p-8 justify-end">
+                  <Link href={`/blogs/${featuredBlog.slug}`} className="flex-1 relative flex flex-col p-6 md:p-8 justify-end">
                     <div
-                      className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-50 transition-all duration-500 group-hover:scale-105"
+                      className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-50 transition-all duration-700 group-hover:scale-105"
                       style={{ backgroundImage: `url('${featuredBlog.featuredImage || "/images/fallback-geopolitics.jpg"}')` }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/80 to-[var(--bg)]/10" />
                     
                     <div className="relative z-10 flex flex-col">
-                      <span className="mb-4 inline-block px-3 py-1.5 rounded bg-[var(--danger)]/20 text-[10px] font-bold uppercase tracking-[0.14em] text-white border border-[var(--danger)]/30 w-fit backdrop-blur-md">
+                      <span className="mb-3 md:mb-4 inline-block px-3 py-1.5 rounded bg-[var(--danger)]/20 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] text-white border border-[var(--danger)]/30 w-fit backdrop-blur-md">
                         {featuredBlog.category}
                       </span>
-                      <h3 className="text-4xl font-bold leading-[1.1] text-white group-hover:text-[var(--gold)] transition-colors mb-4 line-clamp-3">
+                      <h3 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-[1.1] md:leading-[1.2] text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-[var(--gold)] group-hover:to-yellow-200 transition-all duration-300 mb-3 md:mb-4 line-clamp-3 drop-shadow-md">
                         {featuredBlog.title}
                       </h3>
-                      <p className="text-white opacity-75 text-base line-clamp-3 leading-[1.7]">
+                      <p className="text-white/80 text-sm md:text-base line-clamp-2 md:line-clamp-3 leading-[1.6] md:leading-[1.7]">
                         {featuredBlog.excerpt}
                       </p>
                     </div>
@@ -292,27 +294,30 @@ export default async function Home() {
 
       {/* ─── TRENDING ─── */}
       {hasTrending && (
-        <section className="py-28 border-b border-[var(--border)] bg-[var(--surface)]/20">
-          <div className="container mx-auto max-w-7xl px-8">
-            <div className="flex items-center justify-between mb-12 border-b border-[var(--border)] pb-6">
+        <section className="py-16 md:py-28 border-b border-[var(--border)] bg-[var(--surface)]/20 relative">
+          {/* Subtle gradient accent */}
+          <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-[var(--surface)]/50 to-transparent pointer-events-none" />
+
+          <div className="container mx-auto max-w-7xl px-6 md:px-8 relative z-10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 border-b border-[var(--border)] pb-6 gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center">
-                  <Flame className="w-6 h-6 text-[var(--cyan)]" />
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center shrink-0">
+                  <Flame className="w-5 h-5 md:w-6 md:h-6 text-[var(--cyan)] drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white tracking-tight">Most Read This Week</h2>
-                  <p className="text-[var(--muted)] text-sm mt-1 uppercase tracking-[0.14em] font-semibold">Priority Intelligence</p>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Most Read This Week</h2>
+                  <p className="text-[var(--muted)] text-[10px] md:text-sm mt-1 uppercase tracking-[0.14em] font-semibold">Priority Intelligence</p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch">
               <div className="lg:col-span-8 h-full">
                 {trendingBlogs[0] && (
                   <BlogCard blog={trendingBlogs[0]} variant="featured" isViral={trendingBlogs[0]._id === mostViewedBlogId} />
                 )}
               </div>
-              <div className="lg:col-span-4 flex flex-col gap-6 h-full">
+              <div className="lg:col-span-4 flex flex-col gap-4 md:gap-6 h-full">
                 {sideTrending.map((blog) => (
                   <div key={blog._id} className="flex-1 min-h-[120px]">
                     <BlogCard blog={blog} variant="compact" isViral={blog._id === mostViewedBlogId} />
@@ -326,26 +331,26 @@ export default async function Home() {
 
       {/* ─── LATEST ─── */}
       {latestBlogs.length > 0 && (
-        <section className="py-28 border-b border-[var(--border)] bg-[var(--bg)]">
-          <div className="container mx-auto max-w-7xl px-8">
-            <div className="flex items-center justify-between mb-12 border-b border-[var(--border)] pb-6">
+        <section className="py-16 md:py-28 border-b border-[var(--border)] bg-[var(--bg)]">
+          <div className="container mx-auto max-w-7xl px-6 md:px-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 border-b border-[var(--border)] pb-6 gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-[var(--cyan)]" />
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center shrink-0">
+                  <Clock className="w-5 h-5 md:w-6 md:h-6 text-[var(--cyan)] drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
                 </div>
                 <div>
-                  <h2 className="text-3xl font-bold text-white tracking-tight">Latest Reports</h2>
-                  <p className="text-[var(--muted)] text-sm mt-1 uppercase tracking-[0.14em] font-semibold">Real-Time Briefs</p>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Latest Reports</h2>
+                  <p className="text-[var(--muted)] text-[10px] md:text-sm mt-1 uppercase tracking-[0.14em] font-semibold">Real-Time Briefs</p>
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-stretch mb-6 md:mb-8">
               <div className="lg:col-span-8 h-full">
                 {latestBlogs[0] && (
                   <BlogCard blog={latestBlogs[0]} variant="featured" isViral={latestBlogs[0]._id === mostViewedBlogId} />
                 )}
               </div>
-              <div className="lg:col-span-4 flex flex-col gap-6 h-full">
+              <div className="lg:col-span-4 flex flex-col gap-4 md:gap-6 h-full">
                 {latestBlogs.slice(1, 4).map((blog) => (
                   <div key={blog._id} className="flex-1 min-h-[120px]">
                     <BlogCard blog={blog} variant="compact" isViral={blog._id === mostViewedBlogId} />
@@ -354,7 +359,7 @@ export default async function Home() {
               </div>
             </div>
             {latestBlogs.length > 4 && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 items-stretch">
                 {latestBlogs.slice(4).map((blog) => (
                   <div key={blog._id} className="h-full">
                     <BlogCard blog={blog} variant="default" isViral={blog._id === mostViewedBlogId} />
@@ -367,31 +372,33 @@ export default async function Home() {
       )}
 
       {/* ─── WHY GLOBAL CHANAKYA ─── */}
-      <section className="py-28 border-b border-[var(--border)] bg-[var(--surface)]/20">
-        <div className="container mx-auto max-w-7xl px-8">
-          <div className="text-center mb-20">
-            <span className="inline-block px-4 py-2 rounded intel-border bg-[var(--surface)] text-[var(--cyan)] text-[11px] font-bold uppercase tracking-[0.14em] mb-6 shadow-sm">
+      <section className="py-16 md:py-28 border-b border-[var(--border)] bg-[var(--surface)]/20 relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[var(--surface)]/30 blur-[150px] rounded-full pointer-events-none" />
+        
+        <div className="container mx-auto max-w-7xl px-6 md:px-8 relative z-10">
+          <div className="text-center mb-12 md:mb-20">
+            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--gold)]/30 bg-[var(--gold)]/5 text-[var(--gold)] text-[10px] md:text-[11px] font-bold uppercase tracking-[0.14em] mb-6 shadow-[0_0_15px_rgba(212,175,55,0.1)]">
               Why Global Chanakya
             </span>
-            <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6 tracking-tight">
-              Intelligence You Can Act On
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white mb-4 md:mb-6 tracking-tight">
+              Intelligence You Can <span className="bg-gradient-to-r from-[var(--cyan)] to-blue-400 text-transparent bg-clip-text">Act On</span>
             </h2>
-            <p className="text-white opacity-75 text-xl leading-[1.8] max-w-2xl mx-auto font-medium">
+            <p className="text-white/80 text-lg md:text-xl leading-[1.6] md:leading-[1.8] max-w-2xl mx-auto font-medium">
               Built for analysts, policy enthusiasts, and decision-makers who need clarity on a complex world.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
             {pillars.map((p) => (
               <div
                 key={p.title}
-                className="p-8 rounded-2xl glass-card hover:border-[var(--border)] hover:-translate-y-[8px] transition-all duration-300 group border border-[var(--border)]"
+                className="p-6 md:p-8 rounded-2xl glass-card hover:border-[var(--gold)]/30 hover:-translate-y-2 hover:shadow-[0_15px_30px_-10px_rgba(212,175,55,0.15)] transition-all duration-300 group border border-[var(--border)]"
               >
-                <div className={`w-14 h-14 rounded-xl bg-[var(--bg)] flex items-center justify-center mb-8 border border-[var(--border)] transition-colors group-hover:border-[var(--cyan)]/50`}>
-                  <p.icon className="w-6 h-6 text-white" />
+                <div className={`w-12 h-12 md:w-14 md:h-14 rounded-xl bg-[var(--bg)] flex items-center justify-center mb-6 md:mb-8 border border-[var(--border)] transition-all duration-300 group-hover:border-[var(--gold)]/50 group-hover:scale-110 shadow-sm`}>
+                  <p.icon className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:text-[var(--gold)] transition-colors" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-4 tracking-tight">{p.title}</h3>
-                <p className="text-base text-white opacity-75 leading-[1.7]">{p.desc}</p>
+                <h3 className="text-lg md:text-xl font-bold text-white mb-3 md:mb-4 tracking-tight group-hover:text-[var(--gold)] transition-colors">{p.title}</h3>
+                <p className="text-sm md:text-base text-white/75 leading-[1.6] md:leading-[1.7]">{p.desc}</p>
               </div>
             ))}
           </div>
@@ -399,18 +406,18 @@ export default async function Home() {
       </section>
 
       {/* ─── CATEGORIES ─── */}
-      <section className="py-28 border-b border-[var(--border)] bg-[var(--bg)]">
-        <div className="container mx-auto max-w-7xl px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-6 tracking-tight">Browse by Theatre</h2>
-            <p className="text-[var(--muted)] text-sm font-bold uppercase tracking-[0.14em]">Explore reports by strategic region and topic</p>
+      <section className="py-16 md:py-28 border-b border-[var(--border)] bg-[var(--bg)]">
+        <div className="container mx-auto max-w-7xl px-6 md:px-8">
+          <div className="text-center mb-10 md:mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 md:mb-6 tracking-tight">Browse by Theatre</h2>
+            <p className="text-[var(--muted)] text-[10px] md:text-sm font-bold uppercase tracking-[0.14em]">Explore reports by strategic region and topic</p>
           </div>
-          <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
             {theatres.map((cat) => (
               <Link
                 key={cat}
                 href={`/blogs?category=${encodeURIComponent(cat)}`}
-                className="px-6 py-4 rounded-xl intel-border bg-[var(--surface)] text-sm font-bold uppercase tracking-[0.06em] text-white hover:bg-white hover:text-[var(--bg)] transition-all duration-300"
+                className="px-5 py-3 md:px-6 md:py-4 rounded-xl intel-border bg-[var(--surface)] text-xs md:text-sm font-bold uppercase tracking-[0.06em] text-white hover:bg-white hover:text-[var(--bg)] hover:scale-[1.05] hover:shadow-[0_10px_20px_-10px_rgba(255,255,255,0.3)] transition-all duration-300 active:scale-[0.98]"
               >
                 {cat}
               </Link>
