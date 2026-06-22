@@ -35,61 +35,60 @@ export default async function BlogsPage({
   }
 
   const categories = [
-    "Geopolitics", "Defence", "Economy", "Diplomacy",
-    "Indo-Pacific", "South Asia", "Europe", "Middle East",
-    "China", "Russia", "USA", "Analysis",
+    "Geopolitics", "Indo-Pacific", "South Asia", "Middle East",
+    "Defence", "China", "Russia", "Economy & Trade",
   ];
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-6 bg-[#060606]">
+    <div className="min-h-screen pt-32 pb-20 px-6 bg-[var(--bg)] text-[var(--text)]">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 gap-6">
           <div>
             <div className="flex items-center gap-2 mb-3">
               {trending ? (
-                <span className="flex items-center gap-1.5 px-3 py-1 bg-red-500/10 text-red-400 text-[11px] font-semibold uppercase tracking-[0.08em] rounded-md border border-red-500/20">
+                <span className="flex items-center gap-1.5 px-3 py-1.5 bg-[var(--cyan)]/10 text-[var(--cyan)] text-[10px] font-bold uppercase tracking-[0.14em] rounded border border-[var(--cyan)]/20 shadow-[0_0_10px_rgba(6,182,212,0.1)]">
                   <TrendingUp className="w-3.5 h-3.5" /> Trending Intel
                 </span>
               ) : category ? (
-                <span className="px-3 py-1 bg-white/[0.04] text-neutral-400 text-[11px] font-semibold uppercase tracking-[0.08em] rounded-md border border-white/[0.08]">
+                <span className="px-3 py-1.5 bg-[var(--surface)] text-[var(--cyan)] text-[10px] font-bold uppercase tracking-[0.14em] rounded border border-[var(--border)]">
                   {category}
                 </span>
               ) : null}
             </div>
             
-            <h1 className="text-4xl md:text-[44px] font-bold mb-3 text-white leading-tight tracking-[-0.02em]">
-              {trending ? "Most Read Reports" : category ? `${category} Intelligence` : "Latest Reports"}
+            <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-white leading-tight tracking-tight drop-shadow-md">
+              {trending ? "Most Read Reports" : category ? `${category} Intelligence` : "Strategic Reports"}
             </h1>
-            <p className="text-[15px] text-neutral-400">
+            <p className="text-base md:text-lg text-white/80 font-medium">
               Unvarnished analysis and strategic foresight.{" "}
               {blogs.length > 0 && (
-                <span className="text-neutral-500">
-                  {blogs.length} article{blogs.length !== 1 ? "s" : ""} available
+                <span className="text-[var(--gold)] ml-2">
+                  • {blogs.length} article{blogs.length !== 1 ? "s" : ""}
                 </span>
               )}
             </p>
           </div>
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--muted)]" />
               <input
                 type="text"
                 placeholder="Search intelligence..."
-                className="w-full bg-white/[0.02] border border-white/[0.08] rounded-lg pl-10 pr-4 py-2.5 text-[14px] text-white focus:border-red-500/50 focus:bg-white/[0.04] outline-none transition-all placeholder:text-neutral-600"
+                className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl pl-10 pr-4 py-2.5 text-sm text-white focus:border-[var(--cyan)]/50 focus:bg-[var(--surface)]/80 outline-none transition-all placeholder:text-[var(--muted)]"
               />
             </div>
           </div>
         </div>
 
         {/* Category filters */}
-        <div className="flex flex-wrap gap-2 mb-12">
+        <div className="flex flex-wrap gap-2 md:gap-3 mb-12">
           <Link
             href="/blogs"
-            className={`px-4 py-1.5 rounded-lg border text-[13px] font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl border text-[13px] font-bold uppercase tracking-[0.06em] transition-all duration-300 ${
               !category && !trending
-                ? "border-red-500/30 bg-red-500/10 text-red-400"
-                : "border-white/[0.08] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04]"
+                ? "border-[var(--gold)]/50 bg-[var(--gold)]/10 text-[var(--gold)] shadow-[0_0_15px_rgba(212,175,55,0.15)]"
+                : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:text-white hover:bg-[var(--elevated)] hover:border-[var(--border)]/80"
             }`}
           >
             All Reports
@@ -98,10 +97,10 @@ export default async function BlogsPage({
             <Link
               key={cat}
               href={`/blogs?category=${encodeURIComponent(cat)}`}
-              className={`px-4 py-1.5 rounded-lg border text-[13px] font-medium transition-colors ${
+              className={`px-4 py-2 rounded-xl border text-[13px] font-bold uppercase tracking-[0.06em] transition-all duration-300 ${
                 category === cat
-                  ? "border-red-500/30 bg-red-500/10 text-red-400"
-                  : "border-white/[0.08] bg-white/[0.02] text-neutral-400 hover:text-white hover:bg-white/[0.04]"
+                  ? "border-[var(--cyan)]/50 bg-[var(--cyan)]/10 text-[var(--cyan)] shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                  : "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:text-white hover:bg-[var(--elevated)] hover:border-[var(--border)]/80"
               }`}
             >
               {cat}
@@ -112,30 +111,30 @@ export default async function BlogsPage({
         {/* Blog Grid */}
         {blogs.length === 0 ? (
           // Empty state
-          <div className="flex flex-col items-center justify-center py-32 text-center rounded-2xl border border-white/[0.05] bg-white/[0.01]">
-            <div className="w-16 h-16 rounded-2xl bg-white/[0.03] border border-white/[0.08] flex items-center justify-center mb-6">
-              <Newspaper className="w-8 h-8 text-neutral-600" />
+          <div className="flex flex-col items-center justify-center py-32 text-center rounded-2xl glass-card border border-[var(--border)] bg-[var(--surface)]/10">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center mb-6 shadow-sm">
+              <Newspaper className="w-8 h-8 text-[var(--cyan)]" />
             </div>
-            <h2 className="text-xl font-bold text-white mb-2">
+            <h2 className="text-2xl font-bold text-white mb-3">
               {category ? `No ${category} reports yet` : "No reports published yet"}
             </h2>
-            <p className="text-[14px] text-neutral-500 max-w-md mb-8">
+            <p className="text-base text-white/70 max-w-md mb-8 leading-[1.6]">
               {category
                 ? `Be the first to read when our analysts publish in the ${category} theatre.`
                 : "Our editorial team is working on the first batch of reports. Check back soon for strategic intelligence briefs."}
             </p>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-4">
               {category && (
                 <Link
                   href="/blogs"
-                  className="px-5 py-2.5 rounded-lg border border-white/[0.1] text-neutral-300 hover:text-white hover:bg-white/[0.04] transition-colors text-[13px] font-medium"
+                  className="px-6 py-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] text-[var(--muted)] hover:text-white hover:bg-[var(--elevated)] transition-all text-sm font-bold uppercase tracking-[0.06em]"
                 >
                   View all reports
                 </Link>
               )}
               <Link
                 href="/auth/signup"
-                className="px-5 py-2.5 rounded-lg bg-white text-[#060606] hover:bg-neutral-200 transition-colors text-[13px] font-semibold flex items-center gap-1.5"
+                className="px-6 py-3 rounded-xl bg-[var(--gold)] text-[var(--bg)] hover:opacity-90 hover:scale-[1.02] active:scale-[0.98] transition-all text-sm font-extrabold uppercase tracking-[0.06em] flex items-center gap-2 shadow-[0_0_20px_rgba(212,175,55,0.3)]"
               >
                 Join Platform <ArrowRight className="w-4 h-4" />
               </Link>
@@ -144,55 +143,54 @@ export default async function BlogsPage({
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {blogs.map((blog) => (
-              <Link key={blog._id.toString()} href={`/blogs/${blog.slug}`} className="flex flex-col group p-3 rounded-2xl border border-white/[0.04] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.02] transition-all">
-                <div className="relative aspect-[16/10] bg-neutral-900 rounded-xl mb-4 overflow-hidden">
+              <Link key={blog._id.toString()} href={`/blogs/${blog.slug}`} className="group flex flex-col h-full glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:border-[var(--gold)]/40 hover:shadow-xl hover:shadow-[var(--gold)]/10 bg-[var(--surface)]/20">
+                <div className="relative aspect-[16/9] bg-[var(--surface)] overflow-hidden border-b border-[var(--border)]">
                   {blog.featuredImage ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={blog.featuredImage}
                       alt={blog.title}
-                      className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-700"
+                      className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-neutral-800 to-[#060606] group-hover:scale-[1.03] transition-transform duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-[var(--surface)] to-[var(--bg)] group-hover:scale-105 transition-transform duration-500" />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#060606]/80 to-transparent" />
 
-                  <div className="absolute top-3 left-3">
-                    <span className="px-2.5 py-1 bg-black/60 backdrop-blur-sm rounded-md text-[10px] font-semibold tracking-wider uppercase text-neutral-300 border border-white/10">
+                  <div className="absolute top-3 left-3 md:top-4 md:left-4 z-10">
+                    <span className="inline-block px-2.5 py-1 rounded bg-[var(--surface)]/90 backdrop-blur-md text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] border border-[var(--border)]">
                       {blog.category}
                     </span>
                   </div>
                   {blog.visibility === "private" && (
-                    <div className="absolute top-3 right-3 px-2 py-1 bg-zinc-800/90 backdrop-blur-sm rounded-md text-[10px] font-bold uppercase text-white border border-zinc-700 flex items-center gap-1">
-                      Private
+                    <div className="absolute top-3 right-3 md:top-4 md:right-4 z-10 px-3 py-1.5 bg-[var(--danger)]/90 backdrop-blur-md rounded text-[9px] md:text-[10px] font-bold uppercase tracking-[0.14em] text-white flex items-center gap-1.5 shadow-[0_0_10px_var(--danger)]">
+                      <Crown className="w-3.5 h-3.5" /> Clearance: High
                     </div>
                   )}
                 </div>
 
-                <div className="px-1 flex flex-col flex-1">
-                  <h3 className="text-[17px] font-semibold text-white mb-2 leading-snug line-clamp-2 group-hover:text-neutral-300 transition-colors">
+                <div className="flex flex-col flex-1 p-5 md:p-6 lg:p-7">
+                  <h3 className="font-bold text-white text-lg md:text-xl leading-[1.3] mb-3 group-hover:text-[var(--gold)] transition-colors line-clamp-2">
                     {blog.title}
                   </h3>
-                  <p className="text-neutral-500 text-[13px] leading-relaxed line-clamp-2 mb-4 flex-1">
+                  <p className="text-xs md:text-sm text-white/75 leading-[1.6] line-clamp-3 flex-1 mb-5 md:mb-6">
                     {blog.excerpt}
                   </p>
 
-                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/[0.05]">
+                  <div className="mt-auto pt-4 md:pt-5 border-t border-[var(--border)]/50 flex items-center justify-between text-[9px] md:text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
                     <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 text-[10px] font-bold">
+                      <div className="w-6 h-6 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--cyan)]">
                         {(blog.author?.name || "G")[0]}
                       </div>
-                      <span className="text-[12px] text-neutral-400 font-medium">
+                      <span className="text-white/80">
                         {blog.author?.name?.split(" ")[0] || "Global Chanakya"}
                       </span>
                     </div>
-                    <div className="flex items-center gap-3 text-[11px] text-neutral-600">
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-3 h-3" />
+                    <div className="flex items-center gap-4">
+                      <span className="flex items-center gap-1.5 text-white/60">
+                        <Eye className="w-3.5 h-3.5" />
                         {(blog.analytics?.views || 0).toLocaleString()}
                       </span>
-                      <span>
+                      <span className="text-white/60">
                         {formatDate(blog.publishAt, "short")}
                       </span>
                     </div>

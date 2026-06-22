@@ -20,18 +20,13 @@ export const USER_ROLES = {
 // Blog categories
 export const BLOG_CATEGORIES = [
   "Geopolitics",
-  "Strategic Affairs",
   "Indo-Pacific",
   "South Asia",
   "Middle East",
-  "Europe",
-  "Americas",
+  "Defence",
   "China",
   "Russia",
-  "Technology & Security",
-  "Defence",
   "Economy & Trade",
-  "Intelligence Brief",
 ] as const;
 
 // Blog visibility
