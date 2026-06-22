@@ -186,6 +186,13 @@ export default async function Home() {
     BlogService.getMostViewedBlog(),
   ]);
 
+  const categoryBlogsMap = await Promise.all(
+    theatres.map(async (category) => {
+      const blogs = await BlogService.getBlogsByCategory(category, 4);
+      return { category, blogs };
+    })
+  );
+
   const mostViewedBlogId = mostViewedBlogGlobal?._id;
   const featuredBlog = mostViewedBlogGlobal || latestBlogs[0] || trendingBlogs[0];
 
@@ -370,6 +377,43 @@ export default async function Home() {
           </div>
         </section>
       )}
+
+      {/* ─── CATEGORY SECTIONS ─── */}
+      {categoryBlogsMap.map(({ category, blogs }) => {
+        if (!blogs || blogs.length === 0) return null;
+        
+        return (
+          <section key={category} className="py-16 md:py-24 border-b border-[var(--border)] bg-[var(--surface)]/10">
+            <div className="container mx-auto max-w-7xl px-6 md:px-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 border-b border-[var(--border)] pb-6 gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center shrink-0">
+                    <Newspaper className="w-5 h-5 md:w-6 md:h-6 text-[var(--cyan)] drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">{category}</h2>
+                    <p className="text-[var(--muted)] text-[10px] md:text-sm mt-1 uppercase tracking-[0.14em] font-semibold">Latest in {category}</p>
+                  </div>
+                </div>
+                <Link
+                  href={`/blogs?category=${encodeURIComponent(category)}`}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-xs font-bold uppercase tracking-[0.06em] text-white hover:bg-[var(--elevated)] hover:border-[var(--cyan)]/50 transition-all duration-300"
+                >
+                  View All <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 items-stretch">
+                {blogs.map((blog) => (
+                  <div key={blog._id} className="h-full">
+                    <BlogCard blog={blog} variant="default" isViral={blog._id === mostViewedBlogId} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })}
 
       {/* ─── WHY GLOBAL CHANAKYA ─── */}
       <section className="py-16 md:py-28 border-b border-[var(--border)] bg-[var(--surface)]/20 relative">

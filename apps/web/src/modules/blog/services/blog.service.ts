@@ -35,6 +35,16 @@ export class BlogService {
     return data;
   }
 
+  static async getBlogsByCategory(category: string, limit: number = 4) {
+    const cacheKey = `blogs:category:${category}:${limit}`;
+    const cached = await memoryCache.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    const data = await BlogRepository.getBlogsByCategory(category, limit);
+    await memoryCache.set(cacheKey, data, 300);
+    return data;
+  }
+
   static async getMostViewedBlog() {
     const cacheKey = `blogs:mostViewed`;
     const cached = await memoryCache.get<any>(cacheKey);
