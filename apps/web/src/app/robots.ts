@@ -6,8 +6,32 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: ['/', '/country/', '/leader/', '/conflict/', '/topic/', '/blogs/'],
-      disallow: ['/admin/', '/api/', '/dashboard/', '/auth/', '/settings/'],
+      allow: [
+        '/',
+        '/country/',
+        '/leader/',
+        '/conflict/',
+        '/conflicts/',
+        '/topic/',
+        '/blogs/',
+        '/categories/',
+        '/regions/',
+        '/platformseo/',
+        '/about/',
+        '/careers/',
+        '/contact/',
+        '/privacy/',
+        '/terms/',
+        '/subscribe/'
+      ],
+      disallow: [
+        '/admin/',
+        '/api/',
+        '/dashboard/',
+        '/auth/',
+        '/settings/',
+        '/gc-control-9x7k/'
+      ],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
