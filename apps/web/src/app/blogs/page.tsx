@@ -9,6 +9,9 @@ export const metadata = {
   description: "Read the latest geopolitical reports and intelligence briefs.",
 };
 
+// Next.js App Router ISR
+export const revalidate = 3600; // 1 hour
+
 export default async function BlogsPage({
   searchParams,
 }: {

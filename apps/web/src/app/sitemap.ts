@@ -7,19 +7,33 @@ import { getPlatformSeoSitemaps } from '@/modules/seo/sitemap-platformseo';
 
 export const revalidate = 3600; // Update sitemap every hour for new blogs
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  try {
-    const [staticMaps, entities, blogs, topics, platformSeo] = await Promise.all([
-      getStaticSitemaps(),
-      getEntitySitemaps(),
-      getBlogSitemaps(),
-      getTopicSitemaps(),
-      getPlatformSeoSitemaps(),
-    ]);
+export async function generateSitemaps() {
+  return [
+    { id: 0 }, // static, topics, platformseo
+    { id: 1 }, // entities
+    { id: 2 }, // blogs
+  ];
+}
 
-    return [...staticMaps, ...entities, ...blogs, ...topics, ...platformSeo];
+export default async function sitemap({ id }: { id: number }): Promise<MetadataRoute.Sitemap> {
+  try {
+    switch (id) {
+      case 0:
+        const [staticMaps, topics, platformSeo] = await Promise.all([
+          getStaticSitemaps(),
+          getTopicSitemaps(),
+          getPlatformSeoSitemaps(),
+        ]);
+        return [...staticMaps, ...topics, ...platformSeo];
+      case 1:
+        return await getEntitySitemaps();
+      case 2:
+        return await getBlogSitemaps();
+      default:
+        return [];
+    }
   } catch (e) {
     // Return base sitemap if DB fails during build
-    return getStaticSitemaps();
+    return id === 0 ? getStaticSitemaps() : [];
   }
 }

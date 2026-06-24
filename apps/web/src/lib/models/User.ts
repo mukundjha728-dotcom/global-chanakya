@@ -29,6 +29,15 @@ export interface IUser extends Document {
   emailVerified?: Date;
   failedLoginAttempts: number;
   lockedUntil?: Date;
+  authorSlug?: string;
+  bio?: string;
+  expertise?: string[];
+  socialLinks?: {
+    twitter?: string;
+    linkedin?: string;
+    website?: string;
+  };
+  credentials?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -73,6 +82,15 @@ const UserSchema = new Schema<IUser>(
     emailVerified: { type: Date },
     failedLoginAttempts: { type: Number, default: 0 },
     lockedUntil: { type: Date },
+    authorSlug: { type: String, unique: true, sparse: true },
+    bio: { type: String },
+    expertise: [{ type: String }],
+    socialLinks: {
+      twitter: { type: String },
+      linkedin: { type: String },
+      website: { type: String },
+    },
+    credentials: [{ type: String }],
   },
   { timestamps: true }
 );

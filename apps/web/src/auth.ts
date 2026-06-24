@@ -6,6 +6,7 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import dbConnect from "./lib/mongoose";
 import { User } from "./lib/models/User";
+import { AuditLog } from "./lib/models/AuditLog";
 import * as argon2 from "argon2";
 import { authConfig } from "./auth.config";
 
@@ -19,12 +20,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
     }),
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
-      allowDangerousEmailAccountLinking: true,
     }),
     CredentialsProvider({
       name: "Credentials",
@@ -93,5 +92,37 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
+  },
+  events: {
+    async signIn({ user, account }) {
+      try {
+        await dbConnect();
+        await AuditLog.create({
+          actorId: user.id || "SYSTEM",
+          action: "USER_SIGN_IN",
+          targetType: "User",
+          targetId: user.id,
+          metadata: { provider: account?.provider }
+        });
+      } catch (e) {
+        console.error("Audit log error:", e);
+      }
+    },
+    async signOut({ session }) {
+      if (!session?.user) return;
+      try {
+        await dbConnect();
+        // Extract ID depending on next-auth session structure
+        const userId = (session.user as any).id || "SYSTEM";
+        await AuditLog.create({
+          actorId: userId,
+          action: "USER_SIGN_OUT",
+          targetType: "User",
+          targetId: userId,
+        });
+      } catch (e) {
+        console.error("Audit log error:", e);
+      }
+    }
   }
 });

@@ -23,6 +23,10 @@ export interface ICountry extends Document {
     type: string;
     weight: number;
   }[];
+  relatedConflicts?: mongoose.Types.ObjectId[];
+  relatedLeaders?: mongoose.Types.ObjectId[];
+  relatedAlliances?: mongoose.Types.ObjectId[];
+  timelineReferences?: mongoose.Types.ObjectId[];
 }
 
 const RelationSchema = new Schema({
@@ -50,6 +54,10 @@ const CountrySchema = new Schema<ICountry>({
     description: { type: String },
   },
   relations: [RelationSchema],
+  relatedConflicts: [{ type: Schema.Types.ObjectId, ref: "Conflict" }],
+  relatedLeaders: [{ type: Schema.Types.ObjectId, ref: "Leader" }],
+  relatedAlliances: [{ type: Schema.Types.ObjectId, ref: "Alliance" }],
+  timelineReferences: [{ type: Schema.Types.ObjectId, ref: "Timeline" }],
 }, { timestamps: true });
 
 export const Country = mongoose.models.Country || mongoose.model<ICountry>("Country", CountrySchema);

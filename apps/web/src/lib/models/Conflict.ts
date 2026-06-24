@@ -21,6 +21,10 @@ export interface IConflict extends Document {
     type: string;
     weight: number;
   }[];
+  involvedCountries?: mongoose.Types.ObjectId[];
+  relatedLeaders?: mongoose.Types.ObjectId[];
+  timelineReferences?: mongoose.Types.ObjectId[];
+  strategicTags?: string[];
 }
 
 const RelationSchema = new Schema({
@@ -46,6 +50,10 @@ const ConflictSchema = new Schema<IConflict>({
   economicImpact: { type: String },
   tags: [{ type: String }],
   relations: [RelationSchema],
+  involvedCountries: [{ type: Schema.Types.ObjectId, ref: "Country" }],
+  relatedLeaders: [{ type: Schema.Types.ObjectId, ref: "Leader" }],
+  timelineReferences: [{ type: Schema.Types.ObjectId, ref: "Timeline" }],
+  strategicTags: [{ type: String }],
 }, { timestamps: true });
 
 export const Conflict = mongoose.models.Conflict || mongoose.model<IConflict>("Conflict", ConflictSchema);

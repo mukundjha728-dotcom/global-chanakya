@@ -40,6 +40,17 @@ export interface IBlog extends Document {
   commentsEnabled: boolean;
   isTrending: boolean;
   readingTime?: number; // auto-calculated
+  keyInsights?: string[];
+  faq?: { question: string; answer: string }[];
+  semanticBlocks?: { type: string; content: string }[];
+  aiSummary?: string;
+  citations?: { type: "Primary" | "Secondary" | "Government" | "Think Tank"; source: string; url?: string }[];
+  reviewedAt?: Date;
+  entityRelations?: {
+    targetId: mongoose.Types.ObjectId;
+    targetModel: "Country" | "Leader" | "Conflict" | "Alliance";
+    type: string;
+  }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -96,6 +107,27 @@ const BlogSchema = new Schema<IBlog>(
     commentsEnabled: { type: Boolean, default: true },
     isTrending: { type: Boolean, default: false },
     readingTime: { type: Number },
+    keyInsights: [{ type: String }],
+    faq: [{
+      question: { type: String },
+      answer: { type: String }
+    }],
+    semanticBlocks: [{
+      type: { type: String },
+      content: { type: String }
+    }],
+    aiSummary: { type: String },
+    citations: [{
+      type: { type: String, enum: ["Primary", "Secondary", "Government", "Think Tank"] },
+      source: { type: String },
+      url: { type: String }
+    }],
+    reviewedAt: { type: Date },
+    entityRelations: [{
+      targetId: { type: Schema.Types.ObjectId, required: true, refPath: "entityRelations.targetModel" },
+      targetModel: { type: String, required: true, enum: ["Country", "Leader", "Conflict", "Alliance"] },
+      type: { type: String, required: true }
+    }]
   },
   { timestamps: true }
 );
