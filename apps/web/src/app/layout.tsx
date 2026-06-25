@@ -7,6 +7,7 @@ import Footer from "@/components/layout/Footer";
 import Script from "next/script";
 import { ConditionalShell } from "@/components/layout/ConditionalShell";
 import { Providers } from "@/components/layout/Providers";
+import { CSPostHogProvider } from "@/components/providers/PostHogProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -82,7 +83,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: "G9xLRykmNyLPv9oK0P0fg5A8cyNMl0jB10RuomUHn0w",
+    google: "VrGd2s0LCdRNrUkVXP2WS7oMOvKxAUD2qZE1Nsepl3A",
   },
   category: "news",
 };
@@ -138,13 +139,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className={`${inter.variable} ${lora.variable} font-sans antialiased leading-[1.8]`}>
         <DisableInspect />
-        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+        <CSPostHogProvider>
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
             <Providers>
               <ConditionalShell navbar={<Navbar />} footer={<Footer />}>
                 {children}
               </ConditionalShell>
             </Providers>
           </ThemeProvider>
+        </CSPostHogProvider>
       </body>
     </html>
   );
