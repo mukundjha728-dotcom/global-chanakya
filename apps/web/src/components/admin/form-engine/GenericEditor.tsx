@@ -515,7 +515,16 @@ export default function GenericEditor({
 
         {/* SEO Score */}
         <div className="p-4 border-t border-[var(--border)] mt-auto">
-          <SEOScoringWidget formData={formData} />
+          <SEOScoringWidget 
+            formData={formData} 
+            onOptimized={(optimized) => {
+              setFormData((prev: any) => ({
+                ...prev,
+                ...optimized,
+                seo: { ...(prev.seo || {}), ...(optimized.seo || {}) }
+              }));
+            }}
+          />
         </div>
 
         {/* Analytics */}

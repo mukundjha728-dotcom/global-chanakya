@@ -17,6 +17,7 @@ export const createBlogSchema = z.object({
     description: z.string().optional(),
     keywords: z.array(z.string()).optional(),
   }).optional(),
+  aiSummary: z.string().optional(),
 });
 
 export const updateBlogSchema = createBlogSchema.partial().extend({
