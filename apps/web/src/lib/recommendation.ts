@@ -22,7 +22,7 @@ export async function getRelatedArticles(
             // +3 for each matching entity relation
             {
               $multiply: [
-                { $size: { $setIntersection: ["$entityRelations.targetId", sourceBlog.entityRelations?.map(e => e.targetId) || []] } },
+                { $size: { $setIntersection: ["$entityRelations.targetId", sourceBlog.entityRelations?.map((e: any) => e.targetId) || []] } },
                 3
               ]
             },
@@ -46,6 +46,6 @@ export async function getRelatedArticles(
     { $limit: limit }
   ];
 
-  const related = await Blog.aggregate(pipeline);
+  const related = await Blog.aggregate(pipeline as any[]);
   return related as IBlog[];
 }

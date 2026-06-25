@@ -15,7 +15,7 @@ interface CountryHubProps {
 export function CountryHub({ country, leaderNodes = [], conflictNodes = [], edges = [] }: CountryHubProps) {
   // Combine nodes for graph
   const nodes: GraphNode[] = [
-    { id: country._id as string, type: "Country", name: country.name, slug: country.slug, imageUrl: country.flagUrl },
+    { id: country._id.toString(), type: "Country", name: country.name, slug: country.slug, imageUrl: country.flagUrl },
     ...leaderNodes,
     ...conflictNodes,
   ];

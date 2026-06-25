@@ -2,7 +2,7 @@
  * /api/knowledge/entity/[slug]/route.ts
  * Internal API returning semantic graph data for an entity.
  */
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 import dbConnect from "@/lib/mongoose";
 import { Country } from "@/lib/models/Country";
 import { Leader } from "@/lib/models/Leader";
@@ -10,12 +10,12 @@ import { Conflict } from "@/lib/models/Conflict";
 import { Blog } from "@/lib/models/Blog";
 
 export async function GET(
-  request: Request,
-  { params }: { params: { slug: string } }
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     await dbConnect();
-    const { slug } = params;
+    const { slug } = await params;
 
     // Fast parallel lookup across entities
     const [country, leader, conflict] = await Promise.all([

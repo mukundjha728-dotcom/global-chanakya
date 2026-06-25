@@ -20,7 +20,9 @@ interface NavbarClientProps {
 
 const navLinks = [
   { label: "Reports", href: "/blogs" },
-  { label: "Categories", href: "/categories" },
+  { label: "Conflicts", href: "/conflicts" },
+  { label: "Regions", href: "/regions" },
+  { label: "China Watch", href: "/china-watch" },
   { label: "About", href: "/about" },
 ];
 

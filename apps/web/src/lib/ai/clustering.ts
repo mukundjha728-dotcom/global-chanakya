@@ -32,13 +32,13 @@ export async function generateClusters(): Promise<TopicCluster[]> {
     { $limit: 10 }
   ];
 
-  const results = await Blog.aggregate(pipeline);
+  const results = await Blog.aggregate(pipeline as any[]);
 
   return results.map(r => ({
     id: r._id,
     name: r._id,
     articleCount: r.articleCount,
     latestArticles: r.articles.sort((a: any, b: any) => b.publishAt - a.publishAt).slice(0, 5),
-    topEntities: [...new Set(r.entities.flat())].slice(0, 5) // Extract unique entity IDs
+    topEntities: ([...new Set(r.entities.flat())] as any[]).map(e => String(e)).slice(0, 5) // Extract unique entity IDs
   }));
 }

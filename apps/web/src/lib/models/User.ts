@@ -5,7 +5,7 @@ export interface IUser extends Document {
   email: string;
   passwordHash?: string;
   avatar?: string;
-  role: "guest" | "free" | "premium" | "admin";
+  role: "guest" | "free" | "premium" | "admin" | "super_admin" | "editor" | "analyst" | "researcher" | "writer";
   provider: "credentials" | "google" | "github";
   preferences: {
     notifications: {
@@ -50,7 +50,7 @@ const UserSchema = new Schema<IUser>(
     avatar: { type: String },
     role: {
       type: String,
-      enum: ["guest", "free", "premium", "admin"],
+      enum: ["guest", "free", "premium", "admin", "super_admin", "editor", "analyst", "researcher", "writer"],
       default: "free",
     },
     provider: {

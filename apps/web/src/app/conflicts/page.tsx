@@ -1,13 +1,25 @@
 import Link from "next/link";
 import { Filter, Search, Calendar, ArrowRight } from "lucide-react";
-import { CONFLICTS_DATA, TIMELINE_EVENTS } from "@/constants/conflicts";
+import { ConflictService } from "@/modules/conflict/services/conflict.service";
+import { TimelineService } from "@/modules/timeline/services/timeline.service";
+import EmptyState from "@/components/shared/EmptyState";
+import { formatDistanceToNow } from "date-fns";
 
 export const metadata = {
   title: "Active Conflicts | Global Chanakya Intelligence",
   description: "Live tracking of global geopolitical conflicts, military movements, and threat assessments.",
 };
 
-export default function ConflictsPage() {
+export default async function ConflictsPage() {
+  const [conflicts, timelineEvents] = await Promise.all([
+    ConflictService.getAllConflicts(),
+    TimelineService.getGlobalRecentEvents(10)
+  ]);
+
+  const activeCount = conflicts.length;
+  const highRiskCount = conflicts.filter(c => c.conflictState === "Escalating").length; // Threat level mapping
+  const escalatingCount = conflicts.filter(c => c.conflictState === "Active").length;
+
   return (
     <div className="min-h-screen bg-[var(--bg)]">
       {/* ─── HERO ─── */}
@@ -34,19 +46,19 @@ export default function ConflictsPage() {
         <div className="container mx-auto max-w-7xl px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-[var(--border)]">
             <div className="py-8 px-4 flex flex-col gap-2">
-              <div className="text-4xl font-bold text-white">24</div>
+              <div className="text-4xl font-bold text-white">{activeCount}</div>
               <div className="text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Active Theatres</div>
             </div>
             <div className="py-8 px-4 flex flex-col gap-2 pl-8">
-              <div className="text-4xl font-bold text-[var(--danger)]">12</div>
+              <div className="text-4xl font-bold text-[var(--danger)]">{highRiskCount}</div>
               <div className="text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">High Risk</div>
             </div>
             <div className="py-8 px-4 flex flex-col gap-2 pl-8">
-              <div className="text-4xl font-bold text-[var(--gold)]">7</div>
+              <div className="text-4xl font-bold text-[var(--gold)]">{escalatingCount}</div>
               <div className="text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Escalating</div>
             </div>
             <div className="py-8 px-4 flex flex-col gap-2 pl-8">
-              <div className="text-4xl font-bold text-white">142</div>
+              <div className="text-4xl font-bold text-white">--</div>
               <div className="text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Intel Briefs</div>
             </div>
           </div>
@@ -85,34 +97,41 @@ export default function ConflictsPage() {
             
             {/* LEFT: CARDS (2fr equivalent) */}
             <div className="lg:col-span-2 flex flex-col gap-8">
-              {CONFLICTS_DATA.map((conflict) => (
-                <div key={conflict.id} className="flex flex-col sm:flex-row gap-6 p-6 rounded-2xl glass-card border border-[var(--border)] hover:border-[var(--danger)]/30 hover:-translate-y-1 transition-all duration-300 group">
-                  <div className="w-full sm:w-[240px] aspect-[4/3] rounded-xl bg-[var(--surface)] overflow-hidden relative shrink-0">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={conflict.image} alt={conflict.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] to-transparent opacity-80 z-10" />
-                    <span className={`absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2 py-1 rounded text-white text-[9px] font-bold uppercase tracking-wider ${conflict.threatLevel === "Critical" ? "bg-[var(--danger)]" : conflict.threatLevel === "Escalating" ? "bg-[var(--gold)]" : "bg-[var(--surface)] border border-[var(--border)]"}`}>
-                      {conflict.threatLevel}
-                    </span>
-                  </div>
-                  <div className="flex flex-col flex-1 py-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--danger)]">{conflict.region}</span>
-                      <span className="text-[var(--border)] text-[10px]">|</span>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Updated {conflict.updatedAt}</span>
+              {conflicts.length === 0 ? (
+                <EmptyState 
+                  title="No Active Conflicts" 
+                  description="There are currently no active conflicts matching your filters. The global threat matrix is stable." 
+                />
+              ) : (
+                conflicts.map((conflict) => (
+                  <div key={conflict._id?.toString() || conflict.slug} className="flex flex-col sm:flex-row gap-6 p-6 rounded-2xl glass-card border border-[var(--border)] hover:border-[var(--danger)]/30 hover:-translate-y-1 transition-all duration-300 group">
+                    <div className="w-full sm:w-[240px] aspect-[4/3] rounded-xl bg-[var(--surface)] overflow-hidden relative shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={"/images/fallback-geopolitics.jpg"} alt={conflict.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] to-transparent opacity-80 z-10" />
+                      <span className={`absolute top-3 right-3 z-20 flex items-center gap-1.5 px-2 py-1 rounded text-white text-[9px] font-bold uppercase tracking-wider ${conflict.conflictState === "Escalating" ? "bg-[var(--danger)]" : conflict.conflictState === "Active" ? "bg-[var(--gold)]" : "bg-[var(--surface)] border border-[var(--border)]"}`}>
+                        {conflict.conflictState}
+                      </span>
                     </div>
-                    <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[var(--danger)] transition-colors line-clamp-2 leading-[1.3]">
-                      {conflict.title}
-                    </h3>
-                    <p className="text-sm text-[var(--muted)] line-clamp-2 leading-[1.6] mb-4 flex-1">
-                      {conflict.summary}
-                    </p>
-                    <Link href={`/conflicts/${conflict.slug}`} className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--cyan)] hover:text-white transition-colors w-fit mt-auto">
-                      Read Brief <ArrowRight className="w-3 h-3" />
-                    </Link>
+                    <div className="flex flex-col flex-1 py-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--danger)]">{conflict.regions?.[0] || "Global"}</span>
+                        <span className="text-[var(--border)] text-[10px]">|</span>
+                        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">Updated {formatDistanceToNow(new Date((conflict as any).updatedAt || new Date()), { addSuffix: true })}</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-3 group-hover:text-[var(--danger)] transition-colors line-clamp-2 leading-[1.3]">
+                        {conflict.title}
+                      </h3>
+                      <p className="text-sm text-[var(--muted)] line-clamp-2 leading-[1.6] mb-4 flex-1">
+                        {conflict.overview}
+                      </p>
+                      <Link href={`/conflicts/${conflict.slug}`} className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--cyan)] hover:text-white transition-colors w-fit mt-auto">
+                        Read Brief <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
 
             {/* RIGHT: TIMELINE (1fr equivalent) */}
@@ -124,20 +143,24 @@ export default function ConflictsPage() {
                 </div>
                 
                 <div className="flex flex-col gap-8 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-[var(--border)]">
-                  {TIMELINE_EVENTS.map((event) => (
-                    <div key={event.id} className="relative pl-8">
-                      <div className={`absolute left-0 top-1 w-6 h-6 rounded-full bg-[var(--bg)] border-2 flex items-center justify-center z-10 ${event.severity === "critical" ? "border-[var(--danger)]" : event.severity === "high" ? "border-[var(--gold)]" : "border-[var(--cyan)]"}`}>
-                        <div className={`w-2 h-2 rounded-full animate-pulse ${event.severity === "critical" ? "bg-[var(--danger)]" : event.severity === "high" ? "bg-[var(--gold)]" : "bg-[var(--cyan)]"}`} />
+                  {(timelineEvents as any[]).length === 0 ? (
+                    <div className="text-xs text-[var(--muted)] italic pl-6">No recent updates.</div>
+                  ) : (
+                    (timelineEvents as any[]).map((event: any) => (
+                      <div key={event._id?.toString() || event.title} className="relative pl-8">
+                        <div className={`absolute left-0 top-1 w-6 h-6 rounded-full bg-[var(--bg)] border-2 flex items-center justify-center z-10 ${event.severity === "critical" ? "border-[var(--danger)]" : event.severity === "major" ? "border-[var(--gold)]" : "border-[var(--cyan)]"}`}>
+                          <div className={`w-2 h-2 rounded-full animate-pulse ${event.severity === "critical" ? "bg-[var(--danger)]" : event.severity === "major" ? "bg-[var(--gold)]" : "bg-[var(--cyan)]"}`} />
+                        </div>
+                        <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)] mb-1">{formatDistanceToNow(new Date(event.eventDate), { addSuffix: true })}</div>
+                        <span className={`inline-block px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest mb-2 border ${event.severity === "critical" ? "bg-[var(--danger)]/10 text-[var(--danger)] border-[var(--danger)]/20" : "bg-[var(--surface)] text-white border-[var(--border)]"}`}>
+                          {event.title}
+                        </span>
+                        <h4 className="text-sm font-bold text-white leading-[1.4] hover:text-[var(--cyan)] cursor-pointer transition-colors">
+                          {event.description}
+                        </h4>
                       </div>
-                      <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)] mb-1">{event.timestamp}</div>
-                      <span className={`inline-block px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest mb-2 border ${event.severity === "critical" ? "bg-[var(--danger)]/10 text-[var(--danger)] border-[var(--danger)]/20" : "bg-[var(--surface)] text-white border-[var(--border)]"}`}>
-                        {event.type}
-                      </span>
-                      <h4 className="text-sm font-bold text-white leading-[1.4] hover:text-[var(--cyan)] cursor-pointer transition-colors">
-                        {event.description}
-                      </h4>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
                 
                 <button className="w-full mt-8 py-3 intel-border rounded-xl text-xs font-bold uppercase tracking-wider text-white hover:bg-[var(--surface)] transition-colors">

@@ -15,11 +15,11 @@ interface ConflictHubProps {
 export function ConflictHub({ conflict, countryNodes = [], edges = [] }: ConflictHubProps) {
   // Combine nodes for graph
   const nodes: GraphNode[] = [
-    { id: conflict._id as string, type: "Conflict", name: conflict.title, slug: conflict.slug },
+    { id: conflict._id.toString(), type: "Conflict", name: conflict.title, slug: conflict.slug },
     ...countryNodes,
   ];
 
-  const isActive = conflict.status === "Active" || conflict.status === "Escalating";
+  const isActive = (conflict.status as any) === "Active" || (conflict.status as any) === "Escalating";
 
   return (
     <article className="max-w-6xl mx-auto px-4 py-8">
@@ -110,7 +110,7 @@ export function ConflictHub({ conflict, countryNodes = [], edges = [] }: Conflic
         "description": conflict.overview,
         "startDate": conflict.startDate,
         "endDate": conflict.endDate,
-        "eventStatus": conflict.status === "Active" ? "https://schema.org/EventRescheduled" : "https://schema.org/EventScheduled"
+        "eventStatus": (conflict.status as any) === "Active" ? "https://schema.org/EventRescheduled" : "https://schema.org/EventScheduled"
       })}} />
     </article>
   );

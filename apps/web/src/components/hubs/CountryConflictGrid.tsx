@@ -25,7 +25,7 @@ export function CountryConflictGrid({ conflicts }: CountryConflictGridProps) {
           >
             <div className="flex items-start justify-between mb-3">
               <ShieldAlert className="w-5 h-5 text-red-500" />
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${conflict.status === 'Active' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${(conflict.status as any) === 'Active' ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-gray-800 text-gray-400 border-gray-700'}`}>
                 {conflict.status}
               </span>
             </div>

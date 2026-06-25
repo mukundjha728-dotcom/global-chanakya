@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+type Metadata = any;
 
 export interface SeoOptions {
   title: string;

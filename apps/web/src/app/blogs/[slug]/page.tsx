@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 
 import BlogActions from "@/components/blogs/BlogActions";
 import ReadingProgress from "@/components/blogs/ReadingProgress";
+import BlogClientTracker from "@/components/blogs/BlogClientTracker";
 import { generateSeoMetadata, calculateReadingTime, formatDate } from "@repo/utils";
 import { ArrowLeft, Clock, Eye, Calendar, Tag, Crown, TrendingUp, Crosshair, Newspaper } from "lucide-react";
 import { SITE_URL } from "@/constants";
@@ -100,6 +101,11 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <BlogClientTracker 
+        title={blog.title} 
+        category={blog.category} 
+        author={blog.author?.name || "Global Chanakya Editorial"} 
       />
       <ReadingProgress />
 

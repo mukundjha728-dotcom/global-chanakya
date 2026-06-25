@@ -24,7 +24,7 @@ export class Sanitizer {
       for (const [key, value] of Object.entries(payload)) {
         sanitized[key] = this.sanitizePayload(value);
       }
-      return sanitized;
+      return sanitized as unknown as T;
     }
     
     return payload;

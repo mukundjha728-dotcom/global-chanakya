@@ -104,7 +104,7 @@ export default async function DashboardPage() {
             </h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {watchlist.map((w) => (
-                <div key={w._id as string} className="p-4 rounded-xl border border-white/[0.06] bg-white/[0.01] flex items-center justify-between">
+                <div key={w._id as unknown as string} className="p-4 rounded-xl border border-white/[0.06] bg-white/[0.01] flex items-center justify-between">
                   <div>
                     <span className="text-xs text-neutral-500 uppercase">{w.entityType}</span>
                     {/* Real app would populate entity name here */}

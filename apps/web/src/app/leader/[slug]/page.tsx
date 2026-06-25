@@ -10,9 +10,8 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { FaqBlock } from "@/components/seo/FaqBlock";
 import { RelatedIntelligence } from "@/components/shared/RelatedIntelligence";
 import { generateSeoMetadata } from "@repo/utils";
-import { ICountry } from "@/lib/models/Country";
+import { Country, ICountry } from "@/lib/models/Country";
 import { ILeader } from "@/lib/models/Leader";
-import { ITimeline } from "@/lib/models/Timeline";
 import dbConnect from "@/lib/mongoose";
 import Link from "next/link";
 import { SITE_URL } from "@/constants";
@@ -78,9 +77,9 @@ export default async function LeaderPage({ params }: { params: Promise<{ slug: s
   }
 
   // Fetch timeline events
-  let timelineEvents: ITimeline[] = [];
+  let timelineEvents: any[] = [];
   if (leader._id) {
-    timelineEvents = await TimelineService.getEntityTimeline("leader", leader._id.toString());
+    timelineEvents = (await TimelineService.getEntityTimeline("leader", leader._id.toString())) as any[];
   }
 
   const jsonLd = SchemaGenerators.leader(leader, country?.name);

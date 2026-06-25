@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { BlogService } from "@/modules/blog/services/blog.service";
 import { auth } from "@/auth";
+import dbConnect from "@/lib/mongoose";
 
 export async function GET(request: NextRequest) {
   await dbConnect();

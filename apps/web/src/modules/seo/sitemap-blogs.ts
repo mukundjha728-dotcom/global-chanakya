@@ -7,9 +7,9 @@ import { SITE_URL } from "@/constants";
 export async function getBlogSitemaps(): Promise<MetadataRoute.Sitemap> {
   await dbConnect();
   
-  const blogs = await Blog.find({ status: 'published' }).select('slug updatedAt').lean<IBlog[]>();
+  const blogs = await Blog.find({ status: 'published' }).select('slug updatedAt').lean<any[]>();
 
-  return blogs.map((b: IBlog) => ({
+  return blogs.map((b: any) => ({
     url: `${SITE_URL}/blogs/${encodeURIComponent(b.slug || "")}`,
     lastModified: b.updatedAt,
     changeFrequency: 'daily',

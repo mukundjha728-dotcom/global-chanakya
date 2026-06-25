@@ -115,7 +115,7 @@ export function useArticleEditor(authorId: string, editId: string | null) {
         });
       } catch (fetchErr) {
         if (stepTimer) clearTimeout(stepTimer);
-        const msg = fetchErr?.name === "AbortError" ? "Request timed out." : "Network error.";
+        const msg = (fetchErr as any)?.name === "AbortError" ? "Request timed out." : "Network error.";
         if (publishNow) { setPublishing(false); setPublishStep(0); } else setSaving(false);
         alert(msg);
         return;

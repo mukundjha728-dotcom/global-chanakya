@@ -3,14 +3,37 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { LayoutDashboard, Users, Newspaper, PenTool, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Newspaper, PenTool, Settings, LogOut, ShieldAlert, LayoutTemplate, Globe, MapPin, Clock, Link as LinkIcon, Search, TrendingUp, FileText, Activity, Image as ImageIcon } from "lucide-react";
 
-const navItems = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/blogs", label: "Reports", icon: Newspaper },
-  { href: "/admin/write", label: "Write Intel", icon: PenTool },
-  { href: "/admin/settings", label: "Settings", icon: Settings },
+export const navItems = [
+
+  // Content
+  { href: "/admin/blogs", label: "Blogs", icon: Newspaper, group: "Content" },
+  { href: "/admin/categories", label: "Categories", icon: LayoutTemplate, group: "Content" },
+  { href: "/admin/tags", label: "Tags", icon: PenTool, group: "Content" },
+
+  // Intelligence
+  { href: "/admin/conflicts", label: "Conflicts", icon: ShieldAlert, group: "Intelligence" },
+  { href: "/admin/countries", label: "Countries", icon: Globe, group: "Intelligence" },
+  { href: "/admin/leaders", label: "Leaders", icon: Users, group: "Intelligence" },
+  { href: "/admin/alliances", label: "Alliances", icon: Users, group: "Intelligence" },
+  { href: "/admin/regions", label: "Regions", icon: MapPin, group: "Intelligence" },
+  { href: "/admin/timelines", label: "Timelines", icon: Clock, group: "Intelligence" },
+
+  // System & SEO
+  { href: "/admin/homepage", label: "Homepage", icon: LayoutTemplate, group: "System" },
+  { href: "/admin/navigation", label: "Navigation", icon: LinkIcon, group: "System" },
+  { href: "/admin/seo", label: "Global SEO", icon: Search, group: "System" },
+
+  // Media & Growth
+  { href: "/admin/media", label: "Media Library", icon: ImageIcon, group: "Assets" },
+  { href: "/admin/growth", label: "Growth", icon: TrendingUp, group: "Assets" },
+
+  // Admin
+  { href: "/admin/users", label: "Users", icon: Users, group: "Admin" },
+  { href: "/admin/audit", label: "Audit Logs", icon: FileText, group: "Admin" },
+  { href: "/admin/health", label: "Health", icon: Activity, group: "Admin" },
+  { href: "/admin/settings", label: "Settings", icon: Settings, group: "Admin" },
 ];
 
 export default function AdminSidebar({ user }: { user: { name?: string; email?: string; image?: string } }) {

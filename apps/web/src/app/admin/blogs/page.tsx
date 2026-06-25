@@ -1,18 +1,13 @@
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import dbConnect from "@/lib/mongoose";
-import { Blog } from "@/lib/models/Blog";
-import AdminBlogsClient from "@/components/admin/AdminBlogsClient";
+import React from "react";
+import GenericList from "@/components/admin/form-engine/GenericList";
+import { SCHEMAS } from "@/components/admin/form-engine/EntitySchemas";
 
-export default async function AdminBlogsPage() {
-  const session = await auth();
-  if (!session || session.user.role !== "admin") redirect("/404");
+export const metadata = {
+  title: "Blogs | Admin",
+};
 
-  await dbConnect();
-  const blogs = await Blog.find({}, {
-    title: 1, slug: 1, status: 1, category: 1, visibility: 1,
-    "analytics.views": 1, createdAt: 1, publishAt: 1, isTrending: 1,
-  }).sort({ createdAt: -1 }).limit(100).lean();
-
-  return <AdminBlogsClient blogs={JSON.parse(JSON.stringify(blogs))} />;
+export default function BlogsPage() {
+  const schema = SCHEMAS["blogs"];
+  if (!schema) return <div>Schema not found</div>;
+  return <GenericList schema={schema} />;
 }

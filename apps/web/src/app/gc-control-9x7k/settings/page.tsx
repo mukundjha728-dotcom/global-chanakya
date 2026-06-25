@@ -6,5 +6,5 @@ export default async function AdminSettingsPage() {
   const session = await auth();
   if (!session || session.user.role !== "admin") redirect("/404");
 
-  return <AdminSettingsClient user={session.user} />;
+  return <AdminSettingsClient user={session.user as any} />;
 }

@@ -44,7 +44,7 @@ export async function POST(
       const updated = await BlogService.getBlogById(blog._id.toString());
       return NextResponse.json({
         liked: false,
-        likes: updated.analytics?.likes || 0,
+        likes: updated?.analytics?.likes || 0,
       });
     } else {
       // Like
@@ -53,7 +53,7 @@ export async function POST(
       const updated = await BlogService.getBlogById(blog._id.toString());
       return NextResponse.json({
         liked: true,
-        likes: updated.analytics?.likes || 0,
+        likes: updated?.analytics?.likes || 0,
       });
     }
   } catch (error) {

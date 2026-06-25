@@ -68,9 +68,9 @@ export default async function ConflictPage({ params }: { params: Promise<{ slug:
     isFollowing = await WatchlistService.isFollowing(session.user.id, "conflict", conflict._id.toString());
   }
 
-  let timelineEvents: ITimeline[] = [];
+  let timelineEvents: any[] = [];
   if (conflict._id) {
-    timelineEvents = await TimelineService.getEntityTimeline("conflict", conflict._id.toString());
+    timelineEvents = (await TimelineService.getEntityTimeline("conflict", conflict._id.toString())) as any[];
   }
 
   const jsonLd = SchemaGenerators.conflict(conflict);

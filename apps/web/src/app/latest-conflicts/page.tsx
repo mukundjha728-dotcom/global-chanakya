@@ -2,6 +2,9 @@ import React from "react";
 import { Metadata } from "next";
 import { TrendingEngine } from "@/components/growth/TrendingEngine";
 import { NewsletterForm } from "@/components/growth/NewsletterForm";
+import { ConflictService } from "@/modules/conflict/services/conflict.service";
+import EmptyState from "@/components/shared/EmptyState";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Latest Global Conflicts & Strategic Alerts",
@@ -11,7 +14,8 @@ export const metadata: Metadata = {
 // ISR 1 hour
 export const revalidate = 3600;
 
-export default function LatestConflictsPage() {
+export default async function LatestConflictsPage() {
+  const conflicts = await ConflictService.getAllConflicts(10);
   return (
     <div className="container mx-auto px-4 py-12 max-w-7xl">
       <header className="mb-12 text-center max-w-3xl mx-auto">
@@ -23,26 +27,30 @@ export default function LatestConflictsPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-8">
-          {/* Main content area - In prod, this iterates over Conflict models */}
-          <div className="p-8 rounded-3xl bg-red-500/5 border border-red-500/20">
-            <h2 className="text-2xl font-bold text-white mb-2">Escalation in the South China Sea</h2>
-            <p className="text-gray-300 mb-6">
-              Recent naval maneuvers indicate a shift in the regional power dynamic. Our analysts break down the timeline and potential outcomes.
-            </p>
-            <button className="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded-lg font-bold transition-colors">
-              Read Intelligence Report
-            </button>
-          </div>
-          
-          <div className="p-8 rounded-3xl bg-gray-900/50 border border-gray-800">
-            <h2 className="text-2xl font-bold text-white mb-2">Eastern Europe Stabilizing?</h2>
-            <p className="text-gray-300 mb-6">
-              Following the latest diplomatic summit, troop movements suggest a temporary freeze. But the underlying economic war continues.
-            </p>
-            <button className="bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 px-6 py-2 rounded-lg font-bold transition-colors">
-              Read Intelligence Report
-            </button>
-          </div>
+          {conflicts.length === 0 ? (
+            <EmptyState 
+              title="No Escalation Zones" 
+              description="There are currently no major conflicts or escalations to report." 
+            />
+          ) : (
+            conflicts.map((conflict, idx) => (
+              <div key={conflict._id?.toString() || conflict.slug} className={`p-8 rounded-3xl border ${idx === 0 ? 'bg-red-500/5 border-red-500/20' : 'bg-gray-900/50 border-gray-800'}`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded ${conflict.conflictState === 'Escalating' ? 'bg-red-500/10 text-red-500' : 'bg-gray-800 text-gray-400'}`}>
+                    {conflict.conflictState}
+                  </span>
+                  <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">{conflict.regions?.[0] || 'Global'}</span>
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-2">{conflict.title}</h2>
+                <p className="text-gray-300 mb-6 line-clamp-3">
+                  {conflict.overview}
+                </p>
+                <Link href={`/conflicts/${conflict.slug}`} className={`inline-block px-6 py-2 rounded-lg font-bold transition-colors ${idx === 0 ? 'bg-red-600 hover:bg-red-500 text-white' : 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-600'}`}>
+                  Read Intelligence Report
+                </Link>
+              </div>
+            ))
+          )}
         </div>
         
         <aside className="space-y-8">

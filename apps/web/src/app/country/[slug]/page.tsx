@@ -15,7 +15,7 @@ import { generateSeoMetadata } from "@repo/utils";
 import { ICountry } from "@/lib/models/Country";
 import { ILeader } from "@/lib/models/Leader";
 import { IConflict } from "@/lib/models/Conflict";
-import { ITimeline } from "@/lib/models/Timeline";
+
 import Link from "next/link";
 import { SITE_URL } from "@/constants";
 import { auth } from "@/auth";
@@ -78,7 +78,7 @@ export default async function CountryPage({ params }: { params: Promise<{ slug: 
   // Fetch leaders (mocking if using fallback)
   let leaders: (ILeader | { name: string, title: string, slug: string, party: string })[] = [];
   if (country._id) {
-    leaders = await LeaderService.getLeadersByCountry(country._id.toString());
+    leaders = await LeaderService.getLeadersByCountry(country._id as any);
   } else if (country.slug === "india") {
     leaders = [{ name: "Narendra Modi", title: "Prime Minister", slug: "narendra-modi", party: "BJP" }];
   }
@@ -90,9 +90,9 @@ export default async function CountryPage({ params }: { params: Promise<{ slug: 
   }
 
   // Fetch timeline events
-  let timelineEvents: ITimeline[] = [];
+  let timelineEvents: any[] = [];
   if (country._id) {
-    timelineEvents = await TimelineService.getEntityTimeline("country", country._id.toString());
+    timelineEvents = (await TimelineService.getEntityTimeline("country", country._id.toString())) as any[];
   }
 
   // Fetch related conflicts
@@ -114,7 +114,7 @@ export default async function CountryPage({ params }: { params: Promise<{ slug: 
     : [
         ...leaders.map(l => ({ type: "leader", title: l.name, slug: l.slug, subtitle: l.title })),
         ...conflicts.map(c => ({ type: "conflict", title: c.title, slug: c.slug, subtitle: c.status }))
-      ];
+      ] as any[];
 
   const jsonLd = SchemaGenerators.country(country);
   const faqSchema = SchemaGenerators.faq(faqs);

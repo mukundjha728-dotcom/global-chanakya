@@ -9,10 +9,10 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-14 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10 lg:gap-14 mb-20">
           
           {/* Column 1: Brand Block */}
-          <div className="lg:col-span-1 flex flex-col">
+          <div className="lg:col-span-2 flex flex-col">
             <Link href="/" className="flex items-center gap-3 mb-6 group">
               <div className="relative w-10 h-10 rounded-xl overflow-hidden intel-border flex-shrink-0 bg-black">
                 <Image
@@ -32,31 +32,48 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Column 2: Intelligence */}
+          {/* Column 2: Strategic Hubs */}
           <div className="flex flex-col gap-5">
-            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Intelligence</h4>
+            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Strategic Hubs</h4>
             <ul className="flex flex-col gap-3">
-              <li><Link href="/blogs" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Reports</Link></li>
-              <li><Link href="/categories" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Categories</Link></li>
+              <li><Link href="/conflicts" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Active Conflicts</Link></li>
+              <li><Link href="/latest-conflicts" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Live Tracker</Link></li>
+              <li><Link href="/regions" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Global Regions</Link></li>
+              <li><Link href="/china-watch" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">China Watch</Link></li>
+              <li><Link href="/breaking" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Breaking Intel</Link></li>
+              <li><Link href="/blogs" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">All Reports</Link></li>
             </ul>
           </div>
 
-          {/* Column 3: Company */}
+          {/* Column 3: Trust & Ethics */}
+          <div className="flex flex-col gap-5">
+            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Trust & Ethics</h4>
+            <ul className="flex flex-col gap-3">
+              <li><Link href="/source-verification" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Source Verification</Link></li>
+              <li><Link href="/methodology" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Methodology</Link></li>
+              <li><Link href="/editorial-policy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Editorial Policy</Link></li>
+              <li><Link href="/fact-checking" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Fact Checking</Link></li>
+              <li><Link href="/contributor-policy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Contributor Policy</Link></li>
+            </ul>
+          </div>
+
+          {/* Column 4: Company */}
           <div className="flex flex-col gap-5">
             <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Company</h4>
             <ul className="flex flex-col gap-3">
-              <li><Link href="/about" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">About</Link></li>
+              <li><Link href="/about" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">About Us</Link></li>
               <li><Link href="/contact" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Contact</Link></li>
               <li><Link href="/careers" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Careers</Link></li>
             </ul>
           </div>
 
-          {/* Column 4: Legal */}
+          {/* Column 5: Legal & Resources */}
           <div className="flex flex-col gap-5">
             <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Legal</h4>
             <ul className="flex flex-col gap-3">
-              <li><Link href="/privacy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Privacy</Link></li>
-              <li><Link href="/terms" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Terms</Link></li>
+              <li><Link href="/privacy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Privacy Policy</Link></li>
+              <li><Link href="/terms" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Terms of Service</Link></li>
+              <li><Link href="/platformseo" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Platform SEO</Link></li>
             </ul>
           </div>
           

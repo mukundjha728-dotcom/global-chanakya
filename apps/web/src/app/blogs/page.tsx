@@ -182,10 +182,10 @@ export default async function BlogsPage({
                   <div className="mt-auto pt-4 md:pt-5 border-t border-[var(--border)]/50 flex items-center justify-between text-[9px] md:text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 rounded-full bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center text-[var(--cyan)]">
-                        {(blog.author?.name || "G")[0]}
+                        {((blog.author as any)?.name || "G")[0]}
                       </div>
                       <span className="text-white/80">
-                        {blog.author?.name?.split(" ")[0] || "Global Chanakya"}
+                        {(blog.author as any)?.name?.split(" ")[0] || "Global Chanakya"}
                       </span>
                     </div>
                     <div className="flex items-center gap-4">

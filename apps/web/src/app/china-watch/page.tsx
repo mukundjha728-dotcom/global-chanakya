@@ -3,6 +3,10 @@ import { Metadata } from "next";
 import { TrendingEngine } from "@/components/growth/TrendingEngine";
 import { NewsletterForm } from "@/components/growth/NewsletterForm";
 import { TopicSubscription } from "@/components/growth/TopicSubscription";
+import { BlogService } from "@/modules/blog/services/blog.service";
+import EmptyState from "@/components/shared/EmptyState";
+import Link from "next/link";
+import { formatDistanceToNow } from "date-fns";
 
 export const metadata: Metadata = {
   title: "China Watch | Strategic Intelligence & Geopolitical Analysis",
@@ -12,7 +16,9 @@ export const metadata: Metadata = {
 // ISR 6 hours
 export const revalidate = 21600;
 
-export default function ChinaWatchPage() {
+export default async function ChinaWatchPage() {
+  const blogs = await BlogService.searchBlogs("China", 10);
+  
   return (
     <div className="container mx-auto px-4 py-12 max-w-7xl">
       <header className="mb-12 border-b border-gray-800 pb-12">
@@ -27,18 +33,31 @@ export default function ChinaWatchPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2">
-           {/* Placeholder for Dynamic Blogs targeting "China" */}
            <div className="space-y-6">
-              {[1, 2, 3].map((i) => (
-                <article key={i} className="flex flex-col sm:flex-row gap-6 p-6 rounded-2xl bg-gray-900/40 border border-gray-800 hover:border-gray-700 transition-colors">
-                  <div className="w-full sm:w-48 h-32 bg-gray-800 rounded-xl shrink-0"></div>
-                  <div>
-                    <span className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2 block">Economic Strategy</span>
-                    <h3 className="text-xl font-bold text-white mb-2">The Semiconductor Silk Road</h3>
-                    <p className="text-sm text-gray-400">Analysis of the recent supply chain restructuring and its impact on the Indo-Pacific tech alliances.</p>
-                  </div>
-                </article>
-              ))}
+              {blogs.length === 0 ? (
+                <EmptyState 
+                  title="No Intel Available" 
+                  description="There are currently no intelligence reports specifically covering China." 
+                />
+              ) : (
+                blogs.map((blog) => (
+                  <Link href={`/blogs/${blog.slug}`} key={blog._id?.toString() || blog.slug} className="flex flex-col sm:flex-row gap-6 p-6 rounded-2xl bg-gray-900/40 border border-gray-800 hover:border-gray-700 transition-colors group">
+                    <div className="w-full sm:w-48 h-32 bg-gray-800 rounded-xl shrink-0 overflow-hidden relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={blog.featuredImage || "/images/fallback-geopolitics.jpg"} alt={blog.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-bold text-red-500 uppercase tracking-widest">{blog.category}</span>
+                        <span className="text-gray-600 text-xs">•</span>
+                        <span className="text-xs text-gray-500">{formatDistanceToNow(new Date(blog.publishAt || blog.createdAt), { addSuffix: true })}</span>
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-500 transition-colors">{blog.title}</h3>
+                      <p className="text-sm text-gray-400 line-clamp-2">{blog.excerpt}</p>
+                    </div>
+                  </Link>
+                ))
+              )}
            </div>
         </div>
         

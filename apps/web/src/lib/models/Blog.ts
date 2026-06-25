@@ -39,6 +39,13 @@ export interface IBlog extends Document {
   author: mongoose.Types.ObjectId;
   commentsEnabled: boolean;
   isTrending: boolean;
+  isBreaking?: boolean;
+  isFeatured?: boolean;
+  source?: string;
+  isSystemGenerated?: boolean;
+  unpublishAt?: Date;
+  breakingUntil?: Date;
+  featuredUntil?: Date;
   readingTime?: number; // auto-calculated
   keyInsights?: string[];
   faq?: { question: string; answer: string }[];
@@ -53,6 +60,12 @@ export interface IBlog extends Document {
   }[];
   createdAt: Date;
   updatedAt: Date;
+  version: number;
+  previousVersions?: any[];
+  draftSnapshot?: any;
+  isDeleted: boolean;
+  deletedAt?: Date;
+  deletedBy?: mongoose.Types.ObjectId;
 }
 
 const BlogRevisionSchema = new Schema<IBlogRevision>(
@@ -106,6 +119,13 @@ const BlogSchema = new Schema<IBlog>(
     author: { type: Schema.Types.ObjectId, ref: "User", required: true },
     commentsEnabled: { type: Boolean, default: true },
     isTrending: { type: Boolean, default: false },
+    isBreaking: { type: Boolean, default: false },
+    isFeatured: { type: Boolean, default: false },
+    source: { type: String, default: "manual" },
+    isSystemGenerated: { type: Boolean, default: false },
+    unpublishAt: { type: Date },
+    breakingUntil: { type: Date },
+    featuredUntil: { type: Date },
     readingTime: { type: Number },
     keyInsights: [{ type: String }],
     faq: [{

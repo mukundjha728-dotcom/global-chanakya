@@ -22,7 +22,7 @@ export async function RelatedArticles({ currentBlogId, limit = 3 }: RelatedArtic
         {related.map(blog => (
           <Link 
             href={`/blogs/${blog.slug}`} 
-            key={blog._id as string}
+            key={blog._id.toString()}
             className="group flex flex-col h-full bg-gray-900/50 rounded-2xl border border-gray-800 hover:border-gray-600 transition-all overflow-hidden"
           >
             {blog.featuredImage && (

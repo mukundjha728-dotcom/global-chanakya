@@ -1,27 +1,33 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IAuditLog extends Document {
-  actorId: mongoose.Types.ObjectId | string;
+  userId: mongoose.Types.ObjectId | string;
   action: string;
-  targetType: string;
-  targetId?: mongoose.Types.ObjectId | string;
-  metadata?: Record<string, unknown>;
-  createdAt: Date;
+  entityType: string;
+  entityId?: mongoose.Types.ObjectId | string;
+  beforeSnapshot?: Record<string, unknown>;
+  afterSnapshot?: Record<string, unknown>;
+  ipAddress?: string;
+  userAgent?: string;
+  timestamp: Date;
 }
 
 const AuditLogSchema = new Schema<IAuditLog>({
-  actorId: { type: Schema.Types.Mixed, required: true }, // Mixed to allow "SYSTEM" or ObjectId
+  userId: { type: Schema.Types.Mixed, required: true }, // Mixed to allow "SYSTEM" or ObjectId
   action: { type: String, required: true },
-  targetType: { type: String, required: true },
-  targetId: { type: Schema.Types.Mixed },
-  metadata: { type: Schema.Types.Mixed },
-  createdAt: { type: Date, default: Date.now },
+  entityType: { type: String, required: true },
+  entityId: { type: Schema.Types.Mixed },
+  beforeSnapshot: { type: Schema.Types.Mixed },
+  afterSnapshot: { type: Schema.Types.Mixed },
+  ipAddress: { type: String },
+  userAgent: { type: String },
+  timestamp: { type: Date, default: Date.now },
 });
 
 // Indexes for fast querying in admin dashboards
-AuditLogSchema.index({ createdAt: -1 });
-AuditLogSchema.index({ actorId: 1, createdAt: -1 });
-AuditLogSchema.index({ targetType: 1, targetId: 1 });
+AuditLogSchema.index({ timestamp: -1 });
+AuditLogSchema.index({ userId: 1, timestamp: -1 });
+AuditLogSchema.index({ entityType: 1, entityId: 1 });
 AuditLogSchema.index({ action: 1 });
 
 export const AuditLog = mongoose.models.AuditLog || mongoose.model<IAuditLog>("AuditLog", AuditLogSchema);

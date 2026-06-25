@@ -96,10 +96,10 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
         </div>
 
         <div className="space-y-12">
-          <RelatedIntelligence items={data.countries} title={`Countries Involved with ${formattedSlug}`} />
-          <RelatedIntelligence items={data.leaders} title={`Key Leadership (${formattedSlug})`} />
-          <RelatedIntelligence items={data.conflicts} title={`Related Conflicts & Events`} />
-          <RelatedIntelligence items={data.reports} title={`Intelligence Reports & Briefings`} />
+          <RelatedIntelligence items={data.countries as any} title={`Countries Involved with ${formattedSlug}`} />
+          <RelatedIntelligence items={data.leaders as any} title={`Key Leadership (${formattedSlug})`} />
+          <RelatedIntelligence items={data.conflicts as any} title={`Related Conflicts & Events`} />
+          <RelatedIntelligence items={data.reports as any} title={`Intelligence Reports & Briefings`} />
         </div>
       </div>
     </div>

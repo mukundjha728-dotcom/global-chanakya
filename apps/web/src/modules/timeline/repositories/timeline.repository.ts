@@ -4,14 +4,14 @@ import dbConnect from "@/lib/mongoose";
 export class TimelineRepository {
   static async getEventsForEntity(entityType: string, entityId: string): Promise<ITimelineEvent[]> {
     await dbConnect();
-    return Timeline.find({ entityType, entityId })
+    return Timeline.find({ entityType, entityId, status: "published" })
       .sort({ eventDate: -1 })
       .lean();
   }
 
   static async getRecentEvents(limit: number = 20): Promise<ITimelineEvent[]> {
     await dbConnect();
-    return Timeline.find()
+    return Timeline.find({ status: "published" })
       .sort({ eventDate: -1, createdAt: -1 })
       .limit(limit)
       .lean();

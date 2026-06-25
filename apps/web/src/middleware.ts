@@ -2,15 +2,44 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import NextAuth from 'next-auth';
 import { authConfig } from '@/auth.config';
+import { ratelimit } from '@/lib/rate-limit';
 
 const { auth } = NextAuth(authConfig);
 
 // Allowed roles for the /admin dashboard area
 const ADMIN_ROLES = ["super_admin", "admin", "editor", "analyst"];
 
-export default auth((req) => {
+export default auth(async (req) => {
   const session = req.auth;
   const { pathname } = req.nextUrl;
+
+  // 0. API Rate Limiting & CSRF
+  if (pathname.startsWith('/api/')) {
+    // CSRF Check for mutating requests
+    if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+      const origin = req.headers.get('origin');
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+      if (origin && !origin.startsWith(siteUrl)) {
+        return new NextResponse('Forbidden - CSRF origin mismatch', { status: 403 });
+      }
+    }
+
+    // Rate Limiting
+    if (ratelimit) {
+      const ip = req.ip ?? req.headers.get('x-forwarded-for') ?? '127.0.0.1';
+      const { success, pending, limit, reset, remaining } = await ratelimit.limit(ip);
+      if (!success) {
+        return new NextResponse('Too Many Requests', {
+          status: 429,
+          headers: {
+            'X-RateLimit-Limit': limit.toString(),
+            'X-RateLimit-Remaining': remaining.toString(),
+            'X-RateLimit-Reset': reset.toString(),
+          },
+        });
+      }
+    }
+  }
 
   // 1. Admin Route Protection
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
@@ -53,5 +82,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };

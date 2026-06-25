@@ -446,15 +446,40 @@ export default async function Home() {
               </div>
             ))}
           </div>
+
+          <div className="mt-16 text-center">
+             <Link href="/editorial-policy" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[var(--gold)] hover:text-white transition-colors">
+                Explore our Trust & Ethics Framework <ArrowRight className="w-4 h-4" />
+             </Link>
+          </div>
         </div>
       </section>
 
-      {/* ─── CATEGORIES ─── */}
+      {/* ─── CATEGORIES & HUBS ─── */}
       <section className="py-16 md:py-28 border-b border-[var(--border)] bg-[var(--bg)]">
         <div className="container mx-auto max-w-7xl px-6 md:px-8">
           <div className="text-center mb-10 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 md:mb-6 tracking-tight">Browse by Theatre</h2>
-            <p className="text-[var(--muted)] text-[10px] md:text-sm font-bold uppercase tracking-[0.14em]">Explore reports by strategic region and topic</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 md:mb-6 tracking-tight">Strategic Intelligence Hubs</h2>
+            <p className="text-[var(--muted)] text-[10px] md:text-sm font-bold uppercase tracking-[0.14em]">Explore our dedicated intelligence centres</p>
+          </div>
+          
+          <div className="flex flex-wrap justify-center gap-4 md:gap-6 max-w-5xl mx-auto mb-16">
+            <Link href="/conflicts" className="px-6 py-4 rounded-xl border border-[var(--danger)]/30 bg-[var(--danger)]/10 text-xs md:text-sm font-bold uppercase tracking-[0.06em] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(220,38,38,0.1)] text-center flex-1 min-w-[160px]">
+              Active Conflicts
+            </Link>
+            <Link href="/regions" className="px-6 py-4 rounded-xl border border-[var(--cyan)]/30 bg-[var(--cyan)]/10 text-xs md:text-sm font-bold uppercase tracking-[0.06em] text-[var(--cyan)] hover:bg-[var(--cyan)] hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.1)] text-center flex-1 min-w-[160px]">
+              Global Regions
+            </Link>
+            <Link href="/china-watch" className="px-6 py-4 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 text-xs md:text-sm font-bold uppercase tracking-[0.06em] text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--bg)] hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.1)] text-center flex-1 min-w-[160px]">
+              China Watch
+            </Link>
+            <Link href="/breaking" className="px-6 py-4 rounded-xl intel-border bg-[var(--surface)] text-xs md:text-sm font-bold uppercase tracking-[0.06em] text-white hover:bg-white hover:text-[var(--bg)] hover:-translate-y-1 transition-all duration-300 text-center flex-1 min-w-[160px]">
+              Breaking Intel
+            </Link>
+          </div>
+
+          <div className="text-center mb-8">
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-4 tracking-tight">Browse by Theatre</h3>
           </div>
           <div className="flex flex-wrap justify-center gap-3 md:gap-4 max-w-4xl mx-auto">
             {theatres.map((cat) => (

@@ -38,37 +38,38 @@ export class RelatedIntelligenceService {
     ];
 
     for (const candidate of candidates) {
+      const cand = candidate as any;
       let score = 0;
       
-      const relation = (candidate.relations || []).find((r) => r.targetId.toString() === sourceId);
+      const relation = (cand.relations || []).find((r: any) => r.targetId.toString() === sourceId);
       if (relation) {
         score += relation.weight;
       }
 
-      if (candidate.tags && sourceTags) {
-        const overlap = candidate.tags.filter((t: string) => sourceTags.includes(t)).length;
+      if (cand.tags && sourceTags) {
+        const overlap = cand.tags.filter((t: string) => sourceTags.includes(t)).length;
         score += overlap * 10;
       }
 
-      const createdAt = 'createdAt' in candidate ? candidate.createdAt : null;
+      const createdAt = cand.createdAt || null;
       if (createdAt) {
         const daysOld = (Date.now() - new Date(createdAt).getTime()) / (1000 * 60 * 60 * 24);
         score += Math.max(0, 15 - Math.floor(daysOld / 7));
       }
 
-      if (candidate.type === "leader" && 'countryId' in candidate && candidate.countryId?.toString() === sourceId) {
+      if (cand.type === "leader" && cand.countryId && cand.countryId.toString() === sourceId) {
         score += 80;
       }
 
       if (score > 0) {
         let title = "Unknown";
         let subtitle = "";
-        if ('title' in candidate) title = candidate.title;
-        else if ('name' in candidate) title = candidate.name;
+        if (cand.title) title = cand.title;
+        else if (cand.name) title = cand.name;
 
-        if (candidate.type === 'report') subtitle = 'Intelligence Brief';
-        else if ('status' in candidate) subtitle = candidate.status;
-        else if ('geopoliticalStatus' in candidate) subtitle = candidate.geopoliticalStatus;
+        if (cand.type === 'report') subtitle = 'Intelligence Brief';
+        else if (cand.status) subtitle = cand.status;
+        else if (cand.geopoliticalStatus) subtitle = cand.geopoliticalStatus;
         else subtitle = title;
 
         results.push({

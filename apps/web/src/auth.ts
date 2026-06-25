@@ -108,7 +108,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         console.error("Audit log error:", e);
       }
     },
-    async signOut({ session }) {
+    async signOut(msg: any) {
+      const session = msg.session;
       if (!session?.user) return;
       try {
         await dbConnect();

@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import dbConnect from "@/lib/mongoose";
 import { BlogService } from "@/modules/blog/services/blog.service";
 import mongoose from "mongoose";
-import { createBlogSchema, updateBlogSchema } from "@/lib/validators/blog.schema";
+import { createBlogSchema } from "@/lib/validators/blog.schema";
 
 // Give Vercel 30s before cutting off the function
 export const maxDuration = 30;
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     // Validating request body with Zod
     const validation = createBlogSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({ error: validation.error.errors[0].message, details: validation.error.format() }, { status: 400 });
+      return NextResponse.json({ error: (validation.error as any).errors[0].message, details: validation.error.format() }, { status: 400 });
     }
 
     const { title, slug, excerpt, content, category, tags, visibility, status,
@@ -121,35 +121,33 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// PATCH - update blog
+// PATCH - update blog (admin - permissive, trusts editor)
 export async function PATCH(req: NextRequest) {
   try {
     const session = await requireAdmin();
     if (!session) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
     const body = await req.json();
-    
-    const validation = updateBlogSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 });
-    }
+    const { id, ...rest } = body;
+    if (!id) return NextResponse.json({ error: "id is required" }, { status: 400 });
 
-    const { id, status, ...rest } = validation.data;
+    // Allowlist updatable fields (everything from the editor)
+    const ALLOWED = [
+      "title", "slug", "excerpt", "content", "category", "tags",
+      "visibility", "status", "isTrending", "commentsEnabled",
+      "featuredImage", "ogImage", "seo", "aiSummary",
+      "publishAt", "unpublishAt", "isBreaking", "breakingUntil",
+      "isFeatured", "featuredUntil", "citations",
+      "entityRelations", "draftSnapshot", "previousVersions",
+    ];
 
     const updateData: Record<string, unknown> = {};
-    if (status) updateData.status = status;
-    if (rest.title) updateData.title = rest.title;
-    if (rest.slug) updateData.slug = rest.slug;
-    if (rest.excerpt) updateData.excerpt = rest.excerpt;
-    if (rest.content) updateData.content = rest.content;
-    if (rest.category) updateData.category = rest.category;
-    if (rest.tags) updateData.tags = rest.tags;
-    if (rest.visibility) updateData.visibility = rest.visibility;
-    if (rest.featuredImage !== undefined) updateData.featuredImage = rest.featuredImage;
-    if (rest.isTrending !== undefined) updateData.isTrending = rest.isTrending;
-    if (rest.commentsEnabled !== undefined) updateData.commentsEnabled = rest.commentsEnabled;
-    if (rest.seo) updateData.seo = rest.seo;
-    if (status === "published") updateData.publishAt = new Date();
+    for (const key of ALLOWED) {
+      if (rest[key] !== undefined) updateData[key] = rest[key];
+    }
+    if (rest.status === "published" && !rest.publishAt) {
+      updateData.publishAt = new Date();
+    }
 
     const updated = await BlogService.updateBlog(id, updateData);
     if (!updated) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
@@ -160,6 +158,7 @@ export async function PATCH(req: NextRequest) {
     return NextResponse.json({ error: errorMsg(err) }, { status: 500 });
   }
 }
+
 
 // DELETE - delete blog
 export async function DELETE(req: NextRequest) {

@@ -57,7 +57,7 @@ export class FeedService {
       // Only show non-watched items if they are critical/major, or if feed is empty
       if (isWatched || severityScore >= 70) {
         feed.push({
-          id: event._id as string,
+          id: event._id.toString(),
           type: "timeline",
           title: event.title,
           description: event.description,
@@ -77,7 +77,7 @@ export class FeedService {
       const score = (blog.isTrending ? 80 : 40) + recencyScore;
 
       feed.push({
-        id: blog._id as string,
+        id: blog._id.toString(),
         type: "blog",
         title: blog.title,
         description: blog.excerpt,
