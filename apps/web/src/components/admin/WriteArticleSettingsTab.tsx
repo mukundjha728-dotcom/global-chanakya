@@ -1,7 +1,6 @@
 import React from "react";
 import { FormData } from "./useArticleEditor";
-
-const CATEGORIES = ["Geopolitics", "Defence", "Economy", "Diplomacy", "Indo-Pacific", "South Asia", "Europe", "Middle East", "China", "Russia", "USA", "Energy", "Technology", "Analysis"];
+import { BLOG_CATEGORIES } from "@/constants";
 
 export function WriteArticleSettingsTab({ form, update, inputClass, labelClass }: { form: FormData; update: (field: keyof FormData, value: string | boolean) => void; inputClass: string; labelClass: string; }) {
   return (
@@ -10,7 +9,7 @@ export function WriteArticleSettingsTab({ form, update, inputClass, labelClass }
         <div>
           <label className={labelClass}>Category *</label>
           <select value={form.category} onChange={(e) => update("category", e.target.value)} className={inputClass}>
-            {CATEGORIES.map((c) => <option key={c} value={c} className="bg-[#0d0d17]">{c}</option>)}
+            {BLOG_CATEGORIES.map((c) => <option key={c} value={c} className="bg-[#0d0d17]">{c}</option>)}
           </select>
         </div>
         <div>

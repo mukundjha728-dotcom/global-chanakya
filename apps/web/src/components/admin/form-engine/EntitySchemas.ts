@@ -5,6 +5,8 @@ export type FieldType =
   | "media-picker" | "media-gallery" 
   | "citations" | "string-array";
 
+import { BLOG_CATEGORIES } from "@/constants";
+
 export interface FormField {
   name: string;
   label: string;
@@ -101,7 +103,8 @@ export const SCHEMAS: Record<string, EntitySchema> = {
           { name: "slug", label: "Slug", type: "text", required: true },
           { name: "excerpt", label: "Excerpt / Summary", type: "textarea", required: true },
           { name: "content", label: "Content", type: "richtext", required: true },
-          { name: "category", label: "Category", type: "select", options: [
+          { name: "category", label: "Category", type: "select", options: BLOG_CATEGORIES.map(c => ({ label: c, value: c })) },
+          { name: "reportType", label: "Report Type", type: "select", options: [
             { label: "Analysis", value: "Analysis" },
             { label: "Briefing", value: "Briefing" },
             { label: "Op-Ed", value: "Op-Ed" },
