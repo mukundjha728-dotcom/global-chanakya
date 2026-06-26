@@ -62,6 +62,29 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
     }
   };
 
+  const handleUpdate = async (id: string, field: string, value: string) => {
+    try {
+      const res = await fetch(schema.apiPath, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, [field]: value }),
+      });
+      if (res.ok) {
+        setData((prev) => prev.map((item) => {
+          const itemId = item._id || item.id;
+          if (itemId === id) return { ...item, [field]: value };
+          return item;
+        }));
+      } else {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || "Update failed");
+      }
+    } catch {
+      alert("Update failed");
+    }
+  };
+
+
   // Filter & sort
   const filtered = data
     .filter((item) => {
@@ -169,6 +192,9 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
             <thead>
               <tr className="border-b border-[var(--border)] bg-[var(--bg)]/40">
                 <th className="px-5 py-3.5 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Title / Name</th>
+                {data.some(d => d.visibility) && (
+                  <th className="px-5 py-3.5 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Visibility</th>
+                )}
                 <th className="px-5 py-3.5 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Status</th>
                 {hasAnalytics && (
                   <th className="px-5 py-3.5 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">
@@ -224,11 +250,35 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
                           </div>
                         </div>
                       </td>
+                      {data.some(d => d.visibility !== undefined) && (
+                        <td className="px-5 py-4">
+                          {item.visibility !== undefined ? (
+                            <select
+                              value={item.visibility || "public"}
+                              onChange={(e) => handleUpdate(itemId, "visibility", e.target.value)}
+                              className="px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--bg)] text-[var(--muted)] hover:text-white w-fit outline-none cursor-pointer appearance-none"
+                            >
+                              <option value="public">🌐 PUBLIC</option>
+                              <option value="premium">⭐ PREMIUM</option>
+                              <option value="private">🔒 PRIVATE</option>
+                            </select>
+                          ) : (
+                            <span className="text-[var(--muted)] text-xs">—</span>
+                          )}
+                        </td>
+                      )}
                       <td className="px-5 py-4">
                         <div className="flex flex-col gap-1">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider border w-fit ${STATUS_STYLES[item.status] || STATUS_STYLES.archived}`}>
-                            {item.status || "draft"}
-                          </span>
+                          <select
+                            value={item.status || "draft"}
+                            onChange={(e) => handleUpdate(itemId, "status", e.target.value)}
+                            className={`px-2 py-1 rounded-md text-xs font-bold uppercase tracking-wider border w-fit outline-none appearance-none cursor-pointer ${STATUS_STYLES[item.status] || STATUS_STYLES.archived}`}
+                          >
+                            <option value="draft">DRAFT</option>
+                            <option value="published">PUBLISHED</option>
+                            <option value="scheduled">SCHEDULED</option>
+                            <option value="archived">ARCHIVED</option>
+                          </select>
                           {item.isBreaking && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider bg-red-500/10 text-red-400 border border-red-500/20 w-fit">
                               🔴 Breaking

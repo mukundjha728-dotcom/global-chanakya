@@ -16,7 +16,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
   await dbConnect();
-  const blog = await Blog.findOne({ slug: decodedSlug, status: "published" }).populate("author", "name").lean();
+  // We can't use auth() in generateMetadata easily without performance hit or we can just fetch without status filter for metadata
+  // Since it's just metadata, fetching without status filter is safe because the actual page will block non-admins.
+  const blog = await Blog.findOne({ slug: decodedSlug }).populate("author", "name").lean();
   if (!blog) return { title: "Not Found" };
   return generateSeoMetadata({
     title: blog.seo?.title || blog.title,
@@ -32,7 +34,19 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 }
 
 function sanitizeBlogContent(html: string): string {
-  let clean = html;
+  let clean = html || "";
+  
+  // Handle double-escaped HTML tags
+  if (clean.includes("&lt;")) {
+    clean = clean
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&amp;/g, "&")
+      .replace(/&quot;/g, "\"")
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, " ");
+  }
+
   clean = clean.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
   clean = clean.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "");
   clean = clean.replace(/\s+on\w+\s*=\s*"[^"]*"/gi, "");
@@ -45,8 +59,10 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
   const decodedSlug = decodeURIComponent(slug);
   await dbConnect();
   const session = await auth();
+  const isAdmin = session?.user?.role === "admin";
+  const query = isAdmin ? { slug: decodedSlug } : { slug: decodedSlug, status: "published" };
 
-  const blog = await Blog.findOne({ slug: decodedSlug, status: "published" }).populate("author", "name").lean();
+  const blog = await Blog.findOne(query).populate("author", "name").lean();
   if (!blog) notFound();
 
   // Get related blogs
