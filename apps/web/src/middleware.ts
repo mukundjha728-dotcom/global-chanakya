@@ -18,7 +18,7 @@ export default auth(async (req) => {
     // CSRF Check for mutating requests
     if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
       const origin = req.headers.get('origin');
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin || 'http://localhost:3000';
       if (origin && !origin.startsWith(siteUrl)) {
         return new NextResponse('Forbidden - CSRF origin mismatch', { status: 403 });
       }
@@ -82,5 +82,5 @@ export default auth(async (req) => {
 });
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|robots\\.txt).*)'],
 };

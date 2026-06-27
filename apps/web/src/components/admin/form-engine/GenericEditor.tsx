@@ -91,11 +91,20 @@ function StringArrayInput({ value, onChange }: { value: string[]; onChange: (v: 
   const arr = Array.isArray(value) ? value : [];
 
   const add = () => {
-    const trimmed = input.trim();
-    if (trimmed && !arr.includes(trimmed)) {
-      onChange([...arr, trimmed]);
-      setInput("");
+    if (!input.trim()) return;
+    
+    const newTags = input
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(tag => tag !== "" && !arr.includes(tag));
+      
+    const uniqueNewTags = Array.from(new Set(newTags));
+    
+    if (uniqueNewTags.length > 0) {
+      onChange([...arr, ...uniqueNewTags]);
     }
+    
+    setInput("");
   };
 
   return (
