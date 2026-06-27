@@ -4,6 +4,8 @@ import Link from "next/link";
 import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
 import { auth } from "@/auth";
+import { unstable_cache } from "next/cache";
+import { cache } from "react";
 
 import BlogActions from "@/components/blogs/BlogActions";
 import ReadingProgress from "@/components/blogs/ReadingProgress";
@@ -12,13 +14,41 @@ import { generateSeoMetadata, calculateReadingTime, formatDate } from "@repo/uti
 import { ArrowLeft, Clock, Eye, Calendar, Tag, Crown, TrendingUp, Crosshair, Newspaper } from "lucide-react";
 import { SITE_URL } from "@/constants";
 
+// Global cache across requests
+const getCachedBlog = unstable_cache(
+  async (slug: string) => {
+    await dbConnect();
+    const blog = await Blog.findOne({ slug }).populate("author", "name").lean();
+    return blog ? JSON.parse(JSON.stringify(blog)) : null;
+  },
+  ["blog-detail-cache"],
+  { revalidate: 3600, tags: ["blogs"] }
+);
+
+const getCachedRelatedBlogs = unstable_cache(
+  async (blogId: string, category: string) => {
+    await dbConnect();
+    const related = await Blog.find({
+      status: "published",
+      _id: { $ne: blogId },
+      category: category
+    }).sort({ publishAt: -1 }).limit(3).lean();
+    return JSON.parse(JSON.stringify(related));
+  },
+  ["related-blogs-cache"],
+  { revalidate: 3600, tags: ["blogs"] }
+);
+
+// Request-level cache deduplication
+const getBlogData = cache(async (slug: string) => {
+  return await getCachedBlog(slug);
+});
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
-  await dbConnect();
-  // We can't use auth() in generateMetadata easily without performance hit or we can just fetch without status filter for metadata
-  // Since it's just metadata, fetching without status filter is safe because the actual page will block non-admins.
-  const blog = await Blog.findOne({ slug: decodedSlug }).populate("author", "name").lean();
+  const blog = await getBlogData(decodedSlug);
+  
   if (!blog) return { title: "Not Found" };
   return generateSeoMetadata({
     title: blog.seo?.title || blog.title,
@@ -57,20 +87,21 @@ function sanitizeBlogContent(html: string): string {
 export default async function BlogPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const decodedSlug = decodeURIComponent(slug);
-  await dbConnect();
-  const session = await auth();
-  const isAdmin = session?.user?.role === "admin";
-  const query = isAdmin ? { slug: decodedSlug } : { slug: decodedSlug, status: "published" };
-
-  const blog = await Blog.findOne(query).populate("author", "name").lean();
+  
+  const blog = await getBlogData(decodedSlug);
   if (!blog) notFound();
 
-  // Get related blogs
-  const relatedBlogs = await Blog.find({
-    status: "published",
-    _id: { $ne: blog._id },
-    category: blog.category
-  }).sort({ publishAt: -1 }).limit(3).lean();
+  // Defer auth check until after blog is loaded from cache
+  const session = await auth();
+  const isAdmin = session?.user?.role === "admin";
+  
+  // Security check: if not published and not admin, return 404
+  if (blog.status !== "published" && !isAdmin) {
+    notFound();
+  }
+
+  // Get related blogs from cache
+  const relatedBlogs = await getCachedRelatedBlogs(blog._id, blog.category);
 
   const readTime = Math.max(1, calculateReadingTime(blog.content.replace(/<[^>]*>/g, "")));
   const publishDate = formatDate(blog.publishAt, "long");

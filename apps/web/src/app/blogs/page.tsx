@@ -12,6 +12,28 @@ export const metadata = {
 // Next.js App Router ISR
 export const revalidate = 3600; // 1 hour
 
+import { unstable_cache } from "next/cache";
+
+const getCachedBlogs = unstable_cache(
+  async (category?: string, trending?: boolean) => {
+    await dbConnect();
+    const query: Record<string, unknown> = { status: "published" };
+    if (category) query.category = category;
+    if (trending) query.isTrending = true;
+
+    const blogs = await Blog.find(query)
+      .sort({ publishAt: -1 })
+      .populate("author", "name")
+      .limit(30)
+      .lean();
+      
+    // Serialize to remove ObjectIds and Dates for Next.js cache
+    return JSON.parse(JSON.stringify(blogs)) as any[];
+  },
+  ["blogs-list-cache"],
+  { revalidate: 3600, tags: ["blogs"] }
+);
+
 export default async function BlogsPage({
   searchParams,
 }: {
@@ -23,16 +45,7 @@ export default async function BlogsPage({
 
   let blogs: IBlog[] = [];
   try {
-    await dbConnect();
-    const query: Record<string, unknown> = { status: "published" };
-    if (category) query.category = category;
-    if (trending) query.isTrending = true;
-
-    blogs = await Blog.find(query)
-      .sort({ publishAt: -1 })
-      .populate("author", "name")
-      .limit(30)
-      .lean();
+    blogs = await getCachedBlogs(category, trending);
   } catch (error) {
     console.error("DB connection failed for blogs:", error);
   }

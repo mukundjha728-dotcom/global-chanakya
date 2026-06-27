@@ -1,6 +1,6 @@
 import { BlogRepository } from "../repositories/blog.repository";
 import { IBlog } from "@/lib/models/Blog";
-import { memoryCache } from "@/lib/cache/memory.cache";
+import { unstable_cache } from "next/cache";
 
 export class BlogService {
   static async getBlogById(id: string) {
@@ -15,45 +15,41 @@ export class BlogService {
     return BlogRepository.searchBlogs(query, limit);
   }
 
-  static async getTrendingBlogs(limit: number = 6) {
-    const cacheKey = `blogs:trending:${limit}`;
-    const cached = await memoryCache.get<any[]>(cacheKey);
-    if (cached) return cached;
+  static getTrendingBlogs = unstable_cache(
+    async (limit: number = 6) => {
+      const data = await BlogRepository.getTrending(limit);
+      return JSON.parse(JSON.stringify(data));
+    },
+    ['blogs-trending'],
+    { revalidate: 300, tags: ['blogs'] }
+  );
 
-    const data = await BlogRepository.getTrending(limit);
-    await memoryCache.set(cacheKey, data, 300); // 300s TTL
-    return data;
-  }
+  static getLatestBlogs = unstable_cache(
+    async (limit: number = 6) => {
+      const data = await BlogRepository.getLatest(limit);
+      return JSON.parse(JSON.stringify(data));
+    },
+    ['blogs-latest'],
+    { revalidate: 300, tags: ['blogs'] }
+  );
 
-  static async getLatestBlogs(limit: number = 6) {
-    const cacheKey = `blogs:latest:${limit}`;
-    const cached = await memoryCache.get<any[]>(cacheKey);
-    if (cached) return cached;
+  static getBlogsByCategory = unstable_cache(
+    async (category: string, limit: number = 4) => {
+      const data = await BlogRepository.getBlogsByCategory(category, limit);
+      return JSON.parse(JSON.stringify(data));
+    },
+    ['blogs-category'],
+    { revalidate: 300, tags: ['blogs'] }
+  );
 
-    const data = await BlogRepository.getLatest(limit);
-    await memoryCache.set(cacheKey, data, 300);
-    return data;
-  }
-
-  static async getBlogsByCategory(category: string, limit: number = 4) {
-    const cacheKey = `blogs:category:${category}:${limit}`;
-    const cached = await memoryCache.get<any[]>(cacheKey);
-    if (cached) return cached;
-
-    const data = await BlogRepository.getBlogsByCategory(category, limit);
-    await memoryCache.set(cacheKey, data, 300);
-    return data;
-  }
-
-  static async getMostViewedBlog() {
-    const cacheKey = `blogs:mostViewed`;
-    const cached = await memoryCache.get<any>(cacheKey);
-    if (cached) return cached;
-
-    const data = await BlogRepository.getMostViewed();
-    await memoryCache.set(cacheKey, data, 300);
-    return data;
-  }
+  static getMostViewedBlog = unstable_cache(
+    async () => {
+      const data = await BlogRepository.getMostViewed();
+      return data ? JSON.parse(JSON.stringify(data)) : null;
+    },
+    ['blogs-most-viewed'],
+    { revalidate: 300, tags: ['blogs'] }
+  );
 
   static async getAdminBlogs(limit: number = 100) {
     return BlogRepository.getAdminBlogs(limit);
@@ -64,7 +60,6 @@ export class BlogService {
   }
 
   static async createBlog(data: Partial<IBlog>) {
-    // Business logic like generating slugs, auto-setting earlyAccess, etc.
     return BlogRepository.create(data);
   }
 
@@ -80,3 +75,4 @@ export class BlogService {
     return BlogRepository.delete(id);
   }
 }
+
