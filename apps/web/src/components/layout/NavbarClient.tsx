@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { LogOut, Menu, X, LayoutDashboard, Search } from "lucide-react";
+import { LogOut, Menu, X, LayoutDashboard, Search, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import SearchModal from "../shared/SearchModal";
 import { logoutAction } from "@/app/actions";
@@ -125,6 +125,14 @@ export default function NavbarClient({ session }: NavbarClientProps) {
                     <p className="text-[11px] text-[var(--muted)] truncate mt-0.5">{session.user?.email}</p>
                   </div>
                   <div className="py-1">
+                    <Link
+                      href="/profile"
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-[var(--secondary)] hover:text-white hover:bg-[var(--surface)] transition-colors"
+                      onClick={() => setProfileOpen(false)}
+                    >
+                      <User className="w-4 h-4" />
+                      Profile
+                    </Link>
                     <form action={logoutAction} className="w-full">
                       <button
                         type="submit"
@@ -203,6 +211,14 @@ export default function NavbarClient({ session }: NavbarClientProps) {
                       <p className="text-[12px] text-[var(--muted)]">{session.user?.email}</p>
                     </div>
                   </div>
+                  <Link
+                    href="/profile"
+                    onClick={() => setMobileOpen(false)}
+                    className="w-full flex items-center gap-2 px-4 py-3 rounded-md text-[14px] font-bold uppercase tracking-wider text-[var(--secondary)] hover:text-white hover:bg-[var(--surface)] transition-colors"
+                  >
+                    <User className="w-4 h-4" />
+                    Profile
+                  </Link>
                   <form action={logoutAction} className="w-full">
                     <button
                       type="submit"
