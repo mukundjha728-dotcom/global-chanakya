@@ -5,11 +5,11 @@ export class BookmarkService {
     const isBookmarked = await BookmarkRepository.checkStatus(userId, blogId);
 
     if (isBookmarked) {
-      await BookmarkRepository.remove(userId, blogId);
-      return { status: "removed" };
+      const removed = await BookmarkRepository.remove(userId, blogId);
+      return { status: removed ? "removed" : "unchanged" };
     } else {
-      await BookmarkRepository.add(userId, blogId);
-      return { status: "added" };
+      const added = await BookmarkRepository.add(userId, blogId);
+      return { status: added ? "added" : "unchanged" };
     }
   }
 

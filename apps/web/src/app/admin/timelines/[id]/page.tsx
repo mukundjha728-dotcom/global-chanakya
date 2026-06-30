@@ -4,7 +4,7 @@ import { SCHEMAS } from "@/components/admin/form-engine/EntitySchemas";
 
 export const metadata = { title: "Edit Timeline Event | Admin" };
 
-export default async function EditTimelinePage({ params }: { params: { id: string } }) {
+export default async function EditTimelinePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const schema = SCHEMAS["timelines"];
   if (!schema) return <div>Schema not found</div>;

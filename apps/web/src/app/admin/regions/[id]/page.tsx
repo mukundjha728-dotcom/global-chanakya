@@ -4,7 +4,7 @@ import { SCHEMAS } from "@/components/admin/form-engine/EntitySchemas";
 
 export const metadata = { title: "Edit Region | Admin" };
 
-export default async function EditRegionPage({ params }: { params: { id: string } }) {
+export default async function EditRegionPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const schema = SCHEMAS["regions"];
   if (!schema) return <div>Schema not found</div>;

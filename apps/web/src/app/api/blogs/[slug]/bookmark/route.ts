@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { BlogService } from "@/modules/blog/services/blog.service";
 import { auth } from "@/auth";
 import { BookmarkService } from "@/modules/bookmark/services/bookmark.service";
+import * as Sentry from "@sentry/nextjs";
 
 export async function POST(
   request: NextRequest,
@@ -21,16 +22,20 @@ export async function POST(
   try {
     const result = await BookmarkService.toggleBookmark(session.user.id, blog._id.toString());
     
-    // Update analytics counter (in background)
-    BlogService.incrementAnalytics(blog._id.toString(), "bookmarks", result.status === "added" ? 1 : -1);
+    // Update analytics counter
+    if (result.status !== "unchanged") {
+      await BlogService.incrementAnalytics(blog._id.toString(), "bookmarks", result.status === "added" ? 1 : -1);
+    }
 
     const updated = await BlogService.getBlogById(blog._id.toString());
     
     return NextResponse.json({
       bookmarked: result.status === "added",
-      bookmarks: (updated?.analytics?.bookmarks || 0) + (result.status === "added" ? 1 : -1),
+      bookmarks: updated?.analytics?.bookmarks || 0,
     });
-  } catch (error) {
+  } catch (error: any) {
+    Sentry.captureException(error, { extra: { slug, action: "process_bookmark_route" } });
+    console.error({ event: "process_bookmark_failure", error: error.message, timestamp: new Date().toISOString() });
     return NextResponse.json({ error: "Failed to process bookmark" }, { status: 500 });
   }
 }

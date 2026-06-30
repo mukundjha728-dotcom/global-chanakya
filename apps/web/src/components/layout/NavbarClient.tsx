@@ -4,9 +4,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LogOut, Menu, X, LayoutDashboard, Search } from "lucide-react";
-import { signOut } from "next-auth/react";
 import { useState, useEffect } from "react";
 import SearchModal from "../shared/SearchModal";
+import { logoutAction } from "@/app/actions";
 
 interface NavbarClientProps {
   session: {
@@ -125,13 +125,15 @@ export default function NavbarClient({ session }: NavbarClientProps) {
                     <p className="text-[11px] text-[var(--muted)] truncate mt-0.5">{session.user?.email}</p>
                   </div>
                   <div className="py-1">
-                    <button
-                      onClick={() => signOut()}
-                      className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-[var(--danger)] hover:bg-[var(--surface)] transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Secure Sign Out
-                    </button>
+                    <form action={logoutAction} className="w-full">
+                      <button
+                        type="submit"
+                        className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold text-[var(--danger)] hover:bg-[var(--surface)] transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Secure Sign Out
+                      </button>
+                    </form>
                   </div>
                 </div>
               )}
@@ -201,13 +203,15 @@ export default function NavbarClient({ session }: NavbarClientProps) {
                       <p className="text-[12px] text-[var(--muted)]">{session.user?.email}</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => signOut()}
-                    className="w-full flex items-center gap-2 px-4 py-3 rounded-md text-[14px] font-bold uppercase tracking-wider text-[var(--danger)] hover:bg-[var(--surface)] transition-colors"
-                  >
-                    <LogOut className="w-4 h-4" />
-                    Secure Sign Out
-                  </button>
+                  <form action={logoutAction} className="w-full">
+                    <button
+                      type="submit"
+                      className="w-full flex items-center gap-2 px-4 py-3 rounded-md text-[14px] font-bold uppercase tracking-wider text-[var(--danger)] hover:bg-[var(--surface)] transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Secure Sign Out
+                    </button>
+                  </form>
                 </div>
               ) : (
                 <div className="space-y-3">

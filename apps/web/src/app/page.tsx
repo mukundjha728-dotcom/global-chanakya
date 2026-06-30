@@ -325,7 +325,7 @@ export default async function Home() {
                 )}
               </div>
               <div className="lg:col-span-4 flex flex-col gap-4 md:gap-6 h-full">
-                {sideTrending.map((blog) => (
+                {sideTrending.map((blog: TrendingBlog) => (
                   <div key={blog._id} className="flex-1 min-h-[120px]">
                     <BlogCard blog={blog} variant="compact" isViral={blog._id === mostViewedBlogId} />
                   </div>
@@ -358,7 +358,7 @@ export default async function Home() {
                 )}
               </div>
               <div className="lg:col-span-4 flex flex-col gap-4 md:gap-6 h-full">
-                {latestBlogs.slice(1, 4).map((blog) => (
+                {latestBlogs.slice(1, 4).map((blog: TrendingBlog) => (
                   <div key={blog._id} className="flex-1 min-h-[120px]">
                     <BlogCard blog={blog} variant="compact" isViral={blog._id === mostViewedBlogId} />
                   </div>
@@ -367,7 +367,7 @@ export default async function Home() {
             </div>
             {latestBlogs.length > 4 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 items-stretch">
-                {latestBlogs.slice(4).map((blog) => (
+                {latestBlogs.slice(4).map((blog: TrendingBlog) => (
                   <div key={blog._id} className="h-full">
                     <BlogCard blog={blog} variant="default" isViral={blog._id === mostViewedBlogId} />
                   </div>
@@ -404,7 +404,7 @@ export default async function Home() {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 items-stretch">
-                {blogs.map((blog) => (
+                {blogs.map((blog: TrendingBlog) => (
                   <div key={blog._id} className="h-full">
                     <BlogCard blog={blog} variant="default" isViral={blog._id === mostViewedBlogId} />
                   </div>

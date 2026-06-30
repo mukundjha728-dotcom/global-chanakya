@@ -9,6 +9,7 @@ import { cache } from "react";
 
 import BlogActions from "@/components/blogs/BlogActions";
 import ReadingProgress from "@/components/blogs/ReadingProgress";
+import GatedArticleContent from "@/components/blogs/GatedArticleContent";
 import BlogClientTracker from "@/components/blogs/BlogClientTracker";
 import { generateSeoMetadata, calculateReadingTime, formatDate } from "@repo/utils";
 import { ArrowLeft, Clock, Eye, Calendar, Tag, Crown, TrendingUp, Crosshair, Newspaper } from "lucide-react";
@@ -153,6 +154,8 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
         title={blog.title} 
         category={blog.category} 
         author={blog.author?.name || "Global Chanakya Editorial"} 
+        slug={blog.slug}
+        isLoggedIn={!!session}
       />
       <ReadingProgress />
 
@@ -214,7 +217,11 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
               </div>
             )}
 
-            <div className="article-body" dangerouslySetInnerHTML={{ __html: sanitizedContent }} />
+            <GatedArticleContent 
+              content={sanitizedContent} 
+              isLoggedIn={!!session} 
+              slug={blog.slug}
+            />
 
             {/* Tags */}
             {blog.tags && blog.tags.length > 0 && (

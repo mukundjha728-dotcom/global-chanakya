@@ -16,4 +16,35 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
   });
 }
 
+// In-memory rate limiter fallback (Temporary)
+export class MemoryRateLimiter {
+  private static store = new Map<string, { count: number; expiresAt: number }>();
+
+  static async checkLimit(ip: string, action: string, limit: number, windowMs: number) {
+    const key = `${ip}:${action}`;
+    const now = Date.now();
+    const record = this.store.get(key);
+
+    // Clean up old records periodically
+    if (this.store.size > 10000) {
+      for (const [k, v] of this.store.entries()) {
+        if (v.expiresAt < now) this.store.delete(k);
+      }
+    }
+
+    if (!record || record.expiresAt < now) {
+      this.store.set(key, { count: 1, expiresAt: now + windowMs });
+      return { success: true };
+    }
+
+    if (record.count >= limit) {
+      return { success: false }; // Rate limited
+    }
+
+    record.count += 1;
+    this.store.set(key, record);
+    return { success: true };
+  }
+}
+
 export { ratelimit };

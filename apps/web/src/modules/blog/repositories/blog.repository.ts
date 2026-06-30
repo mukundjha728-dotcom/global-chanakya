@@ -135,8 +135,12 @@ export class BlogRepository {
 
   static async incrementAnalytics(id: string, field: string, amount: number): Promise<void> {
     await dbConnect();
+    const filter: any = { _id: id };
+    if (amount < 0) {
+      filter[`analytics.${field}`] = { $gt: 0 };
+    }
     await Blog.updateOne(
-      { _id: id },
+      filter,
       { $inc: { [`analytics.${field}`]: amount } }
     ).exec();
   }

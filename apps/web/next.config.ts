@@ -22,7 +22,4 @@ export default withSentryConfig(nextConfig, {
   sentryUrl: "https://sentry.io/",
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  hideSourceMaps: true,
-  disableLogger: true,
-  automaticVercelMonitors: true,
 });

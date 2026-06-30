@@ -40,10 +40,15 @@ export default function BlogActions({
   const [loadingBookmark, setLoadingBookmark] = useState(false);
   const [loadingComment, setLoadingComment] = useState(false);
   const [loadingComments, setLoadingComments] = useState(false);
-  const [showShareToast, setShowShareToast] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [animateLike, setAnimateLike] = useState(false);
   const [animateBookmark, setAnimateBookmark] = useState(false);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const showToast = (message: string, type: "success" | "error" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 3000);
+  };
 
   // Fetch initial like/bookmark state
   useEffect(() => {
@@ -66,52 +71,79 @@ export default function BlogActions({
       .catch(() => {});
   }, [slug, isLoggedIn]);
 
-  // Track view
-  useEffect(() => {
-    fetch(`/api/blogs/${slug}/view`, { method: "POST" }).catch(() => {});
-  }, [slug]);
+  // View tracking moved to BlogClientTracker to handle advanced analytics and pings
 
   const handleLike = useCallback(async () => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn) {
+      showToast("Sign in to like articles", "error");
+      return;
+    }
     if (loadingLike) return;
+    
+    // Optimistic UI update
     setLoadingLike(true);
     setAnimateLike(true);
+    const prevLiked = liked;
+    const prevLikes = likes;
+    
+    setLiked(!prevLiked);
+    setLikes(prevLikes + (!prevLiked ? 1 : -1));
 
     try {
       const res = await fetch(`/api/blogs/${slug}/like`, { method: "POST" });
       const data = await res.json();
-      if (res.ok) {
-        setLiked(data.liked);
-        setLikes(data.likes);
-      }
-    } catch {
-      // silently fail
+      if (!res.ok) throw new Error(data.error);
+      
+      // Update with server truth
+      setLiked(data.liked);
+      setLikes(data.likes);
+      showToast(data.liked ? "Article liked!" : "Like removed");
+    } catch (err: any) {
+      // Rollback
+      setLiked(prevLiked);
+      setLikes(prevLikes);
+      showToast(err.message || "Failed to like article", "error");
     } finally {
       setLoadingLike(false);
       setTimeout(() => setAnimateLike(false), 400);
     }
-  }, [slug, isLoggedIn, loadingLike]);
+  }, [slug, isLoggedIn, loadingLike, liked, likes]);
 
   const handleBookmark = useCallback(async () => {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn) {
+      showToast("Sign in to save articles", "error");
+      return;
+    }
     if (loadingBookmark) return;
+    
+    // Optimistic UI update
     setLoadingBookmark(true);
     setAnimateBookmark(true);
+    const prevBookmarked = bookmarked;
+    const prevBookmarks = bookmarks;
+    
+    setBookmarked(!prevBookmarked);
+    setBookmarks(prevBookmarks + (!prevBookmarked ? 1 : -1));
 
     try {
       const res = await fetch(`/api/blogs/${slug}/bookmark`, { method: "POST" });
       const data = await res.json();
-      if (res.ok) {
-        setBookmarked(data.bookmarked);
-        setBookmarks(data.bookmarks);
-      }
-    } catch {
-      // silently fail
+      if (!res.ok) throw new Error(data.error);
+      
+      // Update with server truth
+      setBookmarked(data.bookmarked);
+      setBookmarks(data.bookmarks);
+      showToast(data.bookmarked ? "Article saved!" : "Article removed from saved");
+    } catch (err: any) {
+      // Rollback
+      setBookmarked(prevBookmarked);
+      setBookmarks(prevBookmarks);
+      showToast(err.message || "Failed to save article", "error");
     } finally {
       setLoadingBookmark(false);
       setTimeout(() => setAnimateBookmark(false), 400);
     }
-  }, [slug, isLoggedIn, loadingBookmark]);
+  }, [slug, isLoggedIn, loadingBookmark, bookmarked, bookmarks]);
 
   const handleShare = useCallback(async () => {
     const url = window.location.href;
@@ -123,8 +155,7 @@ export default function BlogActions({
       }
     } else {
       await navigator.clipboard.writeText(url);
-      setShowShareToast(true);
-      setTimeout(() => setShowShareToast(false), 2000);
+      showToast("Link copied to clipboard!");
     }
   }, []);
 
@@ -141,7 +172,7 @@ export default function BlogActions({
           setComments(data.comments || []);
         }
       } catch {
-        // silently fail
+        showToast("Failed to load comments", "error");
       } finally {
         setLoadingComments(false);
       }
@@ -166,9 +197,12 @@ export default function BlogActions({
       if (res.ok) {
         setComments((prev) => [data.comment, ...prev]);
         setCommentText("");
+        showToast("Comment added!");
+      } else {
+        throw new Error(data.error);
       }
-    } catch {
-      // silently fail
+    } catch (err: any) {
+      showToast(err.message || "Failed to post comment", "error");
     } finally {
       setLoadingComment(false);
     }
@@ -213,7 +247,7 @@ export default function BlogActions({
       >
         {/* Like */}
         <button
-          onClick={isLoggedIn ? handleLike : undefined}
+          onClick={handleLike}
           disabled={loadingLike}
           style={{
             display: "flex",
@@ -226,11 +260,11 @@ export default function BlogActions({
             color: liked ? "#f87171" : "#9ca3af",
             fontSize: "13px",
             fontWeight: 600,
-            cursor: isLoggedIn ? "pointer" : "default",
+            cursor: "pointer",
             transition: "all 0.2s ease",
             transform: animateLike ? "scale(1.15)" : "scale(1)",
           }}
-          title={isLoggedIn ? (liked ? "Unlike" : "Like") : "Sign in to like"}
+          title={liked ? "Unlike" : "Like"}
         >
           <Heart
             style={{
@@ -270,7 +304,7 @@ export default function BlogActions({
 
         {/* Bookmark */}
         <button
-          onClick={isLoggedIn ? handleBookmark : undefined}
+          onClick={handleBookmark}
           disabled={loadingBookmark}
           style={{
             display: "flex",
@@ -283,11 +317,11 @@ export default function BlogActions({
             color: bookmarked ? "#fbbf24" : "#9ca3af",
             fontSize: "13px",
             fontWeight: 600,
-            cursor: isLoggedIn ? "pointer" : "default",
+            cursor: "pointer",
             transition: "all 0.2s ease",
             transform: animateBookmark ? "scale(1.15)" : "scale(1)",
           }}
-          title={isLoggedIn ? (bookmarked ? "Remove bookmark" : "Bookmark") : "Sign in to bookmark"}
+          title={bookmarked ? "Remove bookmark" : "Bookmark"}
         >
           <Bookmark
             style={{
@@ -367,8 +401,8 @@ export default function BlogActions({
         )}
       </div>
 
-      {/* Share Toast */}
-      {showShareToast && (
+      {/* Toast Notification */}
+      {toast && (
         <div
           style={{
             position: "fixed",
@@ -378,16 +412,19 @@ export default function BlogActions({
             zIndex: 50,
             padding: "10px 20px",
             borderRadius: "12px",
-            background: "rgba(16,185,129,0.15)",
-            border: "1px solid rgba(16,185,129,0.3)",
-            color: "#34d399",
+            background: toast.type === "success" ? "rgba(16,185,129,0.15)" : "rgba(239,68,68,0.15)",
+            border: `1px solid ${toast.type === "success" ? "rgba(16,185,129,0.3)" : "rgba(239,68,68,0.3)"}`,
+            color: toast.type === "success" ? "#34d399" : "#f87171",
             fontSize: "13px",
             fontWeight: 600,
             backdropFilter: "blur(12px)",
             animation: "fadeInUp 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
-          ✓ Link copied to clipboard
+          {toast.type === "success" ? "✓" : "✕"} {toast.message}
         </div>
       )}
 
