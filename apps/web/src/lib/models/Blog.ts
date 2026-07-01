@@ -154,6 +154,16 @@ const BlogSchema = new Schema<IBlog>(
   { timestamps: true }
 );
 
+// Enforce strict SEO slugs
+BlogSchema.pre("validate", function (next) {
+  if (this.slug) {
+    this.slug = this.slug.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+  } else if (this.title) {
+    this.slug = this.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+  }
+  next();
+});
+
 // Auto-set earlyAccessUntil = publishAt + 24 hours on save
 BlogSchema.pre("save", async function () {
   if (this.isModified("publishAt") || !this.earlyAccessUntil) {

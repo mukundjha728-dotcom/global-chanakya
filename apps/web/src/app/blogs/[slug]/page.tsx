@@ -7,6 +7,8 @@ import { auth } from "@/auth";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
+export const revalidate = 3600;
+
 import BlogActions from "@/components/blogs/BlogActions";
 import ReadingProgress from "@/components/blogs/ReadingProgress";
 import GatedArticleContent from "@/components/blogs/GatedArticleContent";
@@ -118,31 +120,71 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
     return `<h${level} id="${id}"${attrs} style="scroll-margin-top: 100px;">${text}</h${level}>`;
   });
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: blog.title,
-    description: blog.excerpt,
-    image: blog.featuredImage ? [blog.featuredImage] : [],
-    datePublished: blog.publishAt ? new Date(blog.publishAt).toISOString() : undefined,
-    dateModified: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
-    author: {
-      "@type": "Person",
-      name: blog.author?.name || "Global Chanakya Editorial",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Global Chanakya",
-      logo: {
-        "@type": "ImageObject",
-        url: `${SITE_URL}/brand/logo.svg`,
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: blog.title,
+      description: blog.excerpt,
+      image: blog.featuredImage ? [blog.featuredImage] : [],
+      datePublished: blog.publishAt ? new Date(blog.publishAt).toISOString() : undefined,
+      dateModified: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
+      author: {
+        "@type": "Person",
+        name: blog.author?.name || "Global Chanakya Editorial",
+        url: `${SITE_URL}/about`
       },
+      publisher: {
+        "@type": "Organization",
+        name: "Global Chanakya",
+        logo: {
+          "@type": "ImageObject",
+          url: `${SITE_URL}/brand/logo.svg`,
+        },
+      },
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": `${SITE_URL}/blogs/${blog.slug}`,
+      },
+      keywords: blog.tags?.join(", ") || (blog.seo?.keywords && Array.isArray(blog.seo.keywords) ? blog.seo.keywords.join(", ") : ""),
+      articleSection: blog.category,
     },
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${SITE_URL}/blogs/${blog.slug}`,
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Home",
+          item: `${SITE_URL}`
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: "Blogs",
+          item: `${SITE_URL}/blogs`
+        },
+        {
+          "@type": "ListItem",
+          position: 3,
+          name: blog.title,
+          item: `${SITE_URL}/blogs/${blog.slug}`
+        }
+      ]
     },
-  };
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      url: `${SITE_URL}`,
+      name: "Global Chanakya",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${SITE_URL}/search?q={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ];
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
@@ -211,9 +253,9 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
           {/* Main Content */}
           <article className="xl:col-span-8 w-full max-w-4xl mx-auto xl:mx-0">
             {blog.featuredImage && (
-              <div className="mb-12 aspect-video w-full rounded-sm overflow-hidden intel-border">
+              <div className="mb-12 aspect-video w-full rounded-sm overflow-hidden intel-border relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={blog.featuredImage} alt={blog.title} className="w-full h-full object-cover" />
+                <img src={blog.featuredImage} alt={blog.title} width={1200} height={675} loading="lazy" className="w-full h-full object-cover" />
               </div>
             )}
 
