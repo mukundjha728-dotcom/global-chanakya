@@ -22,11 +22,13 @@ export async function generateSitemaps() {
 export default async function sitemap({
   id,
 }: {
-  id: number;
+  id: number | string;
 }): Promise<MetadataRoute.Sitemap> {
   await dbConnect();
 
-  if (id === 0) {
+  const numId = Number(id) || 0;
+
+  if (numId === 0) {
     // Generate static routes, categories, tags
     const staticRoutes = [
       { url: `${SITE_URL}`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
@@ -65,7 +67,7 @@ export default async function sitemap({
   }
 
   // Handle blog pagination (id >= 1)
-  const skip = (id - 1) * BLOGS_PER_SITEMAP;
+  const skip = (numId - 1) * BLOGS_PER_SITEMAP;
   try {
     const blogs = await Blog.find({ status: 'published' })
       .select('slug updatedAt publishAt')
