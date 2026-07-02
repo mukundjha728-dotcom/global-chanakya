@@ -16,6 +16,6 @@ export default function robots(): MetadataRoute.Robots {
       ],
       crawlDelay: 2,
     },
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: `${SITE_URL}/sitemap-index.xml`,
   };
 }
