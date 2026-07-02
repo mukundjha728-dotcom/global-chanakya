@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://global-chanakya-web.vercel.app/sitemap.xml
