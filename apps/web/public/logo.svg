@@ -1,21 +1,37 @@
 <svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg">
-  <g id="mark">
-    <!-- Premium black tactical background -->
-    <rect width="120" height="120" rx="24" fill="#0A0A0A" />
+  <defs>
+    <!-- G Cutout Mask for transparent background compatibility -->
+    <mask id="g-mask">
+      <rect x="-50" y="-50" width="300" height="300" fill="white" />
+      <rect x="60" y="15" width="25" height="17" fill="black" />
+    </mask>
+  </defs>
+
+  <!-- Eagle-Eye Intelligence Symbol -->
+  <g transform="translate(20, 25)">
+    <!-- Eye Shape Left (Forms a subtle C) -->
+    <path d="M0,35 C25,5 50,-5 70,35 C50,75 25,65 0,35 Z" fill="none" stroke="#D4AF37" stroke-width="2.5"/>
     
-    <!-- Abstract precise 'G' base structure -->
-    <path d="M 100 30 L 100 10 L 40 10 L 20 30 L 20 90 L 40 110 L 100 110 L 100 55 L 60 55 L 60 75 L 80 75 L 80 90 L 45 90 L 40 85 L 40 35 L 45 30 Z" fill="#FFFFFF" />
+    <!-- Eye Shape Right -->
+    <path d="M120,35 C95,5 70,-5 50,35 C70,75 95,65 120,35 Z" fill="none" stroke="#D4AF37" stroke-width="2.5"/>
     
-    <!-- Nested tactical 'C' inside negative space -->
-    <path d="M 90 35 L 95 40 L 95 50 L 55 50 L 55 80 L 75 80 L 75 82 L 72 85 L 50 85 L 45 80 L 45 40 L 50 35 Z" fill="#B11226" />
+    <!-- Central Iris G -->
+    <circle cx="60" cy="35" r="18" fill="none" stroke="#F5F7FA" stroke-width="5" mask="url(#g-mask)"/>
+    <line x1="60" y1="35" x2="75" y2="35" stroke="#F5F7FA" stroke-width="5" stroke-linecap="square"/>
     
-    <!-- Central intelligence target / diamond -->
-    <path d="M 65 60 L 70 65 L 65 70 L 60 65 Z" fill="#B11226" />
+    <!-- Red Target Pupil -->
+    <circle cx="60" cy="35" r="5" fill="#B91C1C"/>
+    
+    <!-- Precision Crosshairs -->
+    <line x1="60" y1="0" x2="60" y2="10" stroke="#F5F7FA" stroke-width="1.5" stroke-opacity="0.5"/>
+    <line x1="60" y1="60" x2="60" y2="70" stroke="#F5F7FA" stroke-width="1.5" stroke-opacity="0.5"/>
+    <line x1="20" y1="35" x2="30" y2="35" stroke="#F5F7FA" stroke-width="1.5" stroke-opacity="0.5"/>
+    <line x1="90" y1="35" x2="100" y2="35" stroke="#F5F7FA" stroke-width="1.5" stroke-opacity="0.5"/>
   </g>
 
   <!-- Typography -->
-  <g transform="translate(150, 60)">
-    <text x="0" y="-8" font-family="'Inter', 'Helvetica Neue', sans-serif" font-weight="800" font-size="44" fill="#FFFFFF" letter-spacing="-0.5">Global Chanakya</text>
-    <text x="2" y="24" font-family="'Inter', 'Helvetica Neue', sans-serif" font-weight="700" font-size="15" fill="#B11226" letter-spacing="9.5">INTELLIGENCE</text>
+  <g transform="translate(170, 68)">
+    <text x="0" y="0" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="42" fill="#F5F7FA" letter-spacing="2">GLOBAL CHANAKYA</text>
+    <text x="4" y="26" font-family="'Inter', sans-serif" font-weight="600" font-size="14" fill="#D4AF37" letter-spacing="14">INTELLIGENCE</text>
   </g>
 </svg>

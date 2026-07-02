@@ -14,17 +14,20 @@ export default function Footer() {
           {/* Column 1: Brand Block */}
           <div className="lg:col-span-2 flex flex-col">
             <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="relative w-10 h-10 rounded-xl overflow-hidden intel-border flex-shrink-0 bg-black">
-                <Image
-                  src="/icon.svg"
-                  alt="Global Chanakya Logo"
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-[22px] font-bold tracking-[-0.03em] text-white">Global Chanakya</span>
-                <span className="text-[9px] uppercase tracking-[0.22em] text-[#D4AF37] font-semibold mt-1">Strategic Intelligence Platform</span>
+              <Image
+                src="/icon.svg"
+                alt="Global Chanakya"
+                width={48}
+                height={48}
+                className="w-12 h-12 rounded-xl group-hover:scale-105 transition-transform duration-300"
+              />
+              <div className="flex flex-col leading-none gap-1">
+                <span className="text-[28px] font-bold tracking-[-0.03em] text-white">
+                  Global Chanakya
+                </span>
+                <span className="text-[11px] font-bold text-[#D4AF37] tracking-[0.22em] uppercase">
+                  Intelligence
+                </span>
               </div>
             </Link>
             <p className="text-sm text-[var(--muted)] leading-[1.7]">
