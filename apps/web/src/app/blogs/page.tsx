@@ -24,7 +24,6 @@ const getCachedBlogs = unstable_cache(
     const blogs = await Blog.find(query)
       .sort({ publishAt: -1 })
       .populate("author", "name")
-      .limit(30)
       .lean();
       
     // Serialize to remove ObjectIds and Dates for Next.js cache
