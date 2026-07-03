@@ -1,10 +1,13 @@
 import { generateSitemaps } from '../sitemap';
 import { SITE_URL } from '@/constants';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
-  const sitemaps = await generateSitemaps();
-  
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+  try {
+    const sitemaps = await generateSitemaps();
+    
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemaps
   .map(
@@ -16,10 +19,31 @@ ${sitemaps
   .join('\n')}
 </sitemapindex>`;
 
-  return new Response(xml, {
-    headers: {
-      'Content-Type': 'application/xml',
-      'Cache-Control': 'public, s-maxage=86400, stale-while-revalidate',
-    },
-  });
+    return new Response(xml, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=0, must-revalidate',
+        'X-Robots-Tag': 'noindex',
+      },
+    });
+  } catch (error) {
+    console.error('Error generating sitemap index:', error);
+    // Return a minimal valid sitemap index on error so Google doesn't mark it as broken
+    const fallbackXml = `<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap>
+    <loc>${SITE_URL}/sitemap/0.xml</loc>
+    <lastmod>${new Date().toISOString()}</lastmod>
+  </sitemap>
+</sitemapindex>`;
+
+    return new Response(fallbackXml, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/xml; charset=utf-8',
+        'Cache-Control': 'public, max-age=0, must-revalidate',
+      },
+    });
+  }
 }

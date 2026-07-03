@@ -82,5 +82,5 @@ export default auth(async (req) => {
 });
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|sitemap-index\\.xml|robots\\.txt).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|sitemap\\.xml|sitemap-index\\.xml|sitemap/.*|robots\\.txt).*)'],
 };

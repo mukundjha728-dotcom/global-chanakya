@@ -14,7 +14,6 @@ export default function robots(): MetadataRoute.Robots {
         '/api/private',
         '/api/admin',
       ],
-      crawlDelay: 2,
     },
     sitemap: `${SITE_URL}/sitemap-index.xml`,
   };
