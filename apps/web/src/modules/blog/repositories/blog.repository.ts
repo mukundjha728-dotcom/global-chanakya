@@ -106,12 +106,11 @@ export class BlogRepository {
     return result[0] || null;
   }
 
-  static async getAdminBlogs(limit: number = 100): Promise<IBlog[]> {
+  static async getAdminBlogs(limit: number = 0): Promise<IBlog[]> {
     await dbConnect();
-    return Blog.find({})
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .lean();
+    const query = Blog.find({}).sort({ createdAt: -1 });
+    if (limit > 0) query.limit(limit);
+    return query.lean();
   }
 
   static async findBlogsByStatus(status: string, limit: number): Promise<IBlog[]> {

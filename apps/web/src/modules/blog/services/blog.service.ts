@@ -51,7 +51,7 @@ export class BlogService {
     { revalidate: 300, tags: ['blogs'] }
   );
 
-  static async getAdminBlogs(limit: number = 100) {
+  static async getAdminBlogs(limit: number = 0) {
     return BlogRepository.getAdminBlogs(limit);
   }
 

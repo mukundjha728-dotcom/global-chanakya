@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(blog);
     }
 
-    const blogs = await BlogService.getAdminBlogs(100);
+    const blogs = await BlogService.getAdminBlogs();
     return NextResponse.json(blogs);
   } catch (err) {
     console.error("[GET /api/admin/blogs]", err);

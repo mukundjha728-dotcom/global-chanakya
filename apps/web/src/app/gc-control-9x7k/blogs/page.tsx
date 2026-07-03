@@ -12,7 +12,7 @@ export default async function AdminBlogsPage() {
   const blogs = await Blog.find({}, {
     title: 1, slug: 1, status: 1, category: 1, visibility: 1,
     "analytics.views": 1, createdAt: 1, publishAt: 1, isTrending: 1,
-  }).sort({ createdAt: -1 }).limit(100).lean();
+  }).sort({ createdAt: -1 }).lean();
 
   return <AdminBlogsClient blogs={JSON.parse(JSON.stringify(blogs))} />;
 }
