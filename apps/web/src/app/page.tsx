@@ -249,12 +249,7 @@ export default async function Home() {
                   <div className="text-4xl md:text-5xl font-bold text-white leading-none">67+</div>
                   <div className="text-[10px] md:text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Strategic Reports</div>
                 </div>
-                <div className="flex flex-col gap-1 md:gap-2">
-                  <div className="text-4xl md:text-5xl font-bold text-white leading-none flex items-center gap-2">
-                    24 <span className="w-2.5 h-2.5 rounded-full bg-[var(--danger)] animate-pulse shadow-[0_0_10px_rgba(220,38,38,0.8)]" />
-                  </div>
-                  <div className="text-[10px] md:text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Live Conflicts</div>
-                </div>
+
                 <div className="flex flex-col gap-1 md:gap-2 col-span-2 md:col-span-1">
                   <div className="text-4xl md:text-5xl font-bold text-white leading-none">192</div>
                   <div className="text-[10px] md:text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Countries Tracked</div>
@@ -464,15 +459,7 @@ export default async function Home() {
           </div>
           
           <div className="flex flex-wrap justify-center gap-4 md:gap-6 max-w-5xl mx-auto mb-16">
-            <Link href="/conflicts" className="px-6 py-4 rounded-xl border border-[var(--danger)]/30 bg-[var(--danger)]/10 text-xs md:text-sm font-bold uppercase tracking-[0.06em] text-[var(--danger)] hover:bg-[var(--danger)] hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(220,38,38,0.1)] text-center flex-1 min-w-[160px]">
-              Active Conflicts
-            </Link>
-            <Link href="/regions" className="px-6 py-4 rounded-xl border border-[var(--cyan)]/30 bg-[var(--cyan)]/10 text-xs md:text-sm font-bold uppercase tracking-[0.06em] text-[var(--cyan)] hover:bg-[var(--cyan)] hover:text-white hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.1)] text-center flex-1 min-w-[160px]">
-              Global Regions
-            </Link>
-            <Link href="/china-watch" className="px-6 py-4 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 text-xs md:text-sm font-bold uppercase tracking-[0.06em] text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--bg)] hover:-translate-y-1 transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.1)] text-center flex-1 min-w-[160px]">
-              China Watch
-            </Link>
+
             <Link href="/breaking" className="px-6 py-4 rounded-xl intel-border bg-[var(--surface)] text-xs md:text-sm font-bold uppercase tracking-[0.06em] text-white hover:bg-white hover:text-[var(--bg)] hover:-translate-y-1 transition-all duration-300 text-center flex-1 min-w-[160px]">
               Breaking Intel
             </Link>

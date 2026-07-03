@@ -5,11 +5,9 @@ const adminDir = path.join(__dirname, '../apps/web/src/app/admin');
 
 const entities = [
   { id: 'blogs', name: 'Blog' },
-  { id: 'conflicts', name: 'Conflict' },
   { id: 'countries', name: 'Country' },
   { id: 'leaders', name: 'Leader' },
   { id: 'alliances', name: 'Alliance' },
-  { id: 'regions', name: 'Region' },
   { id: 'timelines', name: 'Timeline' },
 ];
 

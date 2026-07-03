@@ -39,10 +39,6 @@ export default function Footer() {
           <div className="flex flex-col gap-5">
             <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Strategic Hubs</h4>
             <ul className="flex flex-col gap-3">
-              <li><Link href="/conflicts" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Active Conflicts</Link></li>
-              <li><Link href="/latest-conflicts" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Live Tracker</Link></li>
-              <li><Link href="/regions" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Global Regions</Link></li>
-              <li><Link href="/china-watch" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">China Watch</Link></li>
               <li><Link href="/breaking" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Breaking Intel</Link></li>
               <li><Link href="/blogs" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">All Reports</Link></li>
             </ul>

@@ -16,11 +16,9 @@ export const navItems = [
   { href: "/admin/tags", label: "Tags", icon: Search, group: "Content" },
 
   // Intelligence
-  { href: "/admin/conflicts", label: "Conflicts", icon: ShieldAlert, group: "Intelligence" },
   { href: "/admin/countries", label: "Countries", icon: Globe, group: "Intelligence" },
   { href: "/admin/leaders", label: "Leaders", icon: Users, group: "Intelligence" },
   { href: "/admin/alliances", label: "Alliances", icon: Users, group: "Intelligence" },
-  { href: "/admin/regions", label: "Regions", icon: MapPin, group: "Intelligence" },
   { href: "/admin/timelines", label: "Timelines", icon: Clock, group: "Intelligence" },
 
   // Media & Growth

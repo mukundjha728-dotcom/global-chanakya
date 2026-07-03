@@ -136,76 +136,7 @@ export const SCHEMAS: Record<string, EntitySchema> = {
     ]
   },
 
-  conflicts: {
-    id: "conflicts",
-    name: "Conflict",
-    apiPath: "/api/admin/conflicts",
-    tabs: [
-      {
-        id: "main",
-        label: "Main Info",
-        fields: [
-          { name: "title", label: "Conflict Name", type: "text", required: true },
-          { name: "slug", label: "Slug", type: "text", required: true },
-          { name: "summary", label: "Summary", type: "textarea", required: true },
-          { name: "type", label: "Conflict Type", type: "select", options: [
-            { label: "Kinetic", value: "Kinetic" },
-            { label: "Proxy", value: "Proxy" },
-            { label: "Economic", value: "Economic" },
-            { label: "Cyber", value: "Cyber" }
-          ]},
-          { name: "threatLevel", label: "Threat Level", type: "select", options: [
-            { label: "Critical", value: "Critical" },
-            { label: "High", value: "High" },
-            { label: "Elevated", value: "Elevated" },
-            { label: "Monitoring", value: "Monitoring" }
-          ]},
-        ]
-      },
-      {
-        id: "parties",
-        label: "Involved Parties",
-        fields: [
-          { name: "involvedParties", label: "Parties", type: "async-relation", relationModel: "Country" }
-        ]
-      },
-      MEDIA_TAB,
-      SEO_TAB,
-      SCHEDULING_TAB,
-      VERSIONING_TAB
-    ]
-  },
-  regions: {
-    id: "regions",
-    name: "Region",
-    apiPath: "/api/admin/regions",
-    tabs: [
-      {
-        id: "main",
-        label: "Main",
-        fields: [
-          { name: "title", label: "Title", type: "text", required: true },
-          { name: "slug", label: "Slug", type: "text", required: true },
-          { name: "summary", label: "Summary", type: "textarea" },
-          { name: "theatre", label: "Theatre", type: "text" },
-          { name: "strategicWeight", label: "Strategic Weight", type: "select", options: [
-            { label: "Critical", value: "Critical" },
-            { label: "High", value: "High" },
-            { label: "Medium", value: "Medium" },
-            { label: "Low", value: "Low" }
-          ]},
-          { name: "trend", label: "Trend", type: "select", options: [
-            { label: "Up", value: "Up" },
-            { label: "Down", value: "Down" },
-            { label: "Stable", value: "Stable" }
-          ]},
-        ]
-      },
-      MEDIA_TAB,
-      SEO_TAB,
-      SCHEDULING_TAB
-    ]
-  },
+
   countries: {
     id: "countries",
     name: "Country",
@@ -238,7 +169,6 @@ export const SCHEMAS: Record<string, EntitySchema> = {
         id: "relations",
         label: "Relations",
         fields: [
-          { name: "relatedConflicts", label: "Related Conflicts", type: "async-relation", relationModel: "Conflict" },
           { name: "relatedLeaders", label: "Related Leaders", type: "async-relation", relationModel: "Leader" },
           { name: "relatedAlliances", label: "Related Alliances", type: "async-relation", relationModel: "Alliance" },
         ]
@@ -343,7 +273,6 @@ export const SCHEMAS: Record<string, EntitySchema> = {
           { name: "entityType", label: "Entity Type", type: "select", required: true, options: [
             { label: "Country", value: "country" },
             { label: "Leader", value: "leader" },
-            { label: "Conflict", value: "conflict" },
           ]},
           { name: "severity", label: "Severity", type: "select", options: [
             { label: "Critical", value: "critical" },
@@ -359,7 +288,7 @@ export const SCHEMAS: Record<string, EntitySchema> = {
         label: "Linked Entity",
         fields: [
           { name: "entityId", label: "Linked Entity", type: "async-relation", relationModel: "any",
-            description: "Select the Country, Leader, or Conflict this event belongs to" },
+            description: "Select the Country or Leader this event belongs to" },
         ]
       },
       SCHEDULING_TAB,
