@@ -17,7 +17,7 @@ export function WriteArticleContentTab({
       <div>
         <label className={labelClass}>URL Slug</label>
         <div className="flex items-center gap-2">
-          <span className="text-gray-500 text-xs">/blogs/</span>
+          <span className="text-white/30 text-[13px] font-medium">/blogs/</span>
           <input type="text" value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputClass} />
         </div>
       </div>
@@ -30,15 +30,15 @@ export function WriteArticleContentTab({
         <input type="text" placeholder="Image URL..." value={form.featuredImage} onChange={(e) => update("featuredImage", e.target.value)} className={inputClass} />
       </div>
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className={labelClass}>Article Content *</label>
-          <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
-            <button type="button" onClick={() => setEditorMode("code")} className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${editorMode === "code" ? "bg-amber-500 text-black" : "text-gray-400 hover:text-white"}`}>&lt;/&gt; Code</button>
-            <button type="button" onClick={() => setEditorMode("preview")} className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${editorMode === "preview" ? "bg-amber-500 text-black" : "text-gray-400 hover:text-white"}`}>👁 Preview</button>
+        <div className="flex items-center justify-between mb-3">
+          <label className={`${labelClass} !mb-0`}>Article Content *</label>
+          <div className="flex gap-1 bg-[var(--surface)] border border-[var(--border)] rounded-lg p-1 shadow-inner">
+            <button type="button" onClick={() => setEditorMode("code")} className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-[0.1em] transition-all ${editorMode === "code" ? "bg-[var(--gold)]/20 text-[var(--gold)] border border-[var(--gold)]/30" : "text-white/40 hover:text-white hover:bg-white/5 border border-transparent"}`}>&lt;/&gt; Code</button>
+            <button type="button" onClick={() => setEditorMode("preview")} className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-[0.1em] transition-all ${editorMode === "preview" ? "bg-[var(--gold)]/20 text-[var(--gold)] border border-[var(--gold)]/30" : "text-white/40 hover:text-white hover:bg-white/5 border border-transparent"}`}>👁 Preview</button>
           </div>
         </div>
         {editorMode === "code" ? (
-          <textarea rows={28} spellCheck={false} placeholder="HTML/CSS/JS here..." value={form.content} onChange={(e) => update("content", e.target.value)} className={`${inputClass} font-mono text-sm leading-relaxed resize-y`} style={{ minHeight: "520px", tabSize: 2 }} onKeyDown={(e) => {
+          <textarea rows={28} spellCheck={false} placeholder="HTML/CSS/JS here..." value={form.content} onChange={(e) => update("content", e.target.value)} className={`${inputClass} font-mono text-[13px] leading-relaxed resize-y`} style={{ minHeight: "520px", tabSize: 2 }} onKeyDown={(e) => {
             if (e.key === "Tab") {
               e.preventDefault();
               const start = e.currentTarget.selectionStart;
@@ -48,11 +48,11 @@ export function WriteArticleContentTab({
             }
           }} />
         ) : (
-          <div className="rounded-xl overflow-hidden border border-white/10" style={{ height: "560px" }}>
+          <div className="rounded-xl overflow-hidden border border-[var(--border)] shadow-inner" style={{ height: "560px" }}>
             {form.content ? (
               <iframe srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{background:#fff;color:#111;font-family:Georgia,serif;font-size:17px;line-height:1.8;padding:24px 32px;max-width:800px;margin:0 auto;}h1,h2,h3,h4{font-family:-apple-system,sans-serif;font-weight:700;margin-top:1.5em;}a{color:#ef4444;}blockquote{border-left:4px solid #ef4444;margin:1.5em 0;padding:12px 20px;background:#fff5f5;border-radius:0 8px 8px 0;font-style:italic;color:#555;}ul,ol{padding-left:1.5em;}img{max-width:100%;border-radius:8px;}</style></head><body>${form.content}</body></html>`} className="w-full h-full bg-white" title="Preview" sandbox="allow-scripts" />
             ) : (
-              <div className="h-full flex items-center justify-center bg-white/5 text-gray-600 text-sm">Preview area</div>
+              <div className="h-full flex items-center justify-center bg-[var(--bg)] text-white/30 text-[13px] font-medium">Preview area</div>
             )}
           </div>
         )}

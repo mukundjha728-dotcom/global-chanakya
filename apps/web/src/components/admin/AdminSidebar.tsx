@@ -6,11 +6,14 @@ import Image from "next/image";
 import { LayoutDashboard, Users, Newspaper, PenTool, Settings, LogOut, ShieldAlert, LayoutTemplate, Globe, MapPin, Clock, Link as LinkIcon, Search, TrendingUp, FileText, Activity, Image as ImageIcon } from "lucide-react";
 
 export const navItems = [
+  // Dashboard
+  { href: "/gc-control-9x7k", label: "Dashboard", icon: LayoutDashboard, group: "Overview" },
 
   // Content
-  { href: "/admin/blogs", label: "Blogs", icon: Newspaper, group: "Content" },
+  { href: "/admin/blogs", label: "Intelligence Archive", icon: Newspaper, group: "Content" },
+  { href: "/admin/write", label: "Write Report", icon: PenTool, group: "Content" },
   { href: "/admin/categories", label: "Categories", icon: LayoutTemplate, group: "Content" },
-  { href: "/admin/tags", label: "Tags", icon: PenTool, group: "Content" },
+  { href: "/admin/tags", label: "Tags", icon: Search, group: "Content" },
 
   // Intelligence
   { href: "/admin/conflicts", label: "Conflicts", icon: ShieldAlert, group: "Intelligence" },
@@ -20,17 +23,12 @@ export const navItems = [
   { href: "/admin/regions", label: "Regions", icon: MapPin, group: "Intelligence" },
   { href: "/admin/timelines", label: "Timelines", icon: Clock, group: "Intelligence" },
 
-  // System & SEO
-  { href: "/admin/homepage", label: "Homepage", icon: LayoutTemplate, group: "System" },
-  { href: "/admin/navigation", label: "Navigation", icon: LinkIcon, group: "System" },
-  { href: "/admin/seo", label: "Global SEO", icon: Search, group: "System" },
-
   // Media & Growth
   { href: "/admin/media", label: "Media Library", icon: ImageIcon, group: "Assets" },
   { href: "/admin/growth", label: "Growth", icon: TrendingUp, group: "Assets" },
 
   // Admin
-  { href: "/admin/users", label: "Users", icon: Users, group: "Admin" },
+  { href: "/admin/users", label: "Operatives", icon: Users, group: "Admin" },
   { href: "/admin/audit", label: "Audit Logs", icon: FileText, group: "Admin" },
   { href: "/admin/health", label: "Health", icon: Activity, group: "Admin" },
   { href: "/admin/settings", label: "Settings", icon: Settings, group: "Admin" },
@@ -39,69 +37,106 @@ export const navItems = [
 export default function AdminSidebar({ user }: { user: { name?: string; email?: string; image?: string } }) {
   const pathname = usePathname();
 
+  // Group the nav items
+  const groupedNavItems = navItems.reduce((acc, item) => {
+    if (!acc[item.group]) acc[item.group] = [];
+    acc[item.group].push(item);
+    return acc;
+  }, {} as Record<string, typeof navItems>);
+
   return (
-    <aside className="w-64 min-w-[256px] h-screen bg-[var(--bg)] border-r border-[var(--border)] flex flex-col">
+    <aside className="w-[280px] min-w-[280px] h-screen bg-[var(--surface)]/60 backdrop-blur-3xl border-r border-[var(--border)] flex flex-col relative overflow-hidden">
+      {/* Background Ambience */}
+      <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[var(--cyan)]/5 to-transparent pointer-events-none" />
+
       {/* Logo */}
-      <div className="px-6 py-5 border-b border-[var(--border)] bg-[var(--surface)]/50">
-        <div className="flex items-center gap-3">
-          <Image
-            src="/icon.svg"
-            alt="GC"
-            width={28}
-            height={28}
-          />
-          <div>
-            <p className="text-white font-bold text-sm tracking-[-0.02em] leading-tight">Global Chanakya</p>
-            <p className="text-[var(--gold)] text-[10px] font-bold uppercase tracking-widest mt-0.5">Admin Desk</p>
+      <div className="px-6 py-6 border-b border-[var(--border)]/50 relative z-10">
+        <Link href="/gc-control-9x7k" className="flex items-center gap-4 group">
+          <div className="relative">
+            <div className="absolute inset-0 bg-[var(--gold)]/20 blur-md rounded-full group-hover:bg-[var(--gold)]/40 transition-colors" />
+            <Image
+              src="/icon.svg"
+              alt="GC"
+              width={32}
+              height={32}
+              className="relative z-10"
+            />
           </div>
-        </div>
+          <div>
+            <p className="text-white font-black text-[15px] tracking-[-0.03em] leading-none group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-white/70 transition-all">Global Chanakya</p>
+            <p className="text-[var(--gold)] text-[10px] font-bold uppercase tracking-[0.2em] mt-1.5 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)] animate-pulse" /> Command
+            </p>
+          </div>
+        </Link>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-6 space-y-1">
-        <p className="px-4 text-[10px] font-bold uppercase tracking-widest text-[var(--muted)] mb-3">Main Menu</p>
-        {navItems.map((item) => {
-          const active = pathname === item.href;
-          const Icon = item.icon;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-sm text-[13px] font-bold uppercase tracking-wider transition-all ${
-                active
-                  ? "bg-[var(--gold)]/10 text-[var(--gold)] border border-[var(--gold)]/20 shadow-[0_0_15px_rgba(212,175,55,0.05)]"
-                  : "text-[var(--secondary)] hover:bg-[var(--surface)] hover:text-white"
-              }`}
-            >
-              <Icon className="w-4 h-4" />
-              <span>{item.label}</span>
-              {active && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--gold)] shadow-[0_0_5px_var(--gold)]" />}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 px-4 py-6 overflow-y-auto custom-scrollbar relative z-10">
+        <div className="space-y-8">
+          {Object.entries(groupedNavItems).map(([group, items]) => (
+            <div key={group}>
+              <p className="px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-white/40 mb-3">{group}</p>
+              <div className="space-y-1">
+                {items.map((item) => {
+                  const active = pathname === item.href;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex items-center gap-3.5 px-4 py-2.5 rounded-xl text-[13px] font-bold uppercase tracking-[0.05em] transition-all group relative overflow-hidden ${
+                        active
+                          ? "text-white"
+                          : "text-white/60 hover:text-white"
+                      }`}
+                    >
+                      {active && (
+                        <div className="absolute inset-0 bg-gradient-to-r from-[var(--gold)]/10 to-transparent border border-[var(--gold)]/20 rounded-xl" />
+                      )}
+                      {!active && (
+                        <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
+                      )}
+                      
+                      <Icon className={`w-4 h-4 relative z-10 transition-colors ${active ? "text-[var(--gold)]" : "group-hover:text-[var(--gold)]/70"}`} />
+                      <span className="relative z-10">{item.label}</span>
+                      
+                      {active && (
+                        <div className="ml-auto w-1.5 h-1.5 rounded-full bg-[var(--gold)] shadow-[0_0_8px_var(--gold)] relative z-10" />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
       </nav>
 
       {/* User */}
-      <div className="px-3 py-4 border-t border-[var(--border)] bg-[var(--surface)]/30">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-sm bg-[var(--bg)] border border-[var(--border)] mb-3 shadow-sm">
-          {user.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={user.image} alt="" className="w-8 h-8 rounded-full ring-2 ring-[var(--gold)]/40" />
-          ) : (
-            <div className="w-8 h-8 rounded-sm bg-[var(--blue)] flex items-center justify-center text-white font-bold text-sm shadow-[0_0_10px_rgba(37,99,235,0.3)]">
-              {user.name?.[0]?.toUpperCase()}
-            </div>
-          )}
+      <div className="p-4 border-t border-[var(--border)]/50 bg-[var(--bg)]/50 relative z-10">
+        <div className="flex items-center gap-3.5 px-4 py-3 rounded-xl bg-[var(--surface)]/80 border border-[var(--border)] shadow-xl mb-3 group hover:border-white/20 transition-colors">
+          <div className="relative">
+            <div className="absolute inset-0 bg-[var(--cyan)]/20 blur-md rounded-full" />
+            {user.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={user.image} alt="" className="relative z-10 w-9 h-9 rounded-full ring-2 ring-[var(--cyan)]/40" />
+            ) : (
+              <div className="relative z-10 w-9 h-9 rounded-full bg-[var(--cyan)]/20 border border-[var(--cyan)]/40 flex items-center justify-center text-[var(--cyan)] font-bold text-sm">
+                {user.name?.[0]?.toUpperCase()}
+              </div>
+            )}
+          </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-[12px] font-bold truncate">{user.name}</p>
-            <p className="text-[var(--gold)] text-[10px] uppercase tracking-wider truncate">{user.email}</p>
+            <p className="text-white text-[13px] font-bold truncate group-hover:text-[var(--cyan)] transition-colors">{user.name}</p>
+            <p className="text-white/40 text-[11px] font-medium truncate mt-0.5">{user.email}</p>
           </div>
         </div>
         <button
           onClick={() => signOut({ callbackUrl: "/" })}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-sm text-[11px] font-bold uppercase tracking-widest text-[var(--danger)] hover:bg-[var(--danger)]/10 hover:border-[var(--danger)]/20 border border-transparent transition-all"
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-[12px] font-bold uppercase tracking-[0.1em] text-[var(--danger)] hover:bg-[var(--danger)]/10 hover:border-[var(--danger)]/30 border border-transparent transition-all"
         >
-          <LogOut className="w-3.5 h-3.5" /> Sign Out
+          <LogOut className="w-4 h-4" /> Disconnect
         </button>
       </div>
     </aside>

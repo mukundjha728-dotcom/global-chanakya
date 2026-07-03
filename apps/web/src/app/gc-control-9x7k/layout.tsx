@@ -21,10 +21,13 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#0a0a0f] text-white">
+    <div className="flex h-screen overflow-hidden bg-[var(--bg)] text-white">
       <AdminSidebar user={session.user as any} />
-      <main className="flex-1 overflow-y-auto bg-[#0a0a0f]">
-        {children}
+      <main className="flex-1 overflow-y-auto bg-[var(--bg)] relative">
+        <div className="absolute inset-0 bg-[url('/images/grid.svg')] bg-center opacity-[0.02] pointer-events-none" />
+        <div className="relative z-10 min-h-full">
+          {children}
+        </div>
       </main>
     </div>
   );

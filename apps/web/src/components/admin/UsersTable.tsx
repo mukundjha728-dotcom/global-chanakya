@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { Search, ShieldAlert, UserX, UserCheck } from "lucide-react";
 
 interface UserRow {
   _id: string;
@@ -11,11 +12,11 @@ interface UserRow {
   createdAt: string;
 }
 
-const roleColors: Record<string, string> = {
-  admin: "bg-amber-500/20 text-amber-300 border-amber-500/30",
-  premium: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-  free: "bg-blue-500/20 text-blue-300 border-blue-500/30",
-  guest: "bg-gray-500/20 text-gray-300 border-gray-500/30",
+const roleColors: Record<string, { bg: string, text: string, border: string }> = {
+  admin: { bg: "bg-[var(--gold)]/10", text: "text-[var(--gold)]", border: "border-[var(--gold)]/30" },
+  premium: { bg: "bg-[var(--cyan)]/10", text: "text-[var(--cyan)]", border: "border-[var(--cyan)]/30" },
+  free: { bg: "bg-[var(--blue)]/10", text: "text-[var(--blue)]", border: "border-[var(--blue)]/30" },
+  guest: { bg: "bg-[var(--surface)]", text: "text-[var(--muted)]", border: "border-[var(--border)]" },
 };
 
 const providerIcons: Record<string, string> = {
@@ -77,113 +78,142 @@ export default function UsersTable({ users }: { users: UserRow[] }) {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white">Users Management 👥</h1>
-        <p className="text-gray-400 text-sm mt-1">
-          {localUsers.length} total users · Admin account is locked (cannot change)
-        </p>
+    <div className="p-6 md:p-10 max-w-7xl mx-auto relative z-10 min-h-screen">
+      
+      {/* Header */}
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-[-0.03em] mb-2 flex items-center gap-3">
+            Operative <span className="bg-gradient-to-r from-[var(--cyan)] to-blue-400 text-transparent bg-clip-text drop-shadow-sm">Roster</span>
+          </h1>
+          <p className="text-white/50 text-[14px] font-medium max-w-xl leading-relaxed">
+            Manage system access, intelligence clearances, and active operatives across the network.
+            <span className="text-[var(--gold)] ml-2">Total Active: {localUsers.length}</span>
+          </p>
+        </div>
+        
+        {/* Admin Warning */}
+        <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[var(--gold)]/20 bg-[var(--gold)]/5 backdrop-blur-md">
+          <ShieldAlert className="w-4 h-4 text-[var(--gold)]" />
+          <p className="text-[var(--gold)] text-[11px] font-bold uppercase tracking-[0.1em]">Admin roles locked</p>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-5">
-        <input
-          type="text"
-          placeholder="Search by name or email…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="flex-1 min-w-[200px] px-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50"
-        />
-        {["all", "admin", "free", "banned"].map((f) => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            className={`px-3 py-2 rounded-lg text-xs font-medium border transition-all capitalize ${
-              filter === f
-                ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
-                : "bg-white/5 text-gray-400 border-white/10 hover:text-white"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+      {/* Filters Bar */}
+      <div className="flex flex-col md:flex-row items-center gap-4 mb-8 bg-[var(--surface)]/50 backdrop-blur-xl border border-[var(--border)] p-3 rounded-2xl shadow-lg">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+          <input
+            type="text"
+            placeholder="Search by name or email identity..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-11 pr-4 py-3 bg-[var(--bg)] border border-[var(--border)] rounded-xl text-[13px] text-white placeholder-white/30 focus:outline-none focus:border-[var(--cyan)]/50 focus:shadow-[0_0_15px_rgba(34,211,238,0.1)] transition-all"
+          />
+        </div>
+        <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          {["all", "admin", "free", "banned"].map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`flex-1 md:flex-none px-5 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-[0.1em] border transition-all ${
+                filter === f
+                  ? "bg-[var(--cyan)]/10 text-[var(--cyan)] border-[var(--cyan)]/30 shadow-[0_0_15px_rgba(34,211,238,0.15)]"
+                  : "bg-[var(--bg)] text-white/40 border-[var(--border)] hover:text-white hover:bg-[var(--surface)]"
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-[#0d0d17] border border-white/10 rounded-xl overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+      {/* Roster Table */}
+      <div className="bg-[var(--surface)]/40 backdrop-blur-2xl border border-[var(--border)] rounded-2xl overflow-hidden shadow-2xl relative">
+        {/* Glow */}
+        <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-[var(--cyan)]/50 to-transparent" />
+        
+        <div className="overflow-x-auto custom-scrollbar">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left text-xs text-gray-500 font-medium px-5 py-3 uppercase tracking-wider">User</th>
-                <th className="text-left text-xs text-gray-500 font-medium px-5 py-3 uppercase tracking-wider">Provider</th>
-                <th className="text-left text-xs text-gray-500 font-medium px-5 py-3 uppercase tracking-wider">Role</th>
-                <th className="text-left text-xs text-gray-500 font-medium px-5 py-3 uppercase tracking-wider">Status</th>
-                <th className="text-left text-xs text-gray-500 font-medium px-5 py-3 uppercase tracking-wider">Joined</th>
-                <th className="text-left text-xs text-gray-500 font-medium px-5 py-3 uppercase tracking-wider">Actions</th>
+              <tr className="border-b border-[var(--border)] bg-[var(--bg)]/50">
+                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Operative Identity</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Access Level</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Origin</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">Status</th>
+                <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 text-right">Directives</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-[var(--border)]/50">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center text-gray-500 py-12">No users found</td>
+                  <td colSpan={5} className="text-center py-20">
+                    <UserX className="w-12 h-12 text-white/10 mx-auto mb-4" />
+                    <p className="text-white/40 text-[14px] font-medium">No operatives matching the query.</p>
+                  </td>
                 </tr>
               ) : (
                 filtered.map((u) => (
-                  <tr key={u._id} className={`hover:bg-white/3 transition-colors ${u.isBanned ? "opacity-50" : ""}`}>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-full bg-amber-500/20 flex items-center justify-center text-amber-300 text-xs font-bold border border-amber-500/20">
-                          {u.name?.[0]?.toUpperCase()}
+                  <tr key={u._id} className={`group hover:bg-[var(--bg)]/50 transition-colors ${u.isBanned ? "opacity-50 hover:opacity-80" : ""}`}>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <div className="absolute inset-0 bg-gradient-to-br from-[var(--cyan)] to-[var(--blue)] blur opacity-30 group-hover:opacity-60 transition-opacity rounded-full" />
+                          <div className="relative w-10 h-10 rounded-full bg-[var(--bg)] border border-[var(--border)] flex items-center justify-center text-white font-bold text-[14px] shadow-inner">
+                            {u.name?.[0]?.toUpperCase() ?? "?"}
+                          </div>
                         </div>
                         <div>
-                          <p className="text-white font-medium text-xs">{u.name}</p>
-                          <p className="text-gray-500 text-xs">{u.email}</p>
+                          <p className="text-white text-[13.5px] font-bold group-hover:text-[var(--cyan)] transition-colors">{u.name}</p>
+                          <p className="text-white/40 text-[11px] font-medium mt-0.5">{u.email}</p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-gray-400 text-xs">
-                      {providerIcons[u.provider] ?? "?"} {u.provider}
+                    <td className="px-6 py-5">
+                      <select
+                        disabled={u.role === "admin"}
+                        value={u.role}
+                        onChange={(e) => updateRole(u._id, e.target.value)}
+                        className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.1em] border outline-none appearance-none cursor-pointer transition-all ${
+                          roleColors[u.role]?.bg ?? roleColors.free.bg
+                        } ${roleColors[u.role]?.text ?? roleColors.free.text} ${roleColors[u.role]?.border ?? roleColors.free.border} ${
+                          u.role === "admin" ? "opacity-70 cursor-not-allowed" : "hover:brightness-125 hover:shadow-md"
+                        }`}
+                      >
+                        <option value="free" className="bg-[var(--bg)] text-white">FREE</option>
+                        <option value="premium" className="bg-[var(--bg)] text-white">PREMIUM</option>
+                        {u.role === "admin" && <option value="admin">ADMIN (LOCKED)</option>}
+                      </select>
                     </td>
-                    <td className="px-5 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs border ${roleColors[u.role] ?? roleColors.free}`}>
-                        {u.role}
-                      </span>
+                    <td className="px-6 py-5">
+                      <div className="flex items-center gap-2 text-white/50 text-[12px] font-medium bg-[var(--bg)] px-3 py-1.5 rounded-lg border border-[var(--border)] w-fit">
+                        {providerIcons[u.provider] ?? "❓"} {u.provider}
+                      </div>
                     </td>
-                    <td className="px-5 py-3">
-                      <span className={`px-2 py-0.5 rounded-full text-xs border ${u.isBanned ? "bg-red-500/20 text-red-300 border-red-500/30" : "bg-green-500/20 text-green-300 border-green-500/30"}`}>
-                        {u.isBanned ? "Banned" : "Active"}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-gray-400 text-xs">
-                      {new Date(u.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
-                    </td>
-                    <td className="px-5 py-3">
-                      {u.role === "admin" ? (
-                        <span className="text-xs text-gray-600 italic">Protected</span>
+                    <td className="px-6 py-5">
+                      {u.isBanned ? (
+                        <span className="flex items-center gap-1.5 text-[var(--danger)] text-[11px] font-bold uppercase tracking-widest">
+                          <UserX className="w-3.5 h-3.5" /> Banned
+                        </span>
                       ) : (
-                        <div className="flex items-center gap-2">
-                          <select
-                            disabled={loading === u._id}
-                            value={u.role}
-                            onChange={(e) => updateRole(u._id, e.target.value)}
-                            className="text-xs bg-white/5 border border-white/10 rounded px-2 py-1 text-white focus:outline-none focus:border-amber-500/50 disabled:opacity-50"
-                          >
-                            <option value="free">Free</option>
-
-                          </select>
-                          <button
-                            disabled={loading === u._id}
-                            onClick={() => toggleBan(u._id, u.isBanned)}
-                            className={`text-xs px-2 py-1 rounded border transition-all disabled:opacity-50 ${
-                              u.isBanned
-                                ? "border-green-500/30 text-green-400 hover:bg-green-500/10"
-                                : "border-red-500/30 text-red-400 hover:bg-red-500/10"
-                            }`}
-                          >
-                            {loading === u._id ? "…" : u.isBanned ? "Unban" : "Ban"}
-                          </button>
-                        </div>
+                        <span className="flex items-center gap-1.5 text-[var(--cyan)] text-[11px] font-bold uppercase tracking-widest">
+                          <UserCheck className="w-3.5 h-3.5" /> Active
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-5 text-right">
+                      {u.role !== "admin" && (
+                        <button
+                          onClick={() => toggleBan(u._id, u.isBanned)}
+                          disabled={loading === u._id}
+                          className={`px-4 py-2 rounded-xl text-[11px] font-bold uppercase tracking-[0.1em] border transition-all ${
+                            u.isBanned
+                              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.1)]"
+                              : "bg-[var(--danger)]/10 text-[var(--danger)] border-[var(--danger)]/30 hover:bg-[var(--danger)]/20 hover:shadow-[0_0_15px_rgba(220,38,38,0.15)]"
+                          } ${loading === u._id ? "opacity-50 cursor-wait" : ""}`}
+                        >
+                          {loading === u._id ? "Processing..." : u.isBanned ? "Reinstate" : "Revoke Access"}
+                        </button>
                       )}
                     </td>
                   </tr>
