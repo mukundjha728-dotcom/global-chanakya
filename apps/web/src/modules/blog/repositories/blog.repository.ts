@@ -106,6 +106,25 @@ export class BlogRepository {
     return result[0] || null;
   }
 
+  static async getMostViewedPast7Days(): Promise<IBlog | null> {
+    await dbConnect();
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    const result = await Blog.find({ 
+      status: "published", 
+      visibility: { $in: ["public", "premium", "private"] },
+      publishAt: { $gte: sevenDaysAgo }
+    }, {
+      title: 1, slug: 1, excerpt: 1, category: 1, visibility: 1,
+      featuredImage: 1, isTrending: 1, analytics: 1, publishAt: 1, createdAt: 1
+    })
+      .sort({ "analytics.views": -1 })
+      .limit(1)
+      .lean();
+    return result[0] || null;
+  }
+
   static async getAdminBlogs(limit: number = 0): Promise<IBlog[]> {
     await dbConnect();
     const query = Blog.find({}).sort({ createdAt: -1 });

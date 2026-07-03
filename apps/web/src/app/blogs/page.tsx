@@ -22,6 +22,7 @@ const getCachedBlogs = unstable_cache(
     if (trending) query.isTrending = true;
 
     const blogs = await Blog.find(query)
+      .select("-content")
       .sort({ publishAt: -1 })
       .populate("author", "name")
       .lean();

@@ -180,10 +180,10 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
 }
 
 export default async function Home() {
-  const [trendingBlogs, latestBlogs, mostViewedBlogGlobal] = await Promise.all([
+  const [trendingBlogs, latestBlogs, mostViewedBlog7Days] = await Promise.all([
     BlogService.getTrendingBlogs(6),
     BlogService.getLatestBlogs(6),
-    BlogService.getMostViewedBlog(),
+    BlogService.getMostViewedBlogPast7Days(),
   ]);
 
   const categoryBlogsMap = await Promise.all(
@@ -193,8 +193,8 @@ export default async function Home() {
     })
   );
 
-  const mostViewedBlogId = mostViewedBlogGlobal?._id;
-  const featuredBlog = mostViewedBlogGlobal || latestBlogs[0] || trendingBlogs[0];
+  const mostViewedBlogId = mostViewedBlog7Days?._id;
+  const featuredBlog = mostViewedBlog7Days || latestBlogs[0] || trendingBlogs[0];
 
   const hasTrending = trendingBlogs.length > 0;
   const sideTrending = trendingBlogs.slice(1, 4); // take exactly 3 for perfect side stack

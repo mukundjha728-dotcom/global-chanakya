@@ -51,6 +51,15 @@ export class BlogService {
     { revalidate: 300, tags: ['blogs'] }
   );
 
+  static getMostViewedBlogPast7Days = unstable_cache(
+    async () => {
+      const data = await BlogRepository.getMostViewedPast7Days();
+      return data ? JSON.parse(JSON.stringify(data)) : null;
+    },
+    ['blogs-most-viewed-7days'],
+    { revalidate: 300, tags: ['blogs'] }
+  );
+
   static async getAdminBlogs(limit: number = 0) {
     return BlogRepository.getAdminBlogs(limit);
   }
