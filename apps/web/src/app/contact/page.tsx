@@ -24,27 +24,14 @@ export default function ContactPage() {
           {/* Contact Info */}
           <div className="lg:col-span-1 flex flex-col gap-10">
             <div className="p-6 rounded-2xl glass-card border border-[var(--border)] bg-[var(--surface)]/30 hover:border-[var(--gold)]/30 transition-colors group">
-              <h3 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-[0.2em] mb-5">Editorial Desk</h3>
+              <h3 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-[0.2em] mb-5">General Support</h3>
               <div className="flex items-start gap-4 text-white">
                 <div className="w-12 h-12 rounded-xl bg-[var(--bg)] flex items-center justify-center border border-[var(--border)] shrink-0 group-hover:border-[var(--cyan)]/50 transition-colors">
                   <Mail className="w-5 h-5 text-[var(--cyan)]" />
                 </div>
                 <div className="flex flex-col justify-center">
-                  <p className="font-bold text-base">editor@globalchanakya.com</p>
-                  <p className="text-sm text-white/60 mt-1">For pitches and analysis tips</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-6 rounded-2xl glass-card border border-[var(--border)] bg-[var(--surface)]/30 hover:border-[var(--gold)]/30 transition-colors group">
-              <h3 className="text-[10px] font-bold text-[var(--muted)] uppercase tracking-[0.2em] mb-5">Reader Support</h3>
-              <div className="flex items-start gap-4 text-white">
-                <div className="w-12 h-12 rounded-xl bg-[var(--bg)] flex items-center justify-center border border-[var(--border)] shrink-0 group-hover:border-[var(--gold)]/50 transition-colors">
-                  <Mail className="w-5 h-5 text-[var(--gold)]" />
-                </div>
-                <div className="flex flex-col justify-center">
-                  <p className="font-bold text-base">support@globalchanakya.com</p>
-                  <p className="text-sm text-white/60 mt-1">For account and access issues</p>
+                  <p className="font-bold text-base break-all">editorglobalchanakya.com@gmail.com</p>
+                  <p className="text-sm text-white/60 mt-1">For all queries, pitches and support</p>
                 </div>
               </div>
             </div>
@@ -73,12 +60,7 @@ export default function ContactPage() {
               <h3 className="text-2xl font-bold text-white mb-8 relative z-10 tracking-tight">Send a Secure Message</h3>
               
               <form action="https://api.web3forms.com/submit" method="POST" className="space-y-6 relative z-10">
-                
-                {/* 
-                  IMPORTANT: Replace YOUR_WEB3FORMS_ACCESS_KEY with the actual key from web3forms.com 
-                  It's free, just enter your email at web3forms.com to get your key.
-                */}
-                <input type="hidden" name="access_key" value="YOUR_WEB3FORMS_ACCESS_KEY" />
+                <input type="hidden" name="access_key" value="e723b223-d3dc-4b8b-b284-c93a5e0d999b" />
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
@@ -104,8 +86,8 @@ export default function ContactPage() {
                   <textarea name="message" required rows={5} className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-5 py-4 text-white focus:border-[var(--cyan)] focus:ring-1 focus:ring-[var(--cyan)] outline-none resize-none transition-all placeholder:text-white/20" placeholder="How can we help?"></textarea>
                 </div>
 
-                {/* Redirect back to contact page after submission */}
-                <input type="hidden" name="redirect" value="https://web3forms.com/success" />
+                {/* Disable FormSubmit captcha if you prefer a seamless submission */}
+                {/* <input type="hidden" name="_captcha" value="false" /> */}
 
                 <div className="pt-4">
                   <button type="submit" className="w-full md:w-auto px-8 py-4 bg-[var(--gold)] text-[var(--bg)] text-sm font-extrabold uppercase tracking-[0.06em] rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
