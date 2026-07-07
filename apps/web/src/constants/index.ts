@@ -2,7 +2,7 @@
 // PDA Sections 2, 3, 10
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://global-chanakya-web.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL || "https://www.globalchanakya.in";
 
 export const SITE_NAME = "Global Chanakya";
 
