@@ -3,6 +3,11 @@ import dbConnect from '@/lib/mongoose';
 import { Blog } from '@/lib/models/Blog';
 import { SITE_URL } from '@/constants';
 
+import { getStaticSitemaps } from '@/modules/seo/sitemap-static';
+import { getEntitySitemaps } from '@/modules/seo/sitemap-entities';
+import { getTopicSitemaps } from '@/modules/seo/sitemap-topics';
+import { getPlatformSeoSitemaps } from '@/modules/seo/sitemap-platformseo';
+
 const BLOGS_PER_SITEMAP = 1000;
 
 export async function generateSitemaps() {
@@ -29,24 +34,20 @@ export default async function sitemap({
   const numId = Number(id) || 0;
 
   if (numId === 0) {
-    // Generate static routes, categories, tags
-    const staticRoutes = [
-      { url: `${SITE_URL}`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
-      { url: `${SITE_URL}/blogs`, lastModified: new Date(), changeFrequency: 'daily', priority: 0.9 },
-      { url: `${SITE_URL}/about`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-      { url: `${SITE_URL}/contact`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.8 },
-      { url: `${SITE_URL}/privacy`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.5 },
-      { url: `${SITE_URL}/terms`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.5 },
-      { url: `${SITE_URL}/categories`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
-    ] as MetadataRoute.Sitemap;
-
     try {
+      const [staticMaps, topics, platformSeo, entities] = await Promise.all([
+        getStaticSitemaps(),
+        getTopicSitemaps(),
+        getPlatformSeoSitemaps(),
+        getEntitySitemaps(),
+      ]);
+
       // Fetch dynamic categories
       const categories = await Blog.distinct('category', { status: 'published' });
       const categoryRoutes = categories.filter(Boolean).map((cat: string) => ({
         url: `${SITE_URL}/categories?type=${encodeURIComponent(cat.toLowerCase())}`,
         lastModified: new Date(),
-        changeFrequency: 'weekly',
+        changeFrequency: 'weekly' as const,
         priority: 0.7,
       })) as MetadataRoute.Sitemap;
 
@@ -55,14 +56,14 @@ export default async function sitemap({
       const tagRoutes = tags.filter(Boolean).map((tag: string) => ({
         url: `${SITE_URL}/blogs?tag=${encodeURIComponent(tag.toLowerCase())}`,
         lastModified: new Date(),
-        changeFrequency: 'weekly',
+        changeFrequency: 'weekly' as const,
         priority: 0.6,
       })) as MetadataRoute.Sitemap;
 
-      return [...staticRoutes, ...categoryRoutes, ...tagRoutes];
+      return [...staticMaps, ...topics, ...platformSeo, ...entities, ...categoryRoutes, ...tagRoutes];
     } catch (e) {
       console.error("Error generating sitemap static routes:", e);
-      return staticRoutes;
+      return getStaticSitemaps();
     }
   }
 
