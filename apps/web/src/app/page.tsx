@@ -203,7 +203,7 @@ export default async function Home() {
     <div className="min-h-screen flex flex-col bg-[var(--bg)] text-[var(--text)]">
 
       {/* ─── HERO ─── */}
-      <section className="relative overflow-hidden border-b border-[var(--border)] strategic-grid min-h-[100dvh] md:min-h-[800px] flex items-center py-24 md:py-32">
+      <section className="relative overflow-hidden border-b border-[var(--border)] strategic-grid min-h-[calc(100vh-5rem)] flex items-center py-12 md:py-16 lg:py-20">
         {/* Background glow effects */}
         <div className="absolute top-1/4 -left-1/4 w-[500px] h-[500px] bg-[var(--cyan)]/10 blur-[120px] rounded-full pointer-events-none" />
         <div className="absolute top-1/2 right-0 translate-x-1/4 -translate-y-1/2 w-[600px] h-[600px] bg-[var(--surface)] blur-[100px] rounded-full pointer-events-none" />
