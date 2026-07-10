@@ -12,6 +12,32 @@ const nextConfig: NextConfig = {
   },
   serverExternalPackages: ["mongoose", "mongodb", "argon2", "jose"],
   outputFileTracingRoot: path.join(process.cwd(), "../../"),
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'global-chanakya-web.vercel.app',
+          },
+        ],
+        destination: 'https://www.globalchanakya.in/:path*',
+        permanent: true,
+      },
+      {
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'globalchanakya.in',
+          },
+        ],
+        destination: 'https://www.globalchanakya.in/:path*',
+        permanent: true,
+      }
+    ];
+  },
 };
 
 export default withSentryConfig(nextConfig, {
