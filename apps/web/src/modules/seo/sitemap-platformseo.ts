@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { SEO_BLOGS } from '@/constants/platformSeoBlogs';
 
 export async function getPlatformSeoSitemaps(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://globalchanakya.com';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.globalchanakya.in';
 
   const sitemap: MetadataRoute.Sitemap = [
     {

@@ -22,7 +22,7 @@ Welcome to the machine-readable version of Global Chanakya. This endpoint expose
 
   blogs.forEach((blog: any) => {
     llmsTxt += `### ${blog.title}\n`;
-    llmsTxt += `- URL: https://globalchanakya.com/blogs/${blog.slug}\n`;
+    llmsTxt += `- URL: https://www.globalchanakya.in/blogs/${blog.slug}\n`;
     llmsTxt += `- Last Updated: ${new Date(blog.updatedAt).toISOString()}\n\n`;
     
     if (blog.aiSummary) {

@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: blog.excerpt,
     keywords: blog.keywords.join(", "),
     alternates: {
-      canonical: `https://globalchanakya.com/platformseo/${blog.slug}`,
+      canonical: `https://www.globalchanakya.in/platformseo/${blog.slug}`,
     },
     robots: "index, follow",
   };
@@ -76,12 +76,12 @@ export default async function PlatformSeoArticle({ params }: Props) {
           "name": "Global Chanakya",
           "logo": {
             "@type": "ImageObject",
-            "url": "https://globalchanakya.com/icon.svg"
+            "url": "https://www.globalchanakya.in/icon.svg"
           }
         },
         "mainEntityOfPage": {
           "@type": "WebPage",
-          "@id": `https://globalchanakya.com/platformseo/${blog.slug}`
+          "@id": `https://www.globalchanakya.in/platformseo/${blog.slug}`
         }
       },
       {
@@ -91,19 +91,19 @@ export default async function PlatformSeoArticle({ params }: Props) {
             "@type": "ListItem",
             "position": 1,
             "name": "Home",
-            "item": "https://globalchanakya.com/"
+            "item": "https://www.globalchanakya.in/"
           },
           {
             "@type": "ListItem",
             "position": 2,
             "name": "Platform SEO",
-            "item": "https://globalchanakya.com/platformseo"
+            "item": "https://www.globalchanakya.in/platformseo"
           },
           {
             "@type": "ListItem",
             "position": 3,
             "name": blog.title,
-            "item": `https://globalchanakya.com/platformseo/${blog.slug}`
+            "item": `https://www.globalchanakya.in/platformseo/${blog.slug}`
           }
         ]
       }

@@ -94,7 +94,7 @@ function optimizeSEO(data: any): Partial<any> {
     "publisher": {
       "@type": "Organization",
       "name": "Global Chanakya",
-      "url": "https://globalchanakya.com",
+      "url": "https://www.globalchanakya.in",
     },
     ...(safePublishDate ? { "datePublished": safePublishDate } : {}),
     ...(safeUpdateDate ? { "dateModified": safeUpdateDate } : {}),
