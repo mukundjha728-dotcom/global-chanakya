@@ -70,10 +70,10 @@ export class TopicService {
     ]);
 
     return {
-      countries: countries.map((c: ICountry) => ({ ...c, type: "country" })),
-      leaders: leaders.map((l: ILeader) => ({ ...l, type: "leader" })),
-      conflicts: conflicts.map((c: IConflict) => ({ ...c, type: "conflict" })),
-      reports: blogs.map((b: IBlog) => ({ ...b, type: "report" })),
+      countries: countries.map((c: any) => ({ ...c, _id: c._id?.toString(), createdAt: c.createdAt?.toISOString(), updatedAt: c.updatedAt?.toISOString(), type: "country" })),
+      leaders: leaders.map((l: any) => ({ ...l, _id: l._id?.toString(), createdAt: l.createdAt?.toISOString(), updatedAt: l.updatedAt?.toISOString(), type: "leader" })),
+      conflicts: conflicts.map((c: any) => ({ ...c, _id: c._id?.toString(), createdAt: c.createdAt?.toISOString(), updatedAt: c.updatedAt?.toISOString(), type: "conflict" })),
+      reports: blogs.map((b: any) => ({ ...b, _id: b._id?.toString(), createdAt: b.createdAt?.toISOString(), updatedAt: b.updatedAt?.toISOString(), publishAt: b.publishAt?.toISOString(), type: "report" })),
     };
   }
 }

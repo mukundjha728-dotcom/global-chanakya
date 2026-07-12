@@ -12,8 +12,8 @@ export const revalidate = 3600;
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
   const formattedSlug = slug.replace(/-/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-  const title = `${formattedSlug} | Intelligence Command Center | Global Chanakya`;
-  const description = `Aggregated intelligence, reports, conflicts, and geopolitical relations concerning ${formattedSlug}. Deep-dive into our massive topical authority graph.`;
+  const title = `${formattedSlug} Analysis & Reports | Global Chanakya`;
+  const description = `Read the latest geopolitical analysis, intelligence reports, and strategic insights concerning ${formattedSlug}.`;
   const canonicalUrl = `${SITE_URL}/topic/${slug}`;
 
   return generateSeoMetadata({
