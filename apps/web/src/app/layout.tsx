@@ -108,16 +108,46 @@ const jsonLd = [
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: SITE_NAME,
-    url: SITE_URL,
-    potentialAction: {
+    "name": SITE_NAME,
+    "url": SITE_URL,
+    "potentialAction": {
       "@type": "SearchAction",
-      target: {
+      "target": {
         "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/blogs?search={search_term_string}`
+        "urlTemplate": `${SITE_URL}/blogs?search={search_term_string}`
       },
       "query-input": "required name=search_term_string"
     }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+      {
+        "@type": "SiteNavigationElement",
+        "position": 1,
+        "name": "Reports",
+        "url": `${SITE_URL}/blogs`
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 2,
+        "name": "About Us",
+        "url": `${SITE_URL}/about`
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 3,
+        "name": "Breaking Intel",
+        "url": `${SITE_URL}/breaking`
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 4,
+        "name": "Methodology",
+        "url": `${SITE_URL}/methodology`
+      }
+    ]
   }
 ];
 
