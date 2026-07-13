@@ -4,7 +4,7 @@
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://www.globalchanakya.in";
 
-export const SITE_NAME = "Global Chanakya";
+export const SITE_NAME = "Global Chanakya Intelligence";
 
 export const SITE_DESCRIPTION = "Enterprise-grade geopolitical intelligence and strategic media platform.";
 

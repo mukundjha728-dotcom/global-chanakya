@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       {
+        source: '/topic/strategic-intelligence',
+        destination: '/',
+        permanent: true,
+      },
+      {
         source: '/:path*',
         has: [
           {
