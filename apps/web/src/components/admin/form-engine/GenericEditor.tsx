@@ -247,7 +247,7 @@ export default function GenericEditor({
       const isPublishing = formRef.current.status === "published" || formRef.current.status === "scheduled";
       if (isPublishing) {
         const missing: string[] = [];
-        if (!formRef.current.title) missing.push("Title");
+        if (!formRef.current.title && !formRef.current.name) missing.push("Title/Name");
         if (!formRef.current.slug) missing.push("Slug");
         if (missing.length > 0) {
           alert("Cannot publish. Missing: " + missing.join(", "));
