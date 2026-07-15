@@ -9,7 +9,7 @@ export interface ICountry extends Document {
   iso3Code?: string;
   flagUrl?: string;
   capital?: string;
-  population?: number;
+  population?: string;
   area?: number; // In square kilometers
   currency?: string;
   languages: string[];
@@ -103,7 +103,7 @@ const CountrySchema = new Schema<ICountry>({
   iso3Code: { type: String },
   flagUrl: { type: String },
   capital: { type: String },
-  population: { type: Number },
+  population: { type: String },
   area: { type: Number },
   currency: { type: String },
   languages: [{ type: String }],

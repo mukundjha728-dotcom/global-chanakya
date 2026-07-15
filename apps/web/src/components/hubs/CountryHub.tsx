@@ -59,7 +59,7 @@ export function CountryHub({ country, leaderNodes = [], conflictNodes = [], edge
           <ul className="space-y-4 text-gray-300">
             <li className="flex justify-between border-b border-gray-800 pb-2">
               <span className="text-gray-500">Population</span>
-              <span className="font-semibold">{country.population.toLocaleString()}</span>
+              <span className="font-semibold">{country.population}</span>
             </li>
             <li className="flex justify-between border-b border-gray-800 pb-2">
               <span className="text-gray-500">GDP</span>

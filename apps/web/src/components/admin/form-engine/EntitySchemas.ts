@@ -152,7 +152,7 @@ export const SCHEMAS: Record<string, EntitySchema> = {
           { name: "capital", label: "Capital City", type: "text", required: true },
           { name: "region", label: "Region", type: "text", required: true },
           { name: "overview", label: "Overview", type: "textarea", required: true },
-          { name: "population", label: "Population", type: "number" },
+          { name: "population", label: "Population", type: "text" },
           { name: "gdp", label: "GDP", type: "text" },
           { name: "intelligenceScore", label: "Intelligence Score (0-100)", type: "number" },
           { name: "geopoliticalStatus", label: "Geopolitical Status", type: "select", options: [
