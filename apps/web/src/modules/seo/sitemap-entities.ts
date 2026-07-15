@@ -16,12 +16,23 @@ export async function getEntitySitemaps(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   return [
-    ...countries.map((c: any) => ({
-      url: `${SITE_URL}/country/${encodeURIComponent(c.slug || "")}`,
-      lastModified: c.updatedAt,
-      changeFrequency: 'weekly' as const,
-      priority: 0.9,
-    })),
+    ...countries.flatMap((c: any) => {
+      const base = {
+        url: `${SITE_URL}/countries/${encodeURIComponent(c.slug || "")}`,
+        lastModified: c.updatedAt,
+        changeFrequency: 'weekly' as const,
+        priority: 0.9,
+      };
+      
+      const topics = ['history', 'military', 'economy', 'politics', 'blog'].map(topic => ({
+        url: `${SITE_URL}/countries/${encodeURIComponent(c.slug || "")}/${topic}`,
+        lastModified: c.updatedAt,
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      }));
+
+      return [base, ...topics];
+    }),
     ...leaders.map((l: any) => ({
       url: `${SITE_URL}/leader/${encodeURIComponent(l.slug || "")}`,
       lastModified: l.updatedAt,
