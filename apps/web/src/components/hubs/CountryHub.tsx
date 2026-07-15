@@ -63,7 +63,11 @@ export function CountryHub({ country, leaderNodes = [], conflictNodes = [], edge
             </li>
             <li className="flex justify-between border-b border-gray-800 pb-2">
               <span className="text-gray-500">GDP</span>
-              <span className="font-semibold">{country.gdp || 'N/A'}</span>
+              <span className="font-semibold">{country.stats?.gdp || 'N/A'}</span>
+            </li>
+            <li className="flex justify-between border-b border-gray-800 pb-2">
+              <span className="text-gray-500">Military Rank</span>
+              <span className="font-semibold">{country.stats?.militaryRank ? `#${country.stats.militaryRank}` : 'N/A'}</span>
             </li>
             <li className="flex justify-between border-b border-gray-800 pb-2">
               <span className="text-gray-500">Intel Score</span>

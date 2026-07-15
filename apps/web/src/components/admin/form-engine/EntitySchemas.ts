@@ -153,7 +153,8 @@ export const SCHEMAS: Record<string, EntitySchema> = {
           { name: "region", label: "Region", type: "text", required: true },
           { name: "overview", label: "Overview", type: "textarea", required: true },
           { name: "population", label: "Population", type: "text" },
-          { name: "gdp", label: "GDP", type: "text" },
+          { name: "stats.gdp", label: "GDP", type: "text" },
+          { name: "stats.militaryRank", label: "Military Rank", type: "number" },
           { name: "intelligenceScore", label: "Intelligence Score (0-100)", type: "number" },
           { name: "geopoliticalStatus", label: "Geopolitical Status", type: "select", options: [
             { label: "Superpower", value: "Superpower" },

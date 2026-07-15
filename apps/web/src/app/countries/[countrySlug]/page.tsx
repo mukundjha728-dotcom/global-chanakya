@@ -39,12 +39,22 @@ export default async function CountryPage({ params }: { params: Promise<{ countr
 
         {/* Quick Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-          {["Capital", "Population", "GDP", "Military Rank"].map((stat) => (
-            <div key={stat} className="bg-[#0B1220] p-4 rounded border border-gray-800">
-              <p className="text-gray-500 text-sm uppercase tracking-wider">{stat}</p>
-              <p className="text-2xl font-bold mt-1">Data</p>
-            </div>
-          ))}
+          <div className="bg-[#0B1220] p-4 rounded border border-gray-800">
+            <p className="text-gray-500 text-sm uppercase tracking-wider">Capital</p>
+            <p className="text-2xl font-bold mt-1">{country?.capital || "N/A"}</p>
+          </div>
+          <div className="bg-[#0B1220] p-4 rounded border border-gray-800">
+            <p className="text-gray-500 text-sm uppercase tracking-wider">Population</p>
+            <p className="text-2xl font-bold mt-1">{country?.population || "N/A"}</p>
+          </div>
+          <div className="bg-[#0B1220] p-4 rounded border border-gray-800">
+            <p className="text-gray-500 text-sm uppercase tracking-wider">GDP</p>
+            <p className="text-2xl font-bold mt-1">{country?.stats?.gdp || "N/A"}</p>
+          </div>
+          <div className="bg-[#0B1220] p-4 rounded border border-gray-800">
+            <p className="text-gray-500 text-sm uppercase tracking-wider">Military Rank</p>
+            <p className="text-2xl font-bold mt-1">{country?.stats?.militaryRank ? `#${country.stats.militaryRank}` : "N/A"}</p>
+          </div>
         </div>
 
         {/* Overview & Geopolitics */}
