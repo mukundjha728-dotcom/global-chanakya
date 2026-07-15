@@ -15,6 +15,7 @@ import BlogClientTracker from "@/components/blogs/BlogClientTracker";
 import { generateSeoMetadata, calculateReadingTime, formatDate } from "@repo/utils";
 import { ArrowLeft, Clock, Eye, Calendar, Tag, Crown, TrendingUp, Crosshair, Newspaper } from "lucide-react";
 import { SITE_URL } from "@/constants";
+import AdUnit, { InArticleAd, SidebarAd } from "@/components/ads/AdUnit";
 
 // Global cache across requests
 const getCachedBlog = unstable_cache(
@@ -258,10 +259,16 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
               </div>
             )}
 
+            {/* Ad: After featured image */}
+            <InArticleAd slot="auto" />
+
             <div 
               className="article-body" 
               dangerouslySetInnerHTML={{ __html: sanitizedContent }} 
             />
+
+            {/* Ad: After article content */}
+            <InArticleAd slot="auto" />
 
             {/* Tags */}
             {blog.tags && blog.tags.length > 0 && (
@@ -351,6 +358,9 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
                 </div>
               </div>
             )}
+
+            {/* Ad: Sidebar ad unit */}
+            <SidebarAd slot="auto" />
           </aside>
 
         </div>
