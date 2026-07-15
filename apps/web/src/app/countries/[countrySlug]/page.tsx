@@ -1,4 +1,9 @@
 import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import dbConnect from "@/lib/mongoose";
+import { Country } from "@/lib/models/Country";
+import { Blog } from "@/lib/models/Blog";
+import Link from "next/link";
 
 export async function generateMetadata({ params }: { params: Promise<{ countrySlug: string }> }): Promise<Metadata> {
   const { countrySlug } = await params;
@@ -10,6 +15,16 @@ export async function generateMetadata({ params }: { params: Promise<{ countrySl
 
 export default async function CountryPage({ params }: { params: Promise<{ countrySlug: string }> }) {
   const { countrySlug } = await params;
+  await dbConnect();
+
+  // Fetch country data (if exists)
+  const country = await Country.findOne({ slug: countrySlug }).lean();
+  
+  // Fetch latest 5 blogs published for this country
+  const latestBlogs = await Blog.find({ 
+    countrySlug: countrySlug,
+    status: "published"
+  }).sort({ publishAt: -1 }).limit(5).lean();
 
   return (
     <main className="min-h-screen bg-[#050816] text-[#F5F5F5] p-8">
@@ -17,8 +32,8 @@ export default async function CountryPage({ params }: { params: Promise<{ countr
         <div className="flex items-center gap-6 mb-8 border-b border-gray-800 pb-8">
           <div className="w-32 h-20 bg-gray-800 rounded flex items-center justify-center text-sm">Flag Placeholder</div>
           <div>
-            <h1 className="text-5xl font-bold text-[#D4AF37] capitalize">{countrySlug}</h1>
-            <p className="text-xl text-gray-400 mt-2">Official Name Placeholder</p>
+            <h1 className="text-5xl font-bold text-[#D4AF37] capitalize">{country?.name || countrySlug}</h1>
+            <p className="text-xl text-gray-400 mt-2">{country?.officialName || "Official Name Placeholder"}</p>
           </div>
         </div>
 
@@ -37,9 +52,29 @@ export default async function CountryPage({ params }: { params: Promise<{ countr
           <div className="md:col-span-2 space-y-8">
             <section>
               <h2 className="text-2xl font-bold text-[#D4AF37] mb-4">Strategic Overview</h2>
-              <p className="text-gray-300 leading-relaxed bg-[#0B1220] p-6 rounded border border-gray-800">
-                Detailed geopolitical overview and strategic importance goes here...
-              </p>
+              <div className="text-gray-300 leading-relaxed bg-[#0B1220] p-6 rounded border border-gray-800 prose prose-invert">
+                {country?.overview || "Detailed geopolitical overview and strategic importance goes here..."}
+              </div>
+            </section>
+
+            <section className="mt-12">
+              <h2 className="text-2xl font-bold text-white mb-6 border-b border-gray-800 pb-2">Latest Intelligence Reports</h2>
+              {latestBlogs.length === 0 ? (
+                <p className="text-gray-500 italic bg-[#0B1220] p-4 rounded border border-gray-800">No reports published for this country yet.</p>
+              ) : (
+                <div className="grid gap-4">
+                  {latestBlogs.map((blog: any) => (
+                    <Link key={blog._id} href={`/blogs/${blog.slug}`} className="bg-[#0B1220] p-5 rounded border border-gray-800 hover:border-[#D4AF37] transition group block">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold text-[#D4AF37] uppercase tracking-widest">{blog.category}</span>
+                        <span className="text-xs text-gray-500">{new Date(blog.publishAt).toLocaleDateString()}</span>
+                      </div>
+                      <h3 className="text-lg font-bold text-white group-hover:text-[#D4AF37] transition">{blog.title}</h3>
+                      <p className="text-sm text-gray-400 mt-2 line-clamp-2">{blog.excerpt}</p>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </section>
           </div>
           <div className="space-y-6">

@@ -22,6 +22,7 @@ export interface IBlog extends Document {
     schemaMarkup?: string;
   };
   category: string;
+  countrySlug?: string;
   reportType?: string;
   tags: string[];
   featuredImage?: string;
@@ -95,6 +96,7 @@ const BlogSchema = new Schema<IBlog>(
       schemaMarkup: { type: String },
     },
     category: { type: String, required: true, index: true },
+    countrySlug: { type: String, index: true },
     reportType: { type: String },
     tags: [{ type: String }],
     featuredImage: { type: String },

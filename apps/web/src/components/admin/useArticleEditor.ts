@@ -7,6 +7,7 @@ export interface FormData {
   excerpt: string;
   content: string;
   category: string;
+  countrySlug: string;
   tags: string;
   visibility: "public" | "premium" | "private";
   status: "draft" | "published" | "scheduled";
@@ -27,7 +28,7 @@ export function useArticleEditor(authorId: string, editId: string | null) {
   const [activeTab, setActiveTab] = useState<"content" | "seo" | "settings">("content");
   const [editorMode, setEditorMode] = useState<"code" | "preview">("code");
   const [form, setForm] = useState<FormData>({
-    title: "", slug: "", excerpt: "", content: "", category: "Geopolitics",
+    title: "", slug: "", excerpt: "", content: "", category: "Geopolitics", countrySlug: "",
     tags: "", visibility: "public", status: "draft", isTrending: false,
     commentsEnabled: true, seoTitle: "", seoDescription: "", seoKeywords: "", featuredImage: "",
   });
@@ -48,6 +49,7 @@ export function useArticleEditor(authorId: string, editId: string | null) {
             setForm({
               title: blog.title ?? "", slug: blog.slug ?? "", excerpt: blog.excerpt ?? "",
               content: blog.content ?? "", category: blog.category ?? "Geopolitics",
+              countrySlug: blog.countrySlug ?? "",
               tags: (blog.tags ?? []).join(", "), visibility: blog.visibility ?? "public",
               status: blog.status ?? "draft", isTrending: blog.isTrending ?? false,
               commentsEnabled: blog.commentsEnabled ?? true, seoTitle: blog.seo?.title ?? "",

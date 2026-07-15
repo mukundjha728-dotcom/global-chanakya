@@ -1,11 +1,22 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { FormData } from "./useArticleEditor";
 import { BLOG_CATEGORIES } from "@/constants";
 
 export function WriteArticleSettingsTab({ form, update, inputClass, labelClass }: { form: FormData; update: (field: keyof FormData, value: string | boolean) => void; inputClass: string; labelClass: string; }) {
+  const [countries, setCountries] = useState<{name: string, slug: string}[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/countries")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setCountries(data);
+      })
+      .catch(console.error);
+  }, []);
+
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div>
           <label className={labelClass}>Category *</label>
           <select value={form.category} onChange={(e) => update("category", e.target.value)} className={inputClass}>
@@ -17,6 +28,13 @@ export function WriteArticleSettingsTab({ form, update, inputClass, labelClass }
           <select value={form.visibility} onChange={(e) => update("visibility", e.target.value)} className={inputClass}>
             <option value="public" className="bg-[#0d0d17]">🌐 Public</option>
             <option value="private" className="bg-[#0d0d17]">🔒 Private</option>
+          </select>
+        </div>
+        <div>
+          <label className={labelClass}>Country Assignment</label>
+          <select value={form.countrySlug} onChange={(e) => update("countrySlug", e.target.value)} className={inputClass}>
+            <option value="" className="bg-[#0d0d17]">None (Global)</option>
+            {countries.map((c) => <option key={c.slug} value={c.slug} className="bg-[#0d0d17]">{c.name}</option>)}
           </select>
         </div>
       </div>
