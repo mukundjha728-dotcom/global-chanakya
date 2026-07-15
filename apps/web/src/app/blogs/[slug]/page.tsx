@@ -11,7 +11,6 @@ export const revalidate = 3600;
 
 import BlogActions from "@/components/blogs/BlogActions";
 import ReadingProgress from "@/components/blogs/ReadingProgress";
-import GatedArticleContent from "@/components/blogs/GatedArticleContent";
 import BlogClientTracker from "@/components/blogs/BlogClientTracker";
 import { generateSeoMetadata, calculateReadingTime, formatDate } from "@repo/utils";
 import { ArrowLeft, Clock, Eye, Calendar, Tag, Crown, TrendingUp, Crosshair, Newspaper } from "lucide-react";
@@ -259,10 +258,9 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
               </div>
             )}
 
-            <GatedArticleContent 
-              content={sanitizedContent} 
-              isLoggedIn={!!session} 
-              slug={blog.slug}
+            <div 
+              className="article-body" 
+              dangerouslySetInnerHTML={{ __html: sanitizedContent }} 
             />
 
             {/* Tags */}
