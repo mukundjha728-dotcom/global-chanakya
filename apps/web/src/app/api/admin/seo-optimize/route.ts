@@ -7,7 +7,7 @@ function errorMsg(err: unknown) {
   return err instanceof Error ? err.message : String(err);
 }
 
-// Simple rule-based SEO optimizer (no external AI API needed)
+// Production-grade rule-based SEO optimizer (no external AI API needed)
 function optimizeSEO(data: any): Partial<any> {
   const title: string = data.title || data.name || "";
   const rawContent: string = (data.content || data.overview || data.summary || data.description || data.excerpt || "")
@@ -17,6 +17,8 @@ function optimizeSEO(data: any): Partial<any> {
   const excerpt: string = data.excerpt || data.summary || "";
   const tags: string[] = Array.isArray(data.tags) ? data.tags : [];
   const category: string = data.category || data.type || "";
+  const slug: string = data.slug || "";
+  const existingFocusKeyword: string = data.seo?.focusKeyword || "";
 
   // ── SEO Title: 50-60 chars, keyword-rich ─────────────────────────────────
   let seoTitle = "";
@@ -46,20 +48,43 @@ function optimizeSEO(data: any): Partial<any> {
     seoDescription = `${seoTitle} — Expert geopolitical analysis and intelligence briefing on Global Chanakya.`.slice(0, 160);
   }
 
+  // ── Focus Keyword: Extract from title if not set ────────────────────────
+  let focusKeyword = existingFocusKeyword;
+  if (!focusKeyword) {
+    // Extract 2-3 word phrase from title (skip common words)
+    const stopWords = new Set(["the", "and", "for", "from", "with", "this", "that", "are", "was", "has", "its", "how", "why", "what"]);
+    const titleWords = title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, "")
+      .split(/\s+/)
+      .filter((w: string) => w.length > 2 && !stopWords.has(w));
+    focusKeyword = titleWords.slice(0, 3).join(" ");
+  }
+
   // ── Keywords: from tags + title words ────────────────────────────────────
   const titleWords = title
     .toLowerCase()
     .split(/\s+/)
-    .filter((w) => w.length > 3)
+    .filter((w: string) => w.length > 3)
     .slice(0, 5);
-  const keywords = [...new Set([...tags.map((t) => (typeof t === "string" ? t.toLowerCase() : String(t).toLowerCase())), ...titleWords])].slice(0, 10);
+  const keywords = [...new Set([
+    ...(focusKeyword ? [focusKeyword] : []),
+    ...tags.map((t) => (typeof t === "string" ? t.toLowerCase() : String(t).toLowerCase())),
+    ...titleWords,
+  ])].slice(0, 10);
+
+  // ── Canonical URL ──────────────────────────────────────────────────────────
+  let canonicalUrl = data.seo?.canonicalUrl || "";
+  if (!canonicalUrl && slug) {
+    canonicalUrl = `https://www.globalchanakya.in/blogs/${slug}`;
+  }
 
   // ── AI Summary (llms.txt) ─────────────────────────────────────────────────
   // 2-3 sentence structured summary for LLM ingestion
   const sentences = rawContent
     .split(/[.!?]+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 40)
+    .map((s: string) => s.trim())
+    .filter((s: string) => s.length > 40)
     .slice(0, 3);
 
   let aiSummary = "";
@@ -85,9 +110,12 @@ function optimizeSEO(data: any): Partial<any> {
   const safeUpdateDate = getSafeIso(data.updatedAt);
 
   // ── Schema Markup (JSON-LD) ───────────────────────────────────────────────
-  const schemaMarkup = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": category === "Op-Ed" ? "OpinionNewsArticle" : "NewsArticle",
+  const schemaGraph: any[] = [];
+
+  // Main article schema
+  const articleType = category === "Op-Ed" ? "OpinionNewsArticle" : "NewsArticle";
+  schemaGraph.push({
+    "@type": articleType,
     "headline": seoTitle,
     "description": seoDescription,
     "keywords": keywords.join(", "),
@@ -95,20 +123,61 @@ function optimizeSEO(data: any): Partial<any> {
       "@type": "Organization",
       "name": "Global Chanakya",
       "url": "https://www.globalchanakya.in",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://www.globalchanakya.in/brand/logo.svg"
+      }
     },
     ...(safePublishDate ? { "datePublished": safePublishDate } : {}),
     ...(safeUpdateDate ? { "dateModified": safeUpdateDate } : {}),
     ...(data.featuredImage ? { "image": data.featuredImage } : {}),
+    ...(canonicalUrl ? { "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl } } : {}),
+  });
+
+  // BreadcrumbList
+  schemaGraph.push({
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.globalchanakya.in/" },
+      { "@type": "ListItem", "position": 2, "name": "Reports", "item": "https://www.globalchanakya.in/blogs" },
+      ...(category ? [{ "@type": "ListItem", "position": 3, "name": category, "item": `https://www.globalchanakya.in/blogs?category=${encodeURIComponent(category)}` }] : []),
+      ...(slug ? [{ "@type": "ListItem", "position": category ? 4 : 3, "name": seoTitle, "item": canonicalUrl }] : []),
+    ]
+  });
+
+  // FAQPage schema if FAQs exist
+  if (Array.isArray(data.faq) && data.faq.length > 0) {
+    const validFaqs = data.faq.filter((f: any) => f.question && f.answer);
+    if (validFaqs.length > 0) {
+      schemaGraph.push({
+        "@type": "FAQPage",
+        "mainEntity": validFaqs.map((f: any) => ({
+          "@type": "Question",
+          "name": f.question,
+          "acceptedAnswer": { "@type": "Answer", "text": f.answer }
+        }))
+      });
+    }
+  }
+
+  const schemaMarkup = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": schemaGraph,
   }, null, 2);
 
   return {
     seo: {
+      focusKeyword,
       title: seoTitle,
       description: seoDescription,
       keywords,
+      canonicalUrl,
+      robots: data.seo?.robots || "index,follow",
       schemaMarkup,
     },
     aiSummary,
+    // Suggest ogImage = featuredImage if not set
+    ...(data.featuredImage && !data.ogImage ? { ogImage: data.featuredImage } : {}),
   };
 }
 

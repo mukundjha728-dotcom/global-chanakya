@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { CheckCircle2, AlertTriangle, XCircle, Sparkles, Loader2 } from "lucide-react";
+import { CheckCircle2, AlertTriangle, XCircle, Sparkles, Loader2, TrendingUp } from "lucide-react";
 
 interface Issue {
   type: "error" | "warn" | "pass";
@@ -18,79 +18,164 @@ export default function SEOScoringWidget({ formData, onOptimized }: Props) {
   const [issues, setIssues] = useState<Issue[]>([]);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [justOptimized, setJustOptimized] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
     const newIssues: Issue[] = [];
     let curScore = 100;
 
-    const title = formData?.title || formData?.seo?.title || "";
+    const title = formData?.seo?.title || formData?.title || "";
     const desc = formData?.seo?.description || "";
     const content = formData?.content || formData?.summary || formData?.overview || "";
     const aiSummary = formData?.aiSummary || "";
     const keywords = formData?.seo?.keywords || [];
+    const focusKeyword = formData?.seo?.focusKeyword || "";
     const featuredImage = formData?.featuredImage || formData?.imageUrl || "";
+    const ogImage = formData?.ogImage || "";
     const slug = formData?.slug || "";
+    const canonicalUrl = formData?.seo?.canonicalUrl || "";
+    const robots = formData?.seo?.robots || "";
 
-    // Title
+    // ── Title ──────────────────────────────────────────
     if (!title) {
       newIssues.push({ type: "error", msg: "Missing SEO title", fix: "seo.title" });
-      curScore -= 25;
-    } else if (title.length < 30 || title.length > 60) {
-      newIssues.push({ type: "warn", msg: `Title: ${title.length} chars (want 30–60)`, fix: "seo.title" });
-      curScore -= 10;
+      curScore -= 20;
+    } else if (title.length < 30) {
+      newIssues.push({ type: "warn", msg: `Title too short: ${title.length} chars (need 30+)`, fix: "seo.title" });
+      curScore -= 8;
+    } else if (title.length > 60) {
+      newIssues.push({ type: "warn", msg: `Title too long: ${title.length} chars (max 60)`, fix: "seo.title" });
+      curScore -= 5;
     } else {
-      newIssues.push({ type: "pass", msg: "Title length is perfect" });
+      newIssues.push({ type: "pass", msg: `Title: ${title.length} chars ✓` });
     }
 
-    // Description
+    // ── Description ────────────────────────────────────
     if (!desc) {
       newIssues.push({ type: "error", msg: "Missing meta description", fix: "seo.description" });
-      curScore -= 25;
-    } else if (desc.length < 120 || desc.length > 160) {
-      newIssues.push({ type: "warn", msg: `Description: ${desc.length} chars (want 120–160)`, fix: "seo.description" });
-      curScore -= 10;
+      curScore -= 20;
+    } else if (desc.length < 120) {
+      newIssues.push({ type: "warn", msg: `Description short: ${desc.length} chars (need 120+)`, fix: "seo.description" });
+      curScore -= 8;
+    } else if (desc.length > 160) {
+      newIssues.push({ type: "warn", msg: `Description long: ${desc.length} chars (max 160)`, fix: "seo.description" });
+      curScore -= 5;
     } else {
-      newIssues.push({ type: "pass", msg: "Description length is perfect" });
+      newIssues.push({ type: "pass", msg: `Description: ${desc.length} chars ✓` });
     }
 
-    // Content
+    // ── Content ────────────────────────────────────────
     const plainContent = content.replace(/<[^>]+>/g, "").trim();
     if (!plainContent || plainContent.length < 300) {
-      newIssues.push({ type: "error", msg: `Content too thin (${plainContent.length} chars, need 300+)` });
-      curScore -= 20;
+      newIssues.push({ type: "error", msg: `Content thin: ${plainContent.length} chars (need 300+)` });
+      curScore -= 15;
     } else {
       newIssues.push({ type: "pass", msg: `Content: ${plainContent.length} chars ✓` });
     }
 
-    // AI Summary
-    if (!aiSummary) {
-      newIssues.push({ type: "warn", msg: "Missing AI Summary (llms.txt)", fix: "aiSummary" });
-      curScore -= 10;
+    // ── Focus Keyword ──────────────────────────────────
+    if (!focusKeyword) {
+      newIssues.push({ type: "warn", msg: "No focus keyword set", fix: "seo.focusKeyword" });
+      curScore -= 5;
     } else {
-      newIssues.push({ type: "pass", msg: "AI Summary present" });
+      const fkLower = focusKeyword.toLowerCase();
+      const titleHasFK = title.toLowerCase().includes(fkLower);
+      const descHasFK = desc.toLowerCase().includes(fkLower);
+      const slugHasFK = slug.toLowerCase().includes(fkLower.replace(/\\s+/g, "-"));
+
+      if (titleHasFK) {
+        newIssues.push({ type: "pass", msg: "Focus keyword in title ✓" });
+      } else {
+        newIssues.push({ type: "warn", msg: "Focus keyword missing from title" });
+        curScore -= 5;
+      }
+      if (descHasFK) {
+        newIssues.push({ type: "pass", msg: "Focus keyword in description ✓" });
+      } else {
+        newIssues.push({ type: "warn", msg: "Focus keyword missing from description" });
+        curScore -= 3;
+      }
+      if (slugHasFK) {
+        newIssues.push({ type: "pass", msg: "Focus keyword in URL ✓" });
+      } else {
+        newIssues.push({ type: "warn", msg: "Focus keyword not in URL slug" });
+        curScore -= 2;
+      }
     }
 
-    // Keywords
+    // ── AI Summary ─────────────────────────────────────
+    if (!aiSummary) {
+      newIssues.push({ type: "warn", msg: "Missing AI Summary (llms.txt)", fix: "aiSummary" });
+      curScore -= 5;
+    } else if (aiSummary.length < 100) {
+      newIssues.push({ type: "warn", msg: `AI Summary too short: ${aiSummary.length} chars` });
+      curScore -= 3;
+    } else {
+      newIssues.push({ type: "pass", msg: "AI Summary present ✓" });
+    }
+
+    // ── Keywords ───────────────────────────────────────
     if (!keywords || keywords.length === 0) {
       newIssues.push({ type: "warn", msg: "No keywords set", fix: "seo.keywords" });
       curScore -= 5;
+    } else if (keywords.length < 3) {
+      newIssues.push({ type: "warn", msg: `Only ${keywords.length} keywords (3+ recommended)` });
+      curScore -= 2;
     } else {
-      newIssues.push({ type: "pass", msg: `${keywords.length} keywords set` });
+      newIssues.push({ type: "pass", msg: `${keywords.length} keywords ✓` });
     }
 
-    // Featured image
+    // ── Featured Image ─────────────────────────────────
     if (!featuredImage) {
-      newIssues.push({ type: "warn", msg: "No featured image set" });
-      curScore -= 5;
+      newIssues.push({ type: "warn", msg: "No featured image" });
+      curScore -= 3;
+    } else {
+      newIssues.push({ type: "pass", msg: "Featured image set ✓" });
     }
 
-    // Slug
+    // ── OG Image ───────────────────────────────────────
+    if (!ogImage && !featuredImage) {
+      newIssues.push({ type: "warn", msg: "No OG image for social sharing" });
+      curScore -= 3;
+    } else {
+      newIssues.push({ type: "pass", msg: "Social image set ✓" });
+    }
+
+    // ── Slug ───────────────────────────────────────────
     if (!slug) {
       newIssues.push({ type: "error", msg: "Missing slug", fix: "slug" });
       curScore -= 10;
+    } else if (slug.length > 75) {
+      newIssues.push({ type: "warn", msg: `URL slug too long: ${slug.length} chars` });
+      curScore -= 3;
+    } else {
+      newIssues.push({ type: "pass", msg: "URL slug set ✓" });
     }
 
-    setScore(Math.max(0, curScore));
+    // ── Canonical URL ──────────────────────────────────
+    if (canonicalUrl && !canonicalUrl.startsWith("http")) {
+      newIssues.push({ type: "error", msg: "Invalid canonical URL format" });
+      curScore -= 5;
+    }
+
+    // ── Robots Directive ───────────────────────────────
+    if (robots && robots.includes("noindex")) {
+      newIssues.push({ type: "warn", msg: "Page set to noindex — won't appear in search" });
+    }
+
+    // ── Readability — basic sentence length analysis ───
+    if (plainContent.length > 300) {
+      const sentences = plainContent.split(/[.!?]+/).filter((s: string) => s.trim().length > 0);
+      const avgSentenceLen = sentences.reduce((sum: number, s: string) => sum + s.trim().split(/\\s+/).length, 0) / (sentences.length || 1);
+      if (avgSentenceLen > 25) {
+        newIssues.push({ type: "warn", msg: `Avg sentence: ${Math.round(avgSentenceLen)} words (aim for <25)` });
+        curScore -= 3;
+      } else {
+        newIssues.push({ type: "pass", msg: `Readability: ${Math.round(avgSentenceLen)} words/sentence ✓` });
+      }
+    }
+
+    setScore(Math.max(0, Math.min(100, curScore)));
     setIssues(newIssues);
   }, [formData]);
 
@@ -126,59 +211,115 @@ export default function SEOScoringWidget({ formData, onOptimized }: Props) {
   };
 
   const scoreColor =
-    score >= 95 ? "text-green-400" :
+    score >= 90 ? "text-green-400" :
     score >= 70 ? "text-[var(--gold)]" :
     score >= 50 ? "text-orange-400" :
     "text-red-500";
 
   const scoreBg =
-    score >= 95 ? "bg-green-500/10 border-green-500/20" :
+    score >= 90 ? "bg-green-500/10 border-green-500/20" :
     score >= 70 ? "bg-[var(--gold)]/10 border-[var(--gold)]/20" :
     score >= 50 ? "bg-orange-500/10 border-orange-500/20" :
     "bg-red-500/10 border-red-500/20";
 
-  const needsOptimize = score < 95;
+  const scoreLabel =
+    score >= 90 ? "Excellent" :
+    score >= 70 ? "Good" :
+    score >= 50 ? "Needs Work" :
+    "Poor";
+
+  const needsOptimize = score < 90;
   const fixableIssues = issues.filter((i) => i.fix && i.type !== "pass");
+  const errors = issues.filter(i => i.type === "error");
+  const warnings = issues.filter(i => i.type === "warn");
+  const passed = issues.filter(i => i.type === "pass");
 
   return (
     <div className="rounded-xl border border-[var(--border)] overflow-hidden">
       {/* Score Header */}
       <div className={`p-4 border-b border-[var(--border)] ${scoreBg}`}>
         <div className="flex items-center justify-between mb-1">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">Live SEO Score</span>
-          <span className={`text-2xl font-black tabular-nums ${scoreColor}`}>{score}<span className="text-sm font-normal text-[var(--muted)]">/100</span></span>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="w-3.5 h-3.5 text-[var(--muted)]" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">SEO Score</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-2xl font-black tabular-nums ${scoreColor}`}>{score}</span>
+            <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${scoreBg} ${scoreColor}`}>
+              {scoreLabel}
+            </span>
+          </div>
         </div>
 
         {/* Score Bar */}
         <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-2">
           <div
             className={`h-full rounded-full transition-all duration-500 ${
-              score >= 95 ? "bg-green-400" : score >= 70 ? "bg-[var(--gold)]" : score >= 50 ? "bg-orange-400" : "bg-red-500"
+              score >= 90 ? "bg-green-400" : score >= 70 ? "bg-[var(--gold)]" : score >= 50 ? "bg-orange-400" : "bg-red-500"
             }`}
             style={{ width: `${score}%` }}
           />
         </div>
-      </div>
 
-      {/* Issues List */}
-      <div className="p-3 space-y-1.5 max-h-48 overflow-y-auto">
-        {issues.map((issue, idx) => (
-          <div key={idx} className="flex items-start gap-2 text-xs">
-            {issue.type === "error" && <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />}
-            {issue.type === "warn" && <AlertTriangle className="w-3.5 h-3.5 text-yellow-500 mt-0.5 shrink-0" />}
-            {issue.type === "pass" && <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />}
-            <span className={
-              issue.type === "pass" ? "text-green-500/70" :
-              issue.type === "error" ? "text-red-400" :
-              "text-[var(--muted)]"
-            }>
-              {issue.msg}
+        {/* Quick Summary */}
+        <div className="flex items-center gap-3 mt-2.5 text-[10px]">
+          {errors.length > 0 && (
+            <span className="flex items-center gap-1 text-red-400 font-semibold">
+              <XCircle className="w-3 h-3" /> {errors.length} errors
             </span>
-          </div>
-        ))}
+          )}
+          {warnings.length > 0 && (
+            <span className="flex items-center gap-1 text-yellow-400 font-semibold">
+              <AlertTriangle className="w-3 h-3" /> {warnings.length} warnings
+            </span>
+          )}
+          {passed.length > 0 && (
+            <span className="flex items-center gap-1 text-green-500/70 font-semibold">
+              <CheckCircle2 className="w-3 h-3" /> {passed.length} passed
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Auto-Optimize Button — only shows when score < 95 */}
+      {/* Toggle Issues List */}
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-[var(--muted)] hover:text-white flex items-center justify-center gap-1 transition-colors"
+      >
+        {expanded ? "Hide Details" : "Show Details"}
+        <svg className={`w-3 h-3 transition-transform ${expanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {/* Issues List — collapsible */}
+      {expanded && (
+        <div className="px-3 pb-2 space-y-1.5 max-h-56 overflow-y-auto border-t border-[var(--border)] pt-2">
+          {/* Errors first */}
+          {errors.map((issue, idx) => (
+            <div key={`e${idx}`} className="flex items-start gap-2 text-xs">
+              <XCircle className="w-3.5 h-3.5 text-red-500 mt-0.5 shrink-0" />
+              <span className="text-red-400">{issue.msg}</span>
+            </div>
+          ))}
+          {/* Warnings */}
+          {warnings.map((issue, idx) => (
+            <div key={`w${idx}`} className="flex items-start gap-2 text-xs">
+              <AlertTriangle className="w-3.5 h-3.5 text-yellow-500 mt-0.5 shrink-0" />
+              <span className="text-[var(--muted)]">{issue.msg}</span>
+            </div>
+          ))}
+          {/* Passed */}
+          {passed.map((issue, idx) => (
+            <div key={`p${idx}`} className="flex items-start gap-2 text-xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+              <span className="text-green-500/70">{issue.msg}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Auto-Optimize Button — only shows when score < 90 */}
       {needsOptimize && onOptimized && (
         <div className="p-3 pt-0">
           <button
@@ -191,7 +332,7 @@ export default function SEOScoringWidget({ formData, onOptimized }: Props) {
                 ? "bg-green-500/20 text-green-400 border border-green-500/30"
                 : isOptimizing
                 ? "bg-[var(--gold)]/10 text-[var(--gold)] border border-[var(--gold)]/20 cursor-wait"
-                : "bg-[var(--gold)] text-black hover:bg-yellow-400 shadow-[0_0_16px_rgba(212,175,55,0.3)] hover:shadow-[0_0_24px_rgba(212,175,55,0.5)]"
+                : "bg-[var(--gold)] text-black hover:bg-yellow-400 shadow-[0_0_16px_rgba(212,175,55,0.2)] hover:shadow-[0_0_24px_rgba(212,175,55,0.5)]"
               }
             `}
           >

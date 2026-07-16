@@ -4,13 +4,115 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { EntitySchema, FormField } from "./EntitySchemas";
 import {
   Save, Clock, Lock, AlertCircle, Eye, ChevronDown, ChevronUp,
-  BarChart2, RefreshCw, CheckCircle2, XCircle
+  BarChart2, RefreshCw, CheckCircle2, XCircle, Search, Globe
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import AsyncRelationSelect from "./AsyncRelationSelect";
 import SEOScoringWidget from "./SEOScoringWidget";
 
-// ─── Rich Text ────────────────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+}
+
+// ─── Character Count Indicator ────────────────────────────────────────────────
+function CharCountIndicator({ value, hint, maxLength }: { value: string; hint?: string; maxLength?: number }) {
+  const len = (value || "").length;
+
+  // Parse hint like "30–60 chars recommended" to extract min/max
+  let hintMin = 0, hintMax = 0;
+  if (hint) {
+    const match = hint.match(/(\d+)\s*[–\-]\s*(\d+)/);
+    if (match) { hintMin = parseInt(match[1]); hintMax = parseInt(match[2]); }
+  }
+
+  const getColor = () => {
+    if (maxLength && len > maxLength) return "text-red-400";
+    if (hintMin && hintMax) {
+      if (len >= hintMin && len <= hintMax) return "text-green-400";
+      if (len > 0 && (len < hintMin || len > hintMax)) return "text-yellow-400";
+    }
+    return "text-[var(--muted)]";
+  };
+
+  const getLabel = () => {
+    if (maxLength && len > maxLength) return `${len}/${maxLength} — too long!`;
+    if (hintMin && hintMax) {
+      if (len === 0) return `0 chars — ${hint}`;
+      if (len < hintMin) return `${len} chars — ${hintMin - len} more needed`;
+      if (len > hintMax) return `${len} chars — ${len - hintMax} over optimal`;
+      return `${len} chars ✓ perfect`;
+    }
+    return `${len} chars`;
+  };
+
+  return (
+    <div className="flex items-center justify-between mt-1.5">
+      <span className={`text-[10px] font-semibold tabular-nums ${getColor()}`}>
+        {getLabel()}
+      </span>
+      {hintMin > 0 && hintMax > 0 && (
+        <div className="flex items-center gap-1">
+          <div className="w-20 h-1 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${
+                len >= hintMin && len <= hintMax ? "bg-green-400" :
+                len > hintMax ? "bg-red-400" :
+                len > 0 ? "bg-yellow-400" : "bg-white/5"
+              }`}
+              style={{ width: `${Math.min(100, (len / (maxLength || hintMax)) * 100)}%` }}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── SERP Preview ─────────────────────────────────────────────────────────────
+function SERPPreview({ title, url, description }: { title: string; url: string; description: string }) {
+  const displayTitle = title || "Page Title — Global Chanakya";
+  const displayUrl = url || "https://www.globalchanakya.in/...";
+  const displayDesc = description || "Add a meta description to see how this page will appear in search results.";
+
+  // Truncate like Google does
+  const truncTitle = displayTitle.length > 60 ? displayTitle.slice(0, 57) + "..." : displayTitle;
+  const truncDesc = displayDesc.length > 160 ? displayDesc.slice(0, 157) + "..." : displayDesc;
+
+  return (
+    <div className="rounded-xl border border-[var(--border)] overflow-hidden">
+      <div className="px-4 py-2.5 bg-[var(--surface)] border-b border-[var(--border)] flex items-center gap-2">
+        <Search className="w-3.5 h-3.5 text-[var(--muted)]" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">
+          Google SERP Preview
+        </span>
+      </div>
+      <div className="p-5 bg-white rounded-b-xl">
+        {/* Google-style result */}
+        <div className="flex items-center gap-2 mb-1">
+          <div className="w-7 h-7 rounded-full bg-gray-100 flex items-center justify-center">
+            <Globe className="w-3.5 h-3.5 text-gray-500" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-xs text-gray-800 font-medium truncate">Global Chanakya</p>
+            <p className="text-[11px] text-gray-500 truncate">{displayUrl}</p>
+          </div>
+        </div>
+        <h3 className="text-lg font-medium text-[#1a0dab] leading-snug mb-1 hover:underline cursor-pointer">
+          {truncTitle}
+        </h3>
+        <p className="text-sm text-gray-600 leading-relaxed line-clamp-2">
+          {truncDesc}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+
 function RichTextEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -307,13 +409,25 @@ export default function GenericEditor({
     switch (field.type) {
       case "text":
         return (
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => handleFieldChange(field.name, e.target.value)}
-            placeholder={field.placeholder}
-            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-white focus:border-[var(--gold)] outline-none transition-colors text-sm"
-          />
+          <div>
+            <input
+              type="text"
+              value={value}
+              onChange={(e) => {
+                handleFieldChange(field.name, e.target.value);
+                // Auto-generate slug from title if slug is empty
+                if ((field.name === "title" || field.name === "name") && !formData.slug) {
+                  handleFieldChange("slug", slugify(e.target.value));
+                }
+              }}
+              placeholder={field.placeholder}
+              maxLength={field.maxLength}
+              className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-white focus:border-[var(--gold)] outline-none transition-colors text-sm"
+            />
+            {(field.charCountHint || field.maxLength) && (
+              <CharCountIndicator value={value} hint={field.charCountHint} maxLength={field.maxLength} />
+            )}
+          </div>
         );
 
       case "number":
@@ -328,13 +442,19 @@ export default function GenericEditor({
 
       case "textarea":
         return (
-          <textarea
-            value={value}
-            onChange={(e) => handleFieldChange(field.name, e.target.value)}
-            placeholder={field.placeholder}
-            rows={5}
-            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-white focus:border-[var(--gold)] outline-none transition-colors text-sm resize-y"
-          />
+          <div>
+            <textarea
+              value={value}
+              onChange={(e) => handleFieldChange(field.name, e.target.value)}
+              placeholder={field.placeholder}
+              rows={field.charCountHint ? 3 : 5}
+              maxLength={field.maxLength}
+              className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-lg px-4 py-2.5 text-white focus:border-[var(--gold)] outline-none transition-colors text-sm resize-y"
+            />
+            {(field.charCountHint || field.maxLength) && (
+              <CharCountIndicator value={value} hint={field.charCountHint} maxLength={field.maxLength} />
+            )}
+          </div>
         );
 
       case "richtext":
@@ -612,6 +732,15 @@ export default function GenericEditor({
                   </div>
                 ))}
               </div>
+            )}
+
+            {/* SERP Preview — shown on SEO tab */}
+            {activeTab === "seo" && (
+              <SERPPreview
+                title={formData.seo?.title || formData.title || formData.name || ""}
+                url={formData.slug ? `https://www.globalchanakya.in/${schema.id === "blogs" ? "blogs" : schema.id}/${formData.slug}` : ""}
+                description={formData.seo?.description || formData.excerpt || formData.overview || ""}
+              />
             )}
 
             {schema.tabs.find((t) => t.id === activeTab)?.fields.map((field) => (

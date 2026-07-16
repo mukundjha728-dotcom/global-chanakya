@@ -56,13 +56,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return generateSeoMetadata({
     title: blog.seo?.title || blog.title,
     description: blog.seo?.description || blog.excerpt,
-    keywords: blog.seo?.keywords || blog.tags?.join(", "),
-    canonicalUrl: `${SITE_URL}/blogs/${blog.slug}`,
-    imageUrl: blog.featuredImage,
+    keywords: blog.seo?.keywords?.join?.(", ") || blog.tags?.join(", "),
+    canonicalUrl: blog.seo?.canonicalUrl || `${SITE_URL}/blogs/${blog.slug}`,
+    imageUrl: blog.ogImage || blog.featuredImage,
     type: "article",
     authorName: blog.author?.name || "Global Chanakya Editorial",
     publishedTime: blog.publishAt ? new Date(blog.publishAt).toISOString() : undefined,
     modifiedTime: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
+    robots: blog.seo?.robots,
+    category: blog.category,
   });
 }
 

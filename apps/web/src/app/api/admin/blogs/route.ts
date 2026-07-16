@@ -136,7 +136,7 @@ export async function PATCH(req: NextRequest) {
     const ALLOWED = [
       "title", "slug", "excerpt", "content", "category", "countrySlug", "tags",
       "visibility", "status", "isTrending", "commentsEnabled",
-      "featuredImage", "ogImage", "seo", "aiSummary",
+      "featuredImage", "ogImage", "seo", "aiSummary", "reportType",
       "publishAt", "unpublishAt", "isBreaking", "breakingUntil",
       "isFeatured", "featuredUntil", "citations",
       "entityRelations", "draftSnapshot", "previousVersions",
@@ -146,8 +146,24 @@ export async function PATCH(req: NextRequest) {
     for (const key of ALLOWED) {
       if (rest[key] !== undefined) updateData[key] = rest[key];
     }
-    if (rest.status === "published" && !rest.publishAt) {
-      updateData.publishAt = new Date();
+
+    // Auto-fill SEO defaults on publish
+    if (rest.status === "published") {
+      if (!rest.publishAt) updateData.publishAt = new Date();
+
+      // Auto-set canonical URL if not provided
+      const seo = (updateData.seo as any) || rest.seo || {};
+      if (!seo.canonicalUrl && rest.slug) {
+        seo.canonicalUrl = `https://www.globalchanakya.in/blogs/${rest.slug}`;
+      }
+      // Auto-fill meta title/description from content if empty
+      if (!seo.title && rest.title) {
+        seo.title = rest.title.length > 60 ? rest.title.slice(0, 57) + "..." : rest.title;
+      }
+      if (!seo.description && rest.excerpt) {
+        seo.description = rest.excerpt.length > 160 ? rest.excerpt.slice(0, 157) + "..." : rest.excerpt;
+      }
+      updateData.seo = seo;
     }
 
     const updated = await BlogService.updateBlog(id, updateData);

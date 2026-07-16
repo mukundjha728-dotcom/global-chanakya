@@ -2,11 +2,38 @@ import Link from "next/link";
 import { Search, ChevronRight, Hash } from "lucide-react";
 import { SEO_BLOGS } from "@/constants/platformSeoBlogs";
 
-export const metadata = {
-  title: "Global Chanakya Strategic Intelligence Platform | Geopolitical Analysis Hub",
-  description: "Explore in-depth geopolitical intelligence, strategic conflict analysis, regional power shifts, global diplomacy, defense strategy, and real-time intelligence insights.",
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Strategic Intelligence Hub | Global Chanakya — Geopolitical Analysis Platform",
+  description: "Explore in-depth geopolitical intelligence, strategic conflict analysis, regional power shifts, global diplomacy, defense strategy, and real-time intelligence insights from Global Chanakya.",
   keywords: "geopolitical analysis, global conflict intelligence, strategic intelligence platform, india geopolitics, world politics analysis, defense intelligence, foreign policy insights, international relations",
-  robots: "index, follow",
+  robots: { index: true, follow: true },
+  alternates: {
+    canonical: "https://www.globalchanakya.in/platformseo",
+  },
+  openGraph: {
+    title: "Strategic Intelligence Hub | Global Chanakya",
+    description: "In-depth geopolitical intelligence, strategic conflict analysis, and real-time intelligence insights.",
+    url: "https://www.globalchanakya.in/platformseo",
+    siteName: "Global Chanakya",
+    locale: "en_US",
+    type: "website",
+    images: [{
+      url: "https://www.globalchanakya.in/og-image.png",
+      width: 1200,
+      height: 630,
+      alt: "Global Chanakya Strategic Intelligence Hub",
+    }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Strategic Intelligence Hub | Global Chanakya",
+    description: "Explore in-depth geopolitical intelligence and strategic analysis.",
+    creator: "@globalchanakya",
+    site: "@globalchanakya",
+    images: ["https://www.globalchanakya.in/og-image.png"],
+  },
 };
 
 export default function PlatformSeoIndex() {

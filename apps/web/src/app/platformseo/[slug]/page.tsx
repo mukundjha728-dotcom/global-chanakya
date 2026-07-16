@@ -28,14 +28,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
+  const canonicalUrl = `https://www.globalchanakya.in/platformseo/${blog.slug}`;
+
   return {
     title: `${blog.title} | Global Chanakya Strategic Intelligence`,
     description: blog.excerpt,
     keywords: blog.keywords.join(", "),
     alternates: {
-      canonical: `https://www.globalchanakya.in/platformseo/${blog.slug}`,
+      canonical: canonicalUrl,
     },
-    robots: "index, follow",
+    robots: { index: true, follow: true },
+    openGraph: {
+      title: blog.title,
+      description: blog.excerpt,
+      url: canonicalUrl,
+      siteName: "Global Chanakya",
+      locale: "en_US",
+      type: "article",
+      publishedTime: new Date(blog.publishedAt).toISOString(),
+      authors: ["Global Chanakya Intelligence"],
+      images: [{
+        url: "https://www.globalchanakya.in/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: blog.title,
+      }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: blog.title,
+      description: blog.excerpt,
+      creator: "@globalchanakya",
+      site: "@globalchanakya",
+      images: ["https://www.globalchanakya.in/og-image.png"],
+    },
   };
 }
 

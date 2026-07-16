@@ -15,12 +15,15 @@ export interface IBlog extends Document {
   content: string; // TipTap HTML
   markdown?: string;
   seo: {
+    focusKeyword?: string;
     title: string;
     description: string;
     keywords: string[];
     canonicalUrl?: string;
+    robots?: string;
     schemaMarkup?: string;
   };
+  ogImage?: string;
   category: string;
   countrySlug?: string;
   reportType?: string;
@@ -89,12 +92,15 @@ const BlogSchema = new Schema<IBlog>(
     content: { type: String, required: true },
     markdown: { type: String },
     seo: {
+      focusKeyword: { type: String },
       title: { type: String },
       description: { type: String },
       keywords: [{ type: String }],
       canonicalUrl: { type: String },
+      robots: { type: String, default: "index,follow" },
       schemaMarkup: { type: String },
     },
+    ogImage: { type: String },
     category: { type: String, required: true, index: true },
     countrySlug: { type: String, index: true },
     reportType: { type: String },
