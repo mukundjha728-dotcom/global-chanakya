@@ -1,8 +1,19 @@
 import { BlogRepository } from "../repositories/blog.repository";
-import { IBlog } from "@/lib/models/Blog";
+import { IBlog, Blog } from "@/lib/models/Blog";
 import { unstable_cache } from "next/cache";
+import dbConnect from "@/lib/mongoose";
 
 export class BlogService {
+  static getActiveCategories = unstable_cache(
+    async () => {
+      await dbConnect();
+      const categories = await Blog.distinct("category", { status: "published" });
+      return categories.filter(Boolean);
+    },
+    ['blogs-active-categories'],
+    { revalidate: 3600, tags: ['blogs'] }
+  );
+
   static async getBlogById(id: string) {
     return BlogRepository.findById(id);
   }

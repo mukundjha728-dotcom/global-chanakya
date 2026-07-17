@@ -4,6 +4,7 @@ import { Blog, IBlog } from "@/lib/models/Blog";
 import { formatDate } from "@repo/utils";
 import { formatViews } from "@/lib/formatViews";
 import dbConnect from "@/lib/mongoose";
+import { BlogService } from "@/modules/blog/services/blog.service";
 
 export const metadata = {
   title: "Latest Intel",
@@ -51,10 +52,7 @@ export default async function BlogsPage({
     console.error("DB connection failed for blogs:", error);
   }
 
-  const categories = [
-    "Geopolitics", "Indo-Pacific", "South Asia", "Middle East",
-    "Defence", "China", "Russia", "Economy & Trade",
-  ];
+  const categories = await BlogService.getActiveCategories();
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-6 bg-[var(--bg)] text-[var(--text)]">

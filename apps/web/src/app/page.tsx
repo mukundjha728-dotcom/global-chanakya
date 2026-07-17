@@ -33,10 +33,7 @@ const pillars = [
   },
 ];
 
-const theatres = [
-  "Geopolitics", "Indo-Pacific", "South Asia", "Middle East",
-  "Defence", "China", "Russia", "Economy & Trade",
-];
+
 
 function BlogCard({ blog, variant = "default", isViral = false }: { blog: TrendingBlog; variant?: "featured" | "default" | "compact"; isViral?: boolean }) {
   if (variant === "compact") {
@@ -186,6 +183,8 @@ export default async function Home() {
     BlogService.getLatestBlogs(6),
     BlogService.getMostViewedBlogPast7Days(),
   ]);
+
+  const theatres = await BlogService.getActiveCategories();
 
   const categoryBlogsMap = await Promise.all(
     theatres.map(async (category) => {
