@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Search, PenTool, Edit3, Trash2, Eye, EyeOff, FileText, BarChart2, ShieldAlert } from "lucide-react";
+import { formatViews } from "@/lib/formatViews";
 
 interface BlogRow {
   _id: string;
@@ -185,7 +186,7 @@ export default function AdminBlogsClient({ blogs }: { blogs: BlogRow[] }) {
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2 text-white/60 text-[12px] font-medium bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg w-fit">
                         <BarChart2 className="w-3.5 h-3.5 text-[var(--gold)]" />
-                        {b.analytics.views.toLocaleString()}
+                        {formatViews(b.analytics.views)}
                       </div>
                     </td>
                     <td className="px-6 py-5 text-white/50 text-[11px] font-medium tracking-wide">

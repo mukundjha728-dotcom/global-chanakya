@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Search, Crown, Eye, Heart, Bookmark, Newspaper, ArrowRight, TrendingUp } from "lucide-react";
 import { Blog, IBlog } from "@/lib/models/Blog";
 import { formatDate } from "@repo/utils";
+import { formatViews } from "@/lib/formatViews";
 import dbConnect from "@/lib/mongoose";
 
 export const metadata = {
@@ -204,7 +205,7 @@ export default async function BlogsPage({
                     <div className="flex items-center gap-4">
                       <span className="flex items-center gap-1.5 text-white/60">
                         <Eye className="w-3.5 h-3.5" />
-                        {(blog.analytics?.views || 0).toLocaleString()}
+                        {formatViews(blog.analytics?.views || 0)}
                       </span>
                       <span className="text-white/60">
                         {formatDate(blog.publishAt, "short")}

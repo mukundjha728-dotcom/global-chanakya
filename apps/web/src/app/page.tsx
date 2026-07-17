@@ -5,6 +5,7 @@ import {
   Newspaper, Flame, Activity
 } from "lucide-react";
 import { BlogService } from "@/modules/blog/services/blog.service";
+import { formatViews } from "@/lib/formatViews";
 import type { TrendingBlog } from "@/lib/trending";
 
 export const revalidate = 60;
@@ -116,7 +117,7 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
               <div className="flex items-center gap-4 md:gap-6">
                 <span className="flex items-center gap-1.5 text-white/80">
                   <Eye className="w-4 h-4" />
-                  {(blog.analytics?.views ?? 0).toLocaleString()} Views
+                  {formatViews(blog.analytics?.views ?? 0)} Views
                 </span>
               </div>
               <span className="text-white/80">
@@ -167,7 +168,7 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
           <div className="mt-auto pt-4 md:pt-5 border-t border-[var(--border)]/50 flex items-center justify-between text-[9px] md:text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
             <span className="flex items-center gap-1.5 text-white/60">
               <Eye className="w-3.5 h-3.5" />
-              {(blog.analytics?.views ?? 0).toLocaleString()}
+               {formatViews(blog.analytics?.views ?? 0)}
             </span>
             <span className="text-white/60">
               {new Date(blog.publishAt).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}

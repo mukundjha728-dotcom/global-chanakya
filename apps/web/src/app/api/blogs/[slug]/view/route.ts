@@ -37,7 +37,7 @@ export async function POST(
       blog = await Blog.findOneAndUpdate(
         { slug, status: "published" },
         { $inc: { "analytics.views": 1 } },
-        { new: true }
+        { new: true, timestamps: false }
       ).lean();
     }
 

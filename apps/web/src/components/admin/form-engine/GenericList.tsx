@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { EntitySchema } from "./EntitySchemas";
 import { Plus, Search, Edit2, Trash2, Eye, Filter, RefreshCw, BarChart2 } from "lucide-react";
 import Link from "next/link";
+import { formatViews } from "@/lib/formatViews";
 
 const STATUS_STYLES: Record<string, string> = {
   published: "bg-green-500/10 text-green-400 border-green-500/20",
@@ -201,7 +202,7 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
                     <span className="flex items-center gap-1"><BarChart2 className="w-3.5 h-3.5" /> Views</span>
                   </th>
                 )}
-                <th className="px-5 py-3.5 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Updated</th>
+                <th className="px-5 py-3.5 text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Published</th>
                 <th className="px-5 py-3.5 text-right text-xs font-bold text-[var(--muted)] uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -290,7 +291,7 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
                         <td className="px-5 py-4">
                           {item.analytics ? (
                             <div>
-                              <p className="text-white font-bold text-sm">{(item.analytics.views ?? 0).toLocaleString()}</p>
+                              <p className="text-white font-bold text-sm">{formatViews(item.analytics.views ?? 0)}</p>
                               <p className="text-xs text-[var(--muted)]">
                                 ❤️ {item.analytics.likes ?? 0} · 🔖 {item.analytics.bookmarks ?? 0}
                               </p>
@@ -301,7 +302,7 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
                         </td>
                       )}
                       <td className="px-5 py-4 text-sm text-[var(--muted)]">
-                        {new Date(item.updatedAt || item.createdAt || Date.now()).toLocaleDateString("en-IN", {
+                        {new Date(item.publishAt || item.createdAt || Date.now()).toLocaleDateString("en-IN", {
                           day: "numeric", month: "short", year: "numeric",
                         })}
                       </td>

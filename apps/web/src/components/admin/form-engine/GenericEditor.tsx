@@ -9,6 +9,7 @@ import {
 import { useRouter } from "next/navigation";
 import AsyncRelationSelect from "./AsyncRelationSelect";
 import SEOScoringWidget from "./SEOScoringWidget";
+import { formatViews } from "@/lib/formatViews";
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 function slugify(text: string): string {
@@ -289,7 +290,7 @@ function AnalyticsWidget({ analytics }: { analytics?: Record<string, number> }) 
         {stats.map((s) => (
           <div key={s.label} className="bg-[var(--bg)] rounded-lg p-3 border border-[var(--border)]">
             <p className="text-[var(--muted)] text-xs">{s.icon} {s.label}</p>
-            <p className="text-white font-bold text-xl">{s.value.toLocaleString()}{s.suffix || ""}</p>
+            <p className="text-white font-bold text-xl">{formatViews(s.value)}{s.suffix || ""}</p>
           </div>
         ))}
       </div>
@@ -727,7 +728,7 @@ export default function GenericEditor({
                   { label: "Read Time", value: `${formData.analytics.readTime ?? 0}s`, color: "text-green-400" },
                 ].map((s) => (
                   <div key={s.label} className="text-center">
-                    <p className={`text-xl font-bold ${s.color}`}>{typeof s.value === "number" ? s.value.toLocaleString() : s.value}</p>
+                    <p className={`text-xl font-bold ${s.color}`}>{typeof s.value === "number" ? formatViews(s.value) : s.value}</p>
                     <p className="text-xs text-[var(--muted)] mt-0.5">{s.label}</p>
                   </div>
                 ))}

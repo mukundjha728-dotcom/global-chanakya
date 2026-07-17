@@ -13,6 +13,7 @@ import BlogActions from "@/components/blogs/BlogActions";
 import ReadingProgress from "@/components/blogs/ReadingProgress";
 import BlogClientTracker from "@/components/blogs/BlogClientTracker";
 import { generateSeoMetadata, calculateReadingTime, formatDate } from "@repo/utils";
+import { formatViews } from "@/lib/formatViews";
 import { ArrowLeft, Clock, Eye, Calendar, Tag, Crown, TrendingUp, Crosshair, Newspaper } from "lucide-react";
 import { SITE_URL } from "@/constants";
 import AdUnit, { InArticleAd, SidebarAd } from "@/components/ads/AdUnit";
@@ -244,7 +245,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             <div className="w-px h-8 bg-[var(--border)] hidden sm:block"></div>
             <span className="flex items-center gap-2"><Calendar className="w-4 h-4 text-[var(--secondary)]" /> {publishDate}</span>
             <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-[var(--secondary)]" /> {readTime} min read</span>
-            <span className="flex items-center gap-2"><Eye className="w-4 h-4 text-[var(--secondary)]" /> {(blog.analytics?.views || 0).toLocaleString()} views</span>
+            <span className="flex items-center gap-2"><Eye className="w-4 h-4 text-[var(--secondary)]" /> {formatViews(blog.analytics?.views || 0)} views</span>
           </div>
         </div>
       </header>
