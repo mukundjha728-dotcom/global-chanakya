@@ -138,7 +138,7 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
         <div className="grid grid-cols-3 gap-4">
           <div className="p-4 bg-[var(--surface)] border border-[var(--border)] rounded-xl">
             <p className="text-xs text-[var(--muted)] flex items-center gap-1.5"><BarChart2 className="w-3.5 h-3.5" /> Total Views</p>
-            <p className="text-2xl font-bold text-white mt-1">{totalViews.toLocaleString()}</p>
+            <p className="text-2xl font-bold text-white mt-1">{formatViews(totalViews)}</p>
           </div>
           <div className="p-4 bg-[var(--surface)] border border-[var(--border)] rounded-xl">
             <p className="text-xs text-[var(--muted)]">📰 Published</p>
