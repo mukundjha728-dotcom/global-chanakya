@@ -80,19 +80,19 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
       <div className="relative w-full max-w-2xl bg-[var(--surface)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh] animate-in fade-in zoom-in-95 duration-200">
         
         {/* Header / Input */}
-        <div className="flex items-center gap-3 px-6 py-4 border-b border-[var(--border)]">
-          <Search className="w-5 h-5 text-[var(--secondary)]" />
+        <div className="flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--border)]">
+          <Search className="w-5 h-5 text-[var(--secondary)] shrink-0" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search intelligence reports, regions, or topics..."
-            className="flex-1 bg-transparent border-none outline-none text-white text-lg placeholder:text-[var(--muted)]"
+            placeholder="Search intelligence reports, regions..."
+            className="flex-1 min-w-0 bg-transparent border-none outline-none text-white text-base sm:text-lg placeholder:text-[var(--muted)]"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           <button 
             onClick={onClose}
-            className="p-1.5 rounded-md hover:bg-white/5 text-[var(--secondary)] hover:text-white transition-colors"
+            className="p-1.5 rounded-md hover:bg-white/5 text-[var(--secondary)] hover:text-white transition-colors shrink-0"
           >
             <X className="w-5 h-5" />
           </button>
