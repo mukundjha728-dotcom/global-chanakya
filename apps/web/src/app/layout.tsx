@@ -155,7 +155,7 @@ import { DisableInspect } from "@/components/DisableInspect";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
       <head>
         <meta name="google-site-verification" content="VrGd2s0LCdRNrUkVXP2WS7oMOvKxAUD2qZE1Nsepl3A" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
@@ -174,13 +174,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           strategy="beforeInteractive"
         />
       </head>
-      <body className={`${inter.variable} ${lora.variable} font-sans antialiased leading-[1.8] overflow-x-hidden`}>
+      <body className={`${inter.variable} ${lora.variable} font-sans antialiased leading-[1.8] overflow-x-hidden w-full max-w-[100vw]`}>
         <DisableInspect />
         <CSPostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
             <Providers>
               <ConditionalShell navbar={<Navbar />} footer={<Footer />}>
-                {children}
+                <div className="overflow-x-hidden w-full">
+                  {children}
+                </div>
               </ConditionalShell>
             </Providers>
           </ThemeProvider>
