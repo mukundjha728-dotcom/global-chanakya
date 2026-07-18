@@ -42,19 +42,19 @@ export default function NavbarClient({ session }: NavbarClientProps) {
       <div className="w-full max-w-7xl mx-auto px-8 flex items-center justify-between">
         
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center gap-4 min-w-[240px] shrink-0 group">
+        <Link href="/" className="flex items-center gap-2 md:gap-4 min-w-fit md:min-w-[240px] shrink-0 group">
           <Image
             src="/icon.svg"
             alt="Global Chanakya"
             width={48}
             height={48}
-            className="w-12 h-12 rounded-xl group-hover:scale-105 transition-transform duration-300"
+            className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl group-hover:scale-105 transition-transform duration-300"
           />
-          <div className="flex flex-col leading-none gap-1">
-            <span className="text-[28px] font-bold tracking-[-0.03em] text-white">
+          <div className="flex flex-col leading-none gap-0.5 md:gap-1">
+            <span className="text-[18px] md:text-[28px] font-bold tracking-[-0.03em] text-white">
               Global Chanakya
             </span>
-            <span className="text-[11px] font-bold text-[var(--gold)] tracking-[0.22em] uppercase">
+            <span className="text-[8px] md:text-[11px] font-bold text-[var(--gold)] tracking-[0.22em] uppercase">
               Intelligence
             </span>
           </div>
