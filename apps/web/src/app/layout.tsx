@@ -174,7 +174,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           strategy="beforeInteractive"
         />
       </head>
-      <body className={`${inter.variable} ${lora.variable} font-sans antialiased leading-[1.8]`}>
+      <body className={`${inter.variable} ${lora.variable} font-sans antialiased leading-[1.8] overflow-x-hidden`}>
         <DisableInspect />
         <CSPostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
