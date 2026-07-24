@@ -21,6 +21,7 @@ interface NavbarClientProps {
 const navLinks = [
   { label: "Reports", href: "/blogs" },
   { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function NavbarClient({ session }: NavbarClientProps) {

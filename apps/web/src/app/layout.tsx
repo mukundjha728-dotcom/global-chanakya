@@ -68,7 +68,6 @@ export const metadata: Metadata = {
     images: [`${SITE_URL}/og-image.png`],
   },
   alternates: {
-    canonical: SITE_URL,
     types: { "application/rss+xml": `${SITE_URL}/feed.xml` },
   },
   robots: {
@@ -151,7 +150,7 @@ const jsonLd = [
   }
 ];
 
-import { DisableInspect } from "@/components/DisableInspect";
+import CookieConsent from "@/components/CookieConsent";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -161,11 +160,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
 
-        <script 
-          async 
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3046817657353243" 
-          crossOrigin="anonymous" 
-        ></script>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3046817657353243"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
 
         <Script
           id="json-ld-org"
@@ -175,7 +175,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
       </head>
       <body className={`${inter.variable} ${lora.variable} font-sans antialiased leading-[1.8] overflow-x-hidden w-full max-w-[100vw]`}>
-        <DisableInspect />
+        <CookieConsent />
         <CSPostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
             <Providers>

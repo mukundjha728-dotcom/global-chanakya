@@ -51,16 +51,7 @@ export default async function sitemap({
         priority: 0.7,
       })) as MetadataRoute.Sitemap;
 
-      // Fetch dynamic tags
-      const tags = await Blog.distinct('tags', { status: 'published' });
-      const tagRoutes = tags.filter(Boolean).map((tag: string) => ({
-        url: `${SITE_URL}/blogs?tag=${encodeURIComponent(tag.toLowerCase())}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.6,
-      })) as MetadataRoute.Sitemap;
-
-      return [...staticMaps, ...topics, ...platformSeo, ...entities, ...categoryRoutes, ...tagRoutes];
+      return [...staticMaps, ...topics, ...platformSeo, ...entities, ...categoryRoutes];
     } catch (e) {
       console.error("Error generating sitemap static routes:", e);
       return getStaticSitemaps();

@@ -72,6 +72,8 @@ export default function Footer() {
             <ul className="flex flex-col gap-3">
               <li><Link href="/privacy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Privacy Policy</Link></li>
               <li><Link href="/terms" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Terms of Service</Link></li>
+              <li><Link href="/disclaimer" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Disclaimer</Link></li>
+              <li><Link href="/cookie-policy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Cookie Policy</Link></li>
               <li><Link href="/platformseo" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Platform SEO</Link></li>
             </ul>
           </div>

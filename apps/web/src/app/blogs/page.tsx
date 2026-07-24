@@ -9,6 +9,9 @@ import { BlogService } from "@/modules/blog/services/blog.service";
 export const metadata = {
   title: "Latest Intel",
   description: "Read the latest geopolitical reports and intelligence briefs.",
+  alternates: {
+    canonical: "/blogs",
+  },
 };
 
 // Next.js App Router ISR
