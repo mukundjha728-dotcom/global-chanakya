@@ -29,7 +29,7 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
   const { slug } = await params;
   const data = await TopicService.getTopicHubData(slug);
   
-  const totalItems = data.countries.length + data.leaders.length + data.conflicts.length + data.reports.length;
+  const totalItems = data.reports?.length || 0;
   if (totalItems === 0) {
     notFound();
   }
@@ -40,7 +40,7 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: formattedSlug,
-    description: `Aggregated intelligence, reports, conflicts, and geopolitical relations concerning ${formattedSlug}.`,
+    description: `Aggregated intelligence, reports, and geopolitical relations concerning ${formattedSlug}.`,
     url: `${SITE_URL}/topic/${slug}`,
     publisher: {
       "@type": "Organization",
@@ -53,14 +53,9 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
     mainEntity: {
       "@type": "ItemList",
       itemListElement: [
-        ...data.countries.map((c: any, index: number) => ({
-          "@type": "ListItem",
-          position: index + 1,
-          url: `${SITE_URL}/country/${c.slug || c._id}`,
-        })),
         ...data.reports.map((r: any, index: number) => ({
           "@type": "ListItem",
-          position: data.countries.length + index + 1,
+          position: index + 1,
           url: `${SITE_URL}/blogs/${r.slug || r._id}`,
         })),
       ]
@@ -96,9 +91,6 @@ export default async function TopicPage({ params }: { params: Promise<{ slug: st
         </div>
 
         <div className="space-y-12">
-          <RelatedIntelligence items={data.countries as any} title={`Countries Involved with ${formattedSlug}`} />
-          <RelatedIntelligence items={data.leaders as any} title={`Key Leadership (${formattedSlug})`} />
-          <RelatedIntelligence items={data.conflicts as any} title={`Related Conflicts & Events`} />
           <RelatedIntelligence items={data.reports as any} title={`Intelligence Reports & Briefings`} />
         </div>
       </div>

@@ -24,12 +24,7 @@ const citationSchema = z.object({
   addedAt: z.any().optional(),
 }).optional();
 
-// ─── Entity Relations Sub-Schema ──────────────────────────────────────────────
-const entityRelationSchema = z.object({
-  targetId: z.string().min(1),
-  targetModel: z.enum(["Country", "Leader", "Conflict", "Alliance"]),
-  type: z.string().min(1),
-}).optional();
+
 
 // ─── Create Blog Schema ──────────────────────────────────────────────────────
 export const createBlogSchema = z.object({
@@ -38,7 +33,7 @@ export const createBlogSchema = z.object({
   excerpt: z.string().min(10, "Excerpt is required").max(500, "Excerpt max 500 chars"),
   content: z.string().min(20, "Content is required"),
   category: z.string().min(2, "Category is required"),
-  countrySlug: z.string().optional().or(z.literal("")),
+
   reportType: z.enum(["Analysis", "Briefing", "Op-Ed", "Intelligence", "Report"]).optional(),
   tags: z.array(z.string()).max(30, "Max 30 tags").optional(),
   visibility: z.enum(["public", "premium", "private"]).optional().default("public"),
@@ -50,7 +45,7 @@ export const createBlogSchema = z.object({
   seo: seoSchema,
   aiSummary: z.string().max(500, "AI Summary max 500 chars").optional(),
   citations: z.array(z.any()).optional(), // Flexible — validated on display
-  entityRelations: z.array(z.any()).optional(),
+
 });
 
 // ─── Update Blog Schema ──────────────────────────────────────────────────────

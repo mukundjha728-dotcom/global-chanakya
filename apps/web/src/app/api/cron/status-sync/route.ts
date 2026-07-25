@@ -1,13 +1,6 @@
 import { NextResponse } from "next/server";
-import mongoose from "mongoose";
 import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
-import { Conflict } from "@/lib/models/Conflict";
-import { Country } from "@/lib/models/Country";
-import { Leader } from "@/lib/models/Leader";
-import { Alliance } from "@/lib/models/Alliance";
-import { Timeline } from "@/lib/models/Timeline";
-import { Region } from "@/lib/models/Region";
 import { AuditLog } from "@/lib/models/AuditLog";
 
 // Vercel Cron handler
@@ -26,12 +19,6 @@ export async function GET(request: Request) {
   
   const models = [
     { name: "Blog", model: Blog },
-    { name: "Conflict", model: Conflict },
-    { name: "Country", model: Country },
-    { name: "Leader", model: Leader },
-    { name: "Alliance", model: Alliance },
-    { name: "Timeline", model: Timeline },
-    { name: "Region", model: Region },
   ];
 
   let publishedCount = 0;

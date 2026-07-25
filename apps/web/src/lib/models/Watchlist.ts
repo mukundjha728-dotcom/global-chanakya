@@ -2,7 +2,7 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IWatchlist extends Document {
   userId: mongoose.Types.ObjectId;
-  entityType: "country" | "leader" | "conflict" | "alliance" | "topic";
+  entityType: "topic";
   entityId: mongoose.Types.ObjectId;
   createdAt: Date;
 }
@@ -11,7 +11,7 @@ const WatchlistSchema = new Schema<IWatchlist>({
   userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   entityType: {
     type: String,
-    enum: ["country", "leader", "conflict", "alliance", "topic"],
+    enum: ["topic"],
     required: true,
   },
   entityId: { type: Schema.Types.ObjectId, required: true },

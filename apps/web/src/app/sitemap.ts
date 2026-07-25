@@ -4,7 +4,6 @@ import { Blog } from '@/lib/models/Blog';
 import { SITE_URL } from '@/constants';
 
 import { getStaticSitemaps } from '@/modules/seo/sitemap-static';
-import { getEntitySitemaps } from '@/modules/seo/sitemap-entities';
 import { getTopicSitemaps } from '@/modules/seo/sitemap-topics';
 import { getPlatformSeoSitemaps } from '@/modules/seo/sitemap-platformseo';
 
@@ -16,7 +15,7 @@ export async function generateSitemaps() {
     const count = await Blog.countDocuments({ status: 'published' });
     const sitemaps = Math.ceil(count / BLOGS_PER_SITEMAP);
     
-    // id 0 is for static pages and categories, id 1 to N is for blogs
+    // id 0 is for static pages, id 1 to N is for blogs
     return Array.from({ length: sitemaps + 1 }, (_, i) => ({ id: i }));
   } catch (e) {
     console.error("Error in generateSitemaps:", e);
@@ -35,23 +34,13 @@ export default async function sitemap({
 
   if (numId === 0) {
     try {
-      const [staticMaps, topics, platformSeo, entities] = await Promise.all([
+      const [staticMaps, topics, platformSeo] = await Promise.all([
         getStaticSitemaps(),
         getTopicSitemaps(),
         getPlatformSeoSitemaps(),
-        getEntitySitemaps(),
       ]);
 
-      // Fetch dynamic categories
-      const categories = await Blog.distinct('category', { status: 'published' });
-      const categoryRoutes = categories.filter(Boolean).map((cat: string) => ({
-        url: `${SITE_URL}/categories?type=${encodeURIComponent(cat.toLowerCase())}`,
-        lastModified: new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.7,
-      })) as MetadataRoute.Sitemap;
-
-      return [...staticMaps, ...topics, ...platformSeo, ...entities, ...categoryRoutes];
+      return [...staticMaps, ...topics, ...platformSeo];
     } catch (e) {
       console.error("Error generating sitemap static routes:", e);
       return getStaticSitemaps();

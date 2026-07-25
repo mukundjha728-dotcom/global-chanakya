@@ -1,12 +1,11 @@
 /**
  * /api/knowledge/entity/[slug]/route.ts
  * Internal API returning semantic graph data for an entity.
+ * Note: Country, Leader, Conflict entities have been removed.
+ * This endpoint now only returns blog-based content.
  */
 import { NextResponse, NextRequest } from "next/server";
 import dbConnect from "@/lib/mongoose";
-import { Country } from "@/lib/models/Country";
-import { Leader } from "@/lib/models/Leader";
-import { Conflict } from "@/lib/models/Conflict";
 import { Blog } from "@/lib/models/Blog";
 
 export async function GET(
@@ -17,42 +16,24 @@ export async function GET(
     await dbConnect();
     const { slug } = await params;
 
-    // Fast parallel lookup across entities
-    const [country, leader, conflict] = await Promise.all([
-      Country.findOne({ slug }).lean(),
-      Leader.findOne({ slug }).lean(),
-      Conflict.findOne({ slug }).lean()
-    ]);
-
-    const entity = country || leader || conflict;
-    
-    if (!entity) {
-      return NextResponse.json({ error: "Entity not found in Knowledge Graph" }, { status: 404 });
-    }
-
-    const type = country ? "Country" : leader ? "Leader" : "Conflict";
-
-    // Fetch semantically related content from blogs
+    // Fetch related blog content by slug or tag match
     const relatedContent = await Blog.find({
-      "entityRelations.targetId": entity._id
+      $or: [
+        { slug },
+        { tags: { $regex: new RegExp(slug.replace(/-/g, '.*'), 'i') } }
+      ],
+      status: "published"
     })
     .select("title slug aiSummary keyInsights tags publishAt")
     .sort({ publishAt: -1 })
-    .limit(5)
+    .limit(10)
     .lean();
 
+    if (!relatedContent || relatedContent.length === 0) {
+      return NextResponse.json({ error: "Entity not found in Knowledge Graph" }, { status: 404 });
+    }
+
     return NextResponse.json({
-      entity: {
-        id: entity._id,
-        type,
-        name: entity.name || entity.title,
-        overview: entity.overview || entity.bio,
-      },
-      graph: {
-        relationships: type === "Country" ? entity.relatedConflicts : type === "Leader" ? entity.associatedConflicts : entity.involvedParties,
-        semanticNeighbors: relatedContent.map(b => b.slug),
-        strategicTags: entity.tags || [],
-      },
       content: relatedContent
     }, {
       headers: {

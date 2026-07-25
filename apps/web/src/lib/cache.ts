@@ -7,9 +7,6 @@ export const CACHE_TTL = {
   TRENDING_ARTICLES: 15 * 60, // 15 min
   RELATED_ARTICLES: 30 * 60, // 30 min
   ARTICLE: 60 * 60, // 1 hr
-  COUNTRY_HUB: 6 * 60 * 60, // 6 hr
-  CONFLICT_HUB: 6 * 60 * 60, // 6 hr
-  LEADER_HUB: 6 * 60 * 60, // 6 hr
   SITEMAP: 12 * 60 * 60, // 12 hr
   LLMS_TXT: 24 * 60 * 60, // 24 hr
 };

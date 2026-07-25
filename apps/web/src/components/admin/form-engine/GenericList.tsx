@@ -32,12 +32,6 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
             res.data ||
             res.items ||
             res.blogs ||
-            res.conflicts ||
-            res.countries ||
-            res.leaders ||
-            res.alliances ||
-            res.regions ||
-            res.timelines ||
             []
           );
         }

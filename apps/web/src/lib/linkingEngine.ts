@@ -1,6 +1,8 @@
 /**
  * linkingEngine.ts
  * Auto-links known geopolitical entities inside HTML content.
+ * Note: Entity linking (leaders, countries, alliances) has been removed.
+ * This engine is kept as a stub for future use.
  */
 
 interface KnownEntity {
@@ -8,20 +10,8 @@ interface KnownEntity {
   url: string;
 }
 
-// In a real production system, these would be fetched dynamically from MongoDB 
-// and cached in Redis. For execution, we demonstrate the engine logic.
-export const KNOWN_ENTITIES: KnownEntity[] = [
-  { name: "Xi Jinping", url: "/leader/xi-jinping" },
-  { name: "Narendra Modi", url: "/leader/narendra-modi" },
-  { name: "Vladimir Putin", url: "/leader/vladimir-putin" },
-  { name: "BRICS", url: "/alliance/brics" },
-  { name: "NATO", url: "/alliance/nato" },
-  { name: "QUAD", url: "/alliance/quad" },
-  { name: "India", url: "/country/india" },
-  { name: "China", url: "/country/china" },
-  { name: "Russia", url: "/country/russia" },
-  { name: "United States", url: "/country/united-states" },
-];
+// Entity linking data removed — no leader/country/alliance pages exist anymore
+export const KNOWN_ENTITIES: KnownEntity[] = [];
 
 /**
  * Replaces the first occurrence of known entities with SEO-safe internal links.
@@ -31,7 +21,7 @@ export const KNOWN_ENTITIES: KnownEntity[] = [
  * - Contextual linking (avoids linking inside existing HTML tags like <a> or <script>).
  */
 export function autoLinkEntities(htmlContent: string): string {
-  if (!htmlContent) return htmlContent;
+  if (!htmlContent || KNOWN_ENTITIES.length === 0) return htmlContent;
 
   let processedHtml = htmlContent;
   
@@ -40,11 +30,6 @@ export function autoLinkEntities(htmlContent: string): string {
   const sortedEntities = [...KNOWN_ENTITIES].sort((a, b) => b.name.length - a.name.length);
 
   sortedEntities.forEach(entity => {
-    // Regex logic:
-    // 1. Matches the entity name exactly with word boundaries (\b).
-    // 2. Uses a negative lookahead to ensure we aren't inside an HTML tag 
-    //    (i.e. checking if a > comes before a < next).
-    // 3. Replaces only the FIRST occurrence (no 'g' flag).
     const regex = new RegExp(`\\b(${escapeRegExp(entity.name)})\\b(?![^<]*>|[^<>]*<\/a>)`, 'i');
     
     processedHtml = processedHtml.replace(regex, `<a href="${entity.url}" class="text-blue-400 hover:underline font-medium" title="Read more about $1">$1</a>`);

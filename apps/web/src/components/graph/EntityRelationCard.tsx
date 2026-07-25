@@ -1,9 +1,9 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Globe, User, ShieldAlert, Users } from "lucide-react";
+import { ArrowRight, FileText } from "lucide-react";
 
-export type EntityType = "Country" | "Leader" | "Conflict" | "Alliance" | "Blog";
+export type EntityType = "Blog";
 
 interface EntityRelationCardProps {
   id: string;
@@ -15,25 +15,8 @@ interface EntityRelationCardProps {
   isActive?: boolean;
 }
 
-const getEntityIcon = (type: EntityType) => {
-  switch (type) {
-    case "Country": return <Globe className="w-5 h-5 text-blue-400" />;
-    case "Leader": return <User className="w-5 h-5 text-emerald-400" />;
-    case "Conflict": return <ShieldAlert className="w-5 h-5 text-red-400" />;
-    case "Alliance": return <Users className="w-5 h-5 text-purple-400" />;
-    default: return <ArrowRight className="w-5 h-5 text-gray-400" />;
-  }
-};
-
 const getEntityUrl = (type: EntityType, slug: string) => {
-  switch (type) {
-    case "Country": return `/country/${slug}`;
-    case "Leader": return `/leader/${slug}`;
-    case "Conflict": return `/conflict/${slug}`;
-    case "Alliance": return `/alliance/${slug}`;
-    case "Blog": return `/blogs/${slug}`;
-    default: return `/`;
-  }
+  return `/blogs/${slug}`;
 };
 
 export function EntityRelationCard({ type, name, slug, imageUrl, subtitle, isActive }: EntityRelationCardProps) {
@@ -52,17 +35,11 @@ export function EntityRelationCard({ type, name, slug, imageUrl, subtitle, isAct
             loading="lazy" 
           />
         ) : (
-          getEntityIcon(type)
+          <FileText className="w-5 h-5 text-gray-400" />
         )}
       </div>
       <h3 className="text-sm font-semibold text-gray-100 text-center line-clamp-1">{name}</h3>
       {subtitle && <p className="text-xs text-gray-400 mt-1 text-center line-clamp-1">{subtitle}</p>}
-      
-      {/* AI Semantic metadata hidden visually but readable by bots */}
-      <span className="sr-only" itemProp="about" itemType={`https://schema.org/${type === "Leader" ? "Person" : type === "Country" ? "Country" : "Event"}`}>
-        <span itemProp="name">{name}</span>
-        <span itemProp="url">{url}</span>
-      </span>
     </Link>
   );
 }

@@ -3,7 +3,7 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { LayoutDashboard, Users, Newspaper, PenTool, Settings, LogOut, ShieldAlert, LayoutTemplate, Globe, MapPin, Clock, Link as LinkIcon, Search, TrendingUp, FileText, Activity, Image as ImageIcon } from "lucide-react";
+import { LayoutDashboard, Users, Newspaper, PenTool, Settings, LogOut, ShieldAlert, TrendingUp, FileText, Activity, Image as ImageIcon } from "lucide-react";
 
 export const navItems = [
   // Dashboard
@@ -12,14 +12,6 @@ export const navItems = [
   // Content
   { href: "/admin/blogs", label: "Intelligence Archive", icon: Newspaper, group: "Content" },
   { href: "/admin/write", label: "Write Report", icon: PenTool, group: "Content" },
-  { href: "/admin/categories", label: "Categories", icon: LayoutTemplate, group: "Content" },
-  { href: "/admin/tags", label: "Tags", icon: Search, group: "Content" },
-
-  // Intelligence
-  { href: "/admin/countries", label: "Countries", icon: Globe, group: "Intelligence" },
-  { href: "/admin/leaders", label: "Leaders", icon: Users, group: "Intelligence" },
-  { href: "/admin/alliances", label: "Alliances", icon: Users, group: "Intelligence" },
-  { href: "/admin/timelines", label: "Timelines", icon: Clock, group: "Intelligence" },
 
   // Media & Growth
   { href: "/admin/media", label: "Media Library", icon: ImageIcon, group: "Assets" },

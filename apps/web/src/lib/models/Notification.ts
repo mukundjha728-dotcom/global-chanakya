@@ -5,7 +5,7 @@ export interface INotification extends Document {
   title: string;
   message: string;
   priority: "low" | "normal" | "high" | "critical";
-  triggerType: "watchlist_event" | "conflict_escalation" | "leader_update";
+  triggerType: "watchlist_event";
   targetEntity?: {
     entityType: string;
     entityId: mongoose.Types.ObjectId;
@@ -25,7 +25,7 @@ const NotificationSchema = new Schema<INotification>({
   },
   triggerType: {
     type: String,
-    enum: ["watchlist_event", "conflict_escalation", "leader_update"],
+    enum: ["watchlist_event"],
     required: true,
   },
   targetEntity: {

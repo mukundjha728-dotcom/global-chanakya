@@ -1,7 +1,4 @@
 import React from "react";
-import { ICountry } from "@/lib/models/Country";
-import { ILeader } from "@/lib/models/Leader";
-import { IConflict } from "@/lib/models/Conflict";
 import { IBlog } from "@/lib/models/Blog";
 
 import { SITE_URL } from "@/constants";
@@ -16,37 +13,6 @@ export function JsonLd({ schema }: { schema: Record<string, unknown> }) {
 }
 
 export const SchemaGenerators = {
-  country: (country: ICountry) => ({
-    "@context": "https://schema.org",
-    "@type": ["Place", "GovernmentOrganization"],
-    name: country.name,
-    description: country.overview,
-    url: `${SITE_URL}/country/${country.slug}`,
-    image: country.flagUrl,
-  }),
-  
-  leader: (leader: ILeader, countryName?: string) => ({
-    "@context": "https://schema.org",
-    "@type": "Person",
-    name: leader.name,
-    jobTitle: leader.title,
-    description: leader.bio,
-    url: `${SITE_URL}/leader/${leader.slug}`,
-    image: leader.imageUrl,
-    ...(countryName && { nationality: { "@type": "Country", name: countryName } }),
-  }),
-
-  conflict: (conflict: IConflict) => ({
-    "@context": "https://schema.org",
-    "@type": "Event",
-    name: conflict.title,
-    description: conflict.overview,
-    startDate: conflict.startDate,
-    endDate: conflict.endDate,
-    eventStatus: "https://schema.org/EventScheduled",
-    url: `${SITE_URL}/conflict/${conflict.slug}`,
-  }),
-
   article: (blog: IBlog) => ({
     "@context": "https://schema.org",
     "@type": "Article",

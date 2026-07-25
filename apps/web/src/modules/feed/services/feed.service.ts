@@ -1,17 +1,16 @@
 import { WatchlistRepository } from "@/modules/watchlist/repositories/watchlist.repository";
-import { TimelineRepository } from "@/modules/timeline/repositories/timeline.repository";
 import { BlogRepository } from "@/modules/blog/repositories/blog.repository";
 import { memoryCache } from "@/lib/cache/memory.cache";
 
 export interface FeedItem {
   id: string;
-  type: "timeline" | "blog";
+  type: "blog";
   title: string;
   description: string;
   date: Date;
   score: number;
   tags?: string[];
-  meta?: { entityType?: string; severity?: string; category?: string };
+  meta?: { category?: string };
 }
 
 export class FeedService {
@@ -20,58 +19,19 @@ export class FeedService {
     const cached = await memoryCache.get<FeedItem[]>(cacheKey);
     if (cached) return cached;
 
-    // 1. Get user's watchlist
+    // 1. Get user's topic watchlist
     const watchlist = await WatchlistRepository.getByUser(userId);
-    const watchedEntityIds = watchlist.map((w) => w.entityId.toString());
+    // Depending on what entityId represents for topics, we can match blogs
 
-    // 2. Fetch recent timeline events (global)
-    const recentEvents = await TimelineRepository.getRecentEvents(50);
-
-    // 3. Fetch recent blogs
+    // 2. Fetch recent blogs
     const recentBlogs = await BlogRepository.getLatest(20);
 
     const feed: FeedItem[] = [];
     const now = new Date().getTime();
 
-    // Scoring Multipliers
-    const severityMap: Record<string, number> = {
-      critical: 100,
-      major: 70,
-      normal: 40,
-      minor: 20,
-    };
-
-    // Process Timeline Events
-    for (const event of recentEvents) {
-      const isWatched = watchedEntityIds.includes(event.entityId.toString());
-      
-      // Calculate recency (max 50 points for within 24 hours, decaying)
-      const hoursOld = (now - new Date(event.eventDate).getTime()) / (1000 * 60 * 60);
-      const recencyScore = Math.max(0, 50 - hoursOld);
-      
-      const watchlistScore = isWatched ? 100 : 0;
-      const severityScore = severityMap[event.severity] || 40;
-
-      const score = severityScore + recencyScore + watchlistScore;
-
-      // Only show non-watched items if they are critical/major, or if feed is empty
-      if (isWatched || severityScore >= 70) {
-        feed.push({
-          id: event._id.toString(),
-          type: "timeline",
-          title: event.title,
-          description: event.description,
-          date: event.eventDate,
-          score,
-          tags: event.tags,
-          meta: { entityType: event.entityType, severity: event.severity }
-        });
-      }
-    }
-
     // Process Blogs
     for (const blog of recentBlogs) {
-      // Very basic blog scoring
+      // Basic blog scoring
       const hoursOld = (now - new Date(blog.publishAt!).getTime()) / (1000 * 60 * 60);
       const recencyScore = Math.max(0, 50 - hoursOld);
       const score = (blog.isTrending ? 80 : 40) + recencyScore;

@@ -244,15 +244,10 @@ export default async function Home() {
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-10 mt-12 md:mt-14 pt-8 border-t border-[var(--border)]">
+              <div className="grid grid-cols-1 gap-6 md:gap-10 mt-12 md:mt-14 pt-8 border-t border-[var(--border)]">
                 <div className="flex flex-col gap-1 md:gap-2">
                   <div className="text-4xl md:text-5xl font-bold text-white leading-none">67+</div>
                   <div className="text-[10px] md:text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Strategic Reports</div>
-                </div>
-
-                <div className="flex flex-col gap-1 md:gap-2 col-span-2 md:col-span-1">
-                  <div className="text-4xl md:text-5xl font-bold text-white leading-none">192</div>
-                  <div className="text-[10px] md:text-xs uppercase tracking-[0.14em] text-[var(--muted)] font-bold">Countries Tracked</div>
                 </div>
               </div>
             </div>

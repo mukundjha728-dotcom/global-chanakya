@@ -168,4 +168,23 @@ export class BlogRepository {
     const result = await Blog.findByIdAndDelete(id);
     return !!result;
   }
+
+  static async getBreakingBlogs(limit: number = 10): Promise<IBlog[]> {
+    await dbConnect();
+    const now = new Date();
+    return Blog.find({ 
+      status: "published", 
+      isBreaking: true,
+      $or: [
+        { breakingUntil: { $exists: false } },
+        { breakingUntil: { $gte: now } }
+      ]
+    }, {
+      title: 1, slug: 1, excerpt: 1, category: 1, visibility: 1,
+      featuredImage: 1, isBreaking: 1, analytics: 1, publishAt: 1, createdAt: 1
+    })
+      .sort({ publishAt: -1 })
+      .limit(limit)
+      .lean();
+  }
 }

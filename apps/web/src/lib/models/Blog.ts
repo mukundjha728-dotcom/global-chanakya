@@ -25,7 +25,7 @@ export interface IBlog extends Document {
   };
   ogImage?: string;
   category: string;
-  countrySlug?: string;
+
   reportType?: string;
   tags: string[];
   featuredImage?: string;
@@ -58,11 +58,7 @@ export interface IBlog extends Document {
   aiSummary?: string;
   citations?: { type: "Primary" | "Secondary" | "Government" | "Think Tank"; source: string; url?: string }[];
   reviewedAt?: Date;
-  entityRelations?: {
-    targetId: mongoose.Types.ObjectId;
-    targetModel: "Country" | "Leader" | "Conflict" | "Alliance";
-    type: string;
-  }[];
+
   createdAt: Date;
   updatedAt: Date;
   version: number;
@@ -102,7 +98,7 @@ const BlogSchema = new Schema<IBlog>(
     },
     ogImage: { type: String },
     category: { type: String, required: true, index: true },
-    countrySlug: { type: String, index: true },
+
     reportType: { type: String },
     tags: [{ type: String }],
     featuredImage: { type: String },
@@ -153,11 +149,7 @@ const BlogSchema = new Schema<IBlog>(
       url: { type: String }
     }],
     reviewedAt: { type: Date },
-    entityRelations: [{
-      targetId: { type: Schema.Types.ObjectId, required: true, refPath: "entityRelations.targetModel" },
-      targetModel: { type: String, required: true, enum: ["Country", "Leader", "Conflict", "Alliance"] },
-      type: { type: String, required: true }
-    }]
+
   },
   { timestamps: true }
 );

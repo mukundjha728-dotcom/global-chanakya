@@ -1,9 +1,9 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, FileText, Map, User, ShieldAlert } from "lucide-react";
+import { ArrowRight, FileText } from "lucide-react";
 
 interface RelatedItem {
-  type: "country" | "leader" | "conflict" | "report";
+  type: "report";
   title: string;
   slug: string;
   imageUrl?: string;
@@ -24,14 +24,9 @@ export function RelatedIntelligence({ items, title = "Related Intelligence" }: {
         }}
       >
         {items.map((item, idx) => {
-          let href = "/";
-          let Icon = FileText;
-          let color = "#3b82f6";
-          
-          if (item.type === "country") { href = `/country/${item.slug}`; Icon = Map; color = "#10b981"; }
-          if (item.type === "leader") { href = `/leader/${item.slug}`; Icon = User; color = "#f59e0b"; }
-          if (item.type === "conflict") { href = `/conflict/${item.slug}`; Icon = ShieldAlert; color = "#ef4444"; }
-          if (item.type === "report") { href = `/blogs/${item.slug}`; Icon = FileText; color = "#6366f1"; }
+          const href = `/blogs/${item.slug}`;
+          const Icon = FileText;
+          const color = "#6366f1";
 
           return (
             <Link
