@@ -45,7 +45,7 @@ export default function AboutPage() {
         <div className="prose prose-invert prose-rose max-w-none text-left mb-20">
           <h2 className="text-2xl font-bold text-white mb-4">Our Story</h2>
           <p className="text-white opacity-85 leading-[1.8] mb-6">
-            Global Chanakya was founded in 2024 with a clear purpose: to fill the gap in accessible, non-partisan geopolitical intelligence. In an era where news cycles move at the speed of social media and strategic analysis is often locked behind expensive paywalls or filtered through ideological lenses, we saw a need for a platform that provides rigorous, independent analysis to anyone who wants to understand global power dynamics.
+            Global Chanakya was founded in 2026 with a clear purpose: to fill the gap in accessible, non-partisan geopolitical intelligence. In an era where news cycles move at the speed of social media and strategic analysis is often locked behind expensive paywalls or filtered through ideological lenses, we saw a need for a platform that provides rigorous, independent analysis to anyone who wants to understand global power dynamics.
           </p>
           <p className="text-white opacity-85 leading-[1.8] mb-6">
             Named after Chanakya (Kautilya), the ancient Indian strategist and author of the Arthashastra — one of the world&apos;s earliest treatises on statecraft, economic policy, and military strategy — our platform embodies his legacy of strategic thinking, realism, and pragmatic analysis. Just as Chanakya provided counsel grounded in deep understanding of power dynamics, we aim to provide our readers with intelligence that is rooted in reality rather than wishful thinking.
