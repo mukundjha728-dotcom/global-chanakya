@@ -1,21 +1,17 @@
-import React from "react";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import AdminGrowthClient from "@/components/admin/AdminGrowthClient";
 
 export const metadata = {
-  title: "Growth Dashboard | Admin",
+  title: "Growth Dashboard | Admin | Global Chanakya",
 };
 
-export default function GrowthDashboardPage() {
-  return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-white mb-2">Growth Dashboard</h1>
-          <p className="text-gray-400">Manage newsletters, trending, and announcements.</p>
-        </div>
-      </div>
-      <div className="bg-[var(--surface)] border border-[var(--border)] rounded-xl p-8 flex flex-col items-center justify-center text-center h-64">
-        <p className="text-gray-500 italic">Module scaffolded and ready for implementation.</p>
-      </div>
-    </div>
-  );
+export default async function GrowthDashboardPage() {
+  const session = await auth();
+  
+  if (!session || session.user.role !== "admin") {
+    redirect("/404");
+  }
+
+  return <AdminGrowthClient />;
 }
