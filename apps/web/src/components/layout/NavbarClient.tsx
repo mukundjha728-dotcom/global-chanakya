@@ -85,6 +85,7 @@ export default function NavbarClient({ session }: NavbarClientProps) {
 
           <button 
             onClick={() => setIsSearchOpen(true)}
+            aria-label="Search"
             className="text-[var(--secondary)] hover:text-white transition-colors ml-2"
           >
             <Search className="w-5 h-5" />
@@ -165,12 +166,14 @@ export default function NavbarClient({ session }: NavbarClientProps) {
         <div className="flex items-center gap-2 lg:hidden">
           <button 
             onClick={() => setIsSearchOpen(true)}
+            aria-label="Search"
             className="p-2 text-[var(--secondary)] hover:text-white rounded-md transition-colors"
           >
             <Search className="w-6 h-6" />
           </button>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle Menu"
             className="p-2 text-[var(--secondary)] hover:text-white rounded-md transition-colors"
           >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

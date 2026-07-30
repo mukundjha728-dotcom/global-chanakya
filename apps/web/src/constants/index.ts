@@ -6,7 +6,7 @@ export const SITE_URL =
 
 export const SITE_NAME = "Global Chanakya Intelligence";
 
-export const SITE_DESCRIPTION = "Enterprise-grade geopolitical intelligence and strategic media platform.";
+export const SITE_DESCRIPTION = "Access unvarnished geopolitical intelligence, defence analysis, and strategic briefs on global power shifts. Read expert insights at Global Chanakya today.";
 
 // Subscription and Early Access logic has been deprecated (Free Open Intelligence Tier)
 
@@ -68,9 +68,6 @@ export const API_ROUTES = {
 export const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Reports", href: "/blogs" },
-  { label: "Regions", href: "/categories?type=regions" },
-  { label: "Conflicts", href: "/categories?type=conflicts" },
-  { label: "Categories", href: "/categories" },
   { label: "About", href: "/about" },
 ] as const;
 

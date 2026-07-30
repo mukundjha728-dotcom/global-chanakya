@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import {
   ArrowRight, ArrowUpRight, Globe, Shield, Clock,
   TrendingUp, Eye, Heart, Bookmark, ChevronRight, Crosshair,
@@ -7,6 +8,7 @@ import {
 import { BlogService } from "@/modules/blog/services/blog.service";
 import { formatViews } from "@/lib/formatViews";
 import type { TrendingBlog } from "@/lib/trending";
+import { BannerAd } from "@/components/ads/AdUnit";
 
 export const revalidate = 60;
 
@@ -41,11 +43,12 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
       <Link href={`/blogs/${blog.slug}`} className="group block h-full">
         <article className="flex flex-row items-center sm:items-stretch gap-4 h-full p-3 glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:border-[var(--gold)]/40 hover:shadow-lg hover:shadow-[var(--gold)]/10 bg-[var(--surface)]/20">
           <div className="relative w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 shrink-0 overflow-hidden rounded-xl border border-[var(--border)]/50">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
-              alt={blog.title}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              alt={blog.title || "Geopolitical Intelligence"}
+              fill
+              sizes="(max-width: 768px) 96px, 128px"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
             {isViral && (
               <div className="absolute top-1.5 left-1.5 bg-[var(--danger)] text-white p-1 rounded shadow-sm">
@@ -76,11 +79,13 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
       <Link href={`/blogs/${blog.slug}`} className="group block h-full min-h-[360px] md:min-h-[440px]">
         <article className="relative flex flex-col h-full glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:border-[var(--gold)]/50 hover:shadow-2xl hover:shadow-[var(--gold)]/20">
           <div className="absolute inset-0 bg-[var(--surface)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
-              alt={blog.title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
+              alt={blog.title || "Geopolitical Intelligence"}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 60vw, 50vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-700 opacity-80"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/80 to-transparent opacity-90 group-hover:opacity-100 transition-opacity" />
           </div>
@@ -132,11 +137,12 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
     <Link href={`/blogs/${blog.slug}`} className="group block h-full">
       <article className="flex flex-col h-full glass-card rounded-2xl border border-[var(--border)] overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:border-[var(--gold)]/40 hover:shadow-xl hover:shadow-[var(--gold)]/10 bg-[var(--surface)]/20">
         <div className="relative aspect-[16/9] overflow-hidden border-b border-[var(--border)] bg-[var(--surface)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
-            alt={blog.title}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            alt={blog.title || "Geopolitical Intelligence"}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
           <div className="absolute top-3 right-3 md:top-4 md:right-4 flex items-center gap-2 z-10">
             {isViral ? (
@@ -302,7 +308,7 @@ export default async function Home() {
                   <Flame className="w-5 h-5 md:w-6 md:h-6 text-[var(--cyan)] drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
                 </div>
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Most Read This Week</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Trending Geopolitical Intelligence</h2>
                   <p className="text-[var(--muted)] text-[10px] md:text-sm mt-1 uppercase tracking-[0.14em] font-semibold">Priority Intelligence</p>
                 </div>
               </div>
@@ -326,6 +332,11 @@ export default async function Home() {
         </section>
       )}
 
+      {/* ─── HOMEPAGE AD UNIT 1 ─── */}
+      <div className="container mx-auto max-w-7xl px-6 md:px-8 py-4">
+        <BannerAd slot="auto" />
+      </div>
+
       {/* ─── LATEST ─── */}
       {latestBlogs.length > 0 && (
         <section className="py-16 md:py-28 border-b border-[var(--border)] bg-[var(--bg)]">
@@ -336,7 +347,7 @@ export default async function Home() {
                   <Clock className="w-5 h-5 md:w-6 md:h-6 text-[var(--cyan)] drop-shadow-[0_0_8px_rgba(6,182,212,0.5)]" />
                 </div>
                 <div>
-                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Latest Reports</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Latest Geopolitical Reports</h2>
                   <p className="text-[var(--muted)] text-[10px] md:text-sm mt-1 uppercase tracking-[0.14em] font-semibold">Real-Time Briefs</p>
                 </div>
               </div>

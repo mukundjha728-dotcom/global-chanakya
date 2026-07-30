@@ -189,6 +189,21 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
     }
   ];
 
+  if (blog.faq && Array.isArray(blog.faq) && blog.faq.length > 0) {
+    jsonLd.push({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: blog.faq.map((q: any) => ({
+        "@type": "Question",
+        name: q.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: q.answer
+        }
+      }))
+    } as any);
+  }
+
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <script

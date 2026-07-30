@@ -26,7 +26,7 @@ import { SITE_URL, SITE_NAME, SITE_DESCRIPTION as SITE_DESC } from "@/constants"
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: `${SITE_NAME} — Geopolitical Intelligence & Strategic Analysis`,
+    default: `Global Chanakya: Geopolitical Intelligence & Strategic Analysis`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESC,
@@ -158,7 +158,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <head>
         <meta name="google-site-verification" content="VrGd2s0LCdRNrUkVXP2WS7oMOvKxAUD2qZE1Nsepl3A" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
 
         <Script
           async

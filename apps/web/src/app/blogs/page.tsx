@@ -5,6 +5,7 @@ import { formatDate } from "@repo/utils";
 import { formatViews } from "@/lib/formatViews";
 import dbConnect from "@/lib/mongoose";
 import { BlogService } from "@/modules/blog/services/blog.service";
+import { BannerAd } from "@/components/ads/AdUnit";
 
 export const metadata = {
   title: "Latest Intel",
@@ -124,6 +125,11 @@ export default async function BlogsPage({
               {cat}
             </Link>
           ))}
+        </div>
+
+        {/* ─── BLOGS PAGE AD UNIT ─── */}
+        <div className="mb-12">
+          <BannerAd slot="auto" />
         </div>
 
         {/* Blog Grid */}

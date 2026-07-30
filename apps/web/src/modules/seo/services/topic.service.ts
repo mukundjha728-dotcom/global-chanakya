@@ -21,7 +21,7 @@ export class TopicService {
   static async getAllUniqueTopics(): Promise<{ slug: string; original: string }[]> {
     await dbConnect();
     
-    const blogTags = await Blog.distinct("tags");
+    const blogTags = await Blog.distinct("tags", { status: "published" });
 
     const uniqueMap = new Map<string, string>();
 
