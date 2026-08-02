@@ -26,6 +26,7 @@ export const BLOG_CATEGORIES = [
   "Defence",
   "China",
   "Russia",
+  "Europe",
   "Economy & Trade",
 ] as const;
 

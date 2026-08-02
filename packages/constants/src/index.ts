@@ -5,5 +5,5 @@ export const SUPPORTED_LOCALES = ["en-IN", "en-US"];
 
 export const THEATRES = [
   "Geopolitics", "Indo-Pacific", "South Asia", "Middle East",
-  "Defence", "China", "Russia", "Economy & Trade",
+  "Defence", "China", "Russia", "Europe", "Economy & Trade",
 ];
