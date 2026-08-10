@@ -39,14 +39,20 @@ export default function AdUnit({
   const pushed = useRef(false);
 
   useEffect(() => {
-    if (pushed.current) return;
+    if (pushed.current || slot === "auto") return;
     try {
       (window.adsbygoogle = window.adsbygoogle || []).push({});
       pushed.current = true;
     } catch (e) {
       // AdSense not loaded yet or ad blocker active
     }
-  }, []);
+  }, [slot]);
+
+  // If slot is "auto" (or invalid), do not render the manual ad unit.
+  // Google Auto Ads will run automatically from the script in the <head>.
+  if (slot === "auto") {
+    return null;
+  }
 
   return (
     <div ref={adRef} className={`ad-container ${className}`} style={{ textAlign: "center", overflow: "hidden", ...style }}>

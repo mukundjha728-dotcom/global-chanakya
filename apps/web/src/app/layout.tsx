@@ -157,14 +157,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
       <head>
         <meta name="google-site-verification" content="VrGd2s0LCdRNrUkVXP2WS7oMOvKxAUD2qZE1Nsepl3A" />
+        <meta name="google-adsense-account" content="ca-pub-3046817657353243" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
-        <Script
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3046817657353243"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
+        ></script>
 
         <Script
           id="json-ld-org"
