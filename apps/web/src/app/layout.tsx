@@ -92,7 +92,8 @@ const jsonLd = [
   {
     "@context": "https://schema.org",
     "@type": "NewsMediaOrganization",
-    name: SITE_NAME,
+    "@id": `${SITE_URL}/#organization`,
+    name: "Global Chanakya",
     url: SITE_URL,
     logo: `${SITE_URL}/brand/logo.svg`,
     description: SITE_DESC,
@@ -107,8 +108,10 @@ const jsonLd = [
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": SITE_NAME,
+    "@id": `${SITE_URL}/#website`,
+    "name": "Global Chanakya",
     "url": SITE_URL,
+    "publisher": { "@id": `${SITE_URL}/#organization` },
     "potentialAction": {
       "@type": "SearchAction",
       "target": {

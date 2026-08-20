@@ -27,45 +27,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: '/categories',
-        destination: '/blogs',
+        source: '/topic/:slug',
+        destination: '/topics/:slug',
         permanent: true,
       },
-      {
-        source: '/categories/:path*',
-        destination: '/blogs',
-        permanent: true,
-      },
-      {
-        source: '/countries',
-        destination: '/blogs',
-        permanent: true,
-      },
-      {
-        source: '/countries/:path*',
-        destination: '/blogs',
-        permanent: true,
-      },
-      {
-        source: '/leaders',
-        destination: '/blogs',
-        permanent: true,
-      },
-      {
-        source: '/leaders/:path*',
-        destination: '/blogs',
-        permanent: true,
-      },
-      {
-        source: '/conflicts',
-        destination: '/blogs',
-        permanent: true,
-      },
-      {
-        source: '/conflicts/:path*',
-        destination: '/blogs',
-        permanent: true,
-      },
+
       {
         source: '/:path*',
         has: [

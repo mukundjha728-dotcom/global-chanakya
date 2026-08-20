@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
 import { auth } from "@/auth";
@@ -22,7 +23,16 @@ import AdUnit, { InArticleAd, SidebarAd } from "@/components/ads/AdUnit";
 const getCachedBlog = unstable_cache(
   async (slug: string) => {
     await dbConnect();
-    const blog = await Blog.findOne({ slug }).populate("author", "name").lean();
+    const blog = await Blog.findOne({ slug })
+      .populate("author", "name authorSlug bio expertise socialLinks avatar")
+      .populate("categoryId", "name slug")
+      .populate("topics", "name slug")
+      .populate("countries", "name slug")
+      .populate("regions", "name slug")
+      .populate("leaders", "name slug")
+      .populate("conflicts", "name slug")
+      .populate("organizations", "name slug")
+      .lean();
     return blog ? JSON.parse(JSON.stringify(blog)) : null;
   },
   ["blog-detail-cache"],
@@ -107,7 +117,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
   }
 
   // Get related blogs from cache
-  const relatedBlogs = await getCachedRelatedBlogs(blog._id, blog.category);
+  const relatedBlogs = await getCachedRelatedBlogs(blog);
 
   const readTime = Math.max(1, calculateReadingTime(blog.content.replace(/<[^>]*>/g, "")));
   const publishDate = formatDate(blog.publishAt, "long");
@@ -123,6 +133,22 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
     return `<h${level} id="${id}"${attrs} style="scroll-margin-top: 100px;">${text}</h${level}>`;
   });
 
+  const authorData = (blog.author && blog.author.name && blog.author.name !== "Global Chanakya Editorial")
+    ? {
+        "@type": "Person",
+        name: blog.author.name,
+        ...(blog.author.avatar && { image: blog.author.avatar }),
+        ...(blog.author.bio && { description: blog.author.bio }),
+        ...(blog.author.socialLinks && Object.keys(blog.author.socialLinks).length > 0 && { 
+          sameAs: Object.values(blog.author.socialLinks).filter(v => v) 
+        })
+      }
+    : {
+        "@type": "Organization",
+        "@id": `${SITE_URL}/#organization`,
+        name: "Global Chanakya"
+      };
+
   const jsonLd = [
     {
       "@context": "https://schema.org",
@@ -132,18 +158,9 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
       image: blog.featuredImage ? [blog.featuredImage] : [],
       datePublished: blog.publishAt ? new Date(blog.publishAt).toISOString() : undefined,
       dateModified: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
-      author: {
-        "@type": "Person",
-        name: blog.author?.name || "Global Chanakya Editorial",
-        url: `${SITE_URL}/about`
-      },
+      author: authorData,
       publisher: {
-        "@type": "Organization",
-        name: "Global Chanakya",
-        logo: {
-          "@type": "ImageObject",
-          url: `${SITE_URL}/brand/logo.svg`,
-        },
+        "@id": `${SITE_URL}/#organization`
       },
       mainEntityOfPage: {
         "@type": "WebPage",
@@ -175,17 +192,6 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
           item: `${SITE_URL}/blogs/${blog.slug}`
         }
       ]
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      url: `${SITE_URL}`,
-      name: "Global Chanakya",
-      potentialAction: {
-        "@type": "SearchAction",
-        target: `${SITE_URL}/search?q={search_term_string}`,
-        "query-input": "required name=search_term_string"
-      }
     }
   ];
 
@@ -273,7 +279,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             {blog.featuredImage && (
               <div className="mb-12 aspect-video w-full rounded-sm overflow-hidden intel-border relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={blog.featuredImage} alt={blog.title} width={1200} height={675} loading="lazy" className="w-full h-full object-cover" />
+                <Image src={blog.featuredImage} alt={blog.seo?.title || blog.title || "Global Chanakya"} width={1200} height={675} priority={true} className="w-full h-full object-cover" />
               </div>
             )}
 

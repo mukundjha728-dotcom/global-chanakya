@@ -7,13 +7,36 @@ import dbConnect from "@/lib/mongoose";
 import { BlogService } from "@/modules/blog/services/blog.service";
 import { BannerAd } from "@/components/ads/AdUnit";
 
-export const metadata = {
-  title: "Latest Intel",
-  description: "Read the latest geopolitical reports and intelligence briefs.",
-  alternates: {
-    canonical: "/blogs",
-  },
-};
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const resolvedParams = await searchParams;
+  const category = resolvedParams.category as string | undefined;
+
+  let canonical = "/blogs";
+  if (category) {
+    try {
+      const activeCategories = await BlogService.getActiveCategories();
+      const isValid = activeCategories.some(cat => cat.toLowerCase() === category.toLowerCase());
+      if (isValid) {
+        const slug = category.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+        canonical = `/categories/${slug}`;
+      }
+    } catch (error) {
+      console.error("Failed to fetch active categories for canonical:", error);
+    }
+  }
+
+  return {
+    title: "Latest Intel",
+    description: "Read the latest geopolitical reports and intelligence briefs.",
+    alternates: {
+      canonical,
+    },
+  };
+}
 
 // Next.js App Router ISR
 export const revalidate = 3600; // 1 hour

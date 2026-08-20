@@ -33,14 +33,22 @@ export function generateSeoMetadata({
   category,
   twitterHandle = "@globalchanakya",
 }: SeoOptions): Metadata {
+  const safeTitle = (title || "").trim() || siteName;
+  const safeDescription = (description || "").trim() || "Global Chanakya Intelligence - Strategic Affairs, Geopolitics, and Defence Analysis";
+  
+  let safeCanonicalUrl = (canonicalUrl || "").trim();
+  if (safeCanonicalUrl && !/^https?:\/\//i.test(safeCanonicalUrl)) {
+    safeCanonicalUrl = `https://${safeCanonicalUrl.replace(/^\/+/, "")}`;
+  }
+
   const openGraph: any = {
-    title,
-    description,
-    url: canonicalUrl,
+    title: safeTitle,
+    description: safeDescription,
+    url: safeCanonicalUrl,
     type,
     siteName,
     locale,
-    ...(imageUrl ? { images: [{ url: imageUrl, width: 1200, height: 630, alt: title }] } : {}),
+    ...(imageUrl ? { images: [{ url: imageUrl, width: 1200, height: 630, alt: safeTitle }] } : {}),
   };
 
   if (type === "article") {
@@ -50,17 +58,17 @@ export function generateSeoMetadata({
   }
 
   const metadata: any = {
-    title,
-    description,
+    title: safeTitle,
+    description: safeDescription,
     keywords,
     alternates: {
-      canonical: canonicalUrl,
+      canonical: safeCanonicalUrl,
     },
     openGraph,
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
+      title: safeTitle,
+      description: safeDescription,
       creator: twitterHandle,
       site: twitterHandle,
       ...(imageUrl ? { images: [imageUrl] } : {}),

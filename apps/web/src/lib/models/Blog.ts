@@ -25,7 +25,13 @@ export interface IBlog extends Document {
   };
   ogImage?: string;
   category: string;
-
+  categoryId?: mongoose.Types.ObjectId;
+  topics?: mongoose.Types.ObjectId[];
+  countries?: mongoose.Types.ObjectId[];
+  regions?: mongoose.Types.ObjectId[];
+  leaders?: mongoose.Types.ObjectId[];
+  conflicts?: mongoose.Types.ObjectId[];
+  organizations?: mongoose.Types.ObjectId[];
   reportType?: string;
   tags: string[];
   featuredImage?: string;
@@ -149,6 +155,13 @@ const BlogSchema = new Schema<IBlog>(
       url: { type: String }
     }],
     reviewedAt: { type: Date },
+    categoryId: { type: Schema.Types.ObjectId, ref: "Category" },
+    topics: [{ type: Schema.Types.ObjectId, ref: "Topic" }],
+    countries: [{ type: Schema.Types.ObjectId, ref: "Country" }],
+    regions: [{ type: Schema.Types.ObjectId, ref: "Region" }],
+    leaders: [{ type: Schema.Types.ObjectId, ref: "Leader" }],
+    conflicts: [{ type: Schema.Types.ObjectId, ref: "Conflict" }],
+    organizations: [{ type: Schema.Types.ObjectId, ref: "Organization" }],
 
   },
   { timestamps: true }
@@ -176,6 +189,15 @@ BlogSchema.index({ status: 1, publishAt: -1 });
 BlogSchema.index({ category: 1, status: 1 });
 BlogSchema.index({ tags: 1 });
 BlogSchema.index({ "analytics.views": -1 });
+
+// Relational Taxonomy Compound Indexes (supports exact match + status filter + sort)
+BlogSchema.index({ categoryId: 1, status: 1, publishAt: -1 });
+BlogSchema.index({ topics: 1, status: 1, publishAt: -1 });
+BlogSchema.index({ countries: 1, status: 1, publishAt: -1 });
+BlogSchema.index({ regions: 1, status: 1, publishAt: -1 });
+BlogSchema.index({ leaders: 1, status: 1, publishAt: -1 });
+BlogSchema.index({ conflicts: 1, status: 1, publishAt: -1 });
+BlogSchema.index({ organizations: 1, status: 1, publishAt: -1 });
 
 export const Blog =
   mongoose.models.Blog || mongoose.model<IBlog>("Blog", BlogSchema);
