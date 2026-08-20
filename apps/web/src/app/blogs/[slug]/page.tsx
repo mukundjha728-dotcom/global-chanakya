@@ -19,6 +19,22 @@ import { ArrowLeft, Clock, Eye, Calendar, Tag, Crown, TrendingUp, Crosshair, New
 import { SITE_URL } from "@/constants";
 import AdUnit, { InArticleAd, SidebarAd } from "@/components/ads/AdUnit";
 
+/**
+ * Strips hotlinked Google TBN (gstatic) thumbnail URLs before they are emitted
+ * as OG/Twitter image tags. gstatic encrypted-tbn0 URLs block direct access by
+ * social crawlers (Twitter, LinkedIn, Googlebot) and return 403, silently
+ * breaking Open Graph previews. Returns undefined so the tag is omitted rather
+ * than emitting a broken image reference.
+ */
+function sanitizeOgImageUrl(url: string | undefined | null): string | undefined {
+  if (!url) return undefined;
+  // Block Google encrypted TBN hotlinks — they expire and block crawlers
+  if (url.includes('encrypted-tbn0.gstatic.com') || url.includes('gstatic.com/images')) {
+    return undefined;
+  }
+  return url;
+}
+
 // Global cache across requests
 const getCachedBlog = unstable_cache(
   async (slug: string) => {
@@ -69,7 +85,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     description: blog.seo?.description || blog.excerpt,
     keywords: blog.seo?.keywords?.join?.(", ") || blog.tags?.join(", "),
     canonicalUrl: blog.seo?.canonicalUrl || `${SITE_URL}/blogs/${blog.slug}`,
-    imageUrl: blog.ogImage || blog.featuredImage,
+    imageUrl: sanitizeOgImageUrl(blog.ogImage || blog.featuredImage),
     type: "article",
     authorName: blog.author?.name || "Global Chanakya Editorial",
     publishedTime: blog.publishAt ? new Date(blog.publishAt).toISOString() : undefined,

@@ -163,11 +163,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="google-adsense-account" content="ca-pub-3046817657353243" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
-        <script
+        <Script
+          id="google-adsense"
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3046817657353243"
           crossOrigin="anonymous"
-        ></script>
+          strategy="afterInteractive"
+        />
 
         <Script
           id="json-ld-org"
