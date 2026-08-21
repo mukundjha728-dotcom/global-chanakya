@@ -14,7 +14,7 @@ export async function POST(req: Request) {
     const validation = bookmarkSchema.safeParse(body);
 
     if (!validation.success) {
-      return NextResponse.json({ error: (validation.error as any).errors[0].message }, { status: 400 });
+      return NextResponse.json({ error: validation.error.issues[0].message }, { status: 400 });
     }
 
     const { blogId } = validation.data;

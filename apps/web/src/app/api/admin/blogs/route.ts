@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
     // Validating request body with Zod
     const validation = createBlogSchema.safeParse(body);
     if (!validation.success) {
-      return NextResponse.json({ error: (validation.error as any).errors[0].message, details: validation.error.format() }, { status: 400 });
+      return NextResponse.json({ error: validation.error.issues[0].message, details: validation.error.format() }, { status: 400 });
     }
 
     const { title, slug, excerpt, content, category, countrySlug, tags, visibility, status,
