@@ -59,14 +59,25 @@ const getCachedBlog = unstable_cache(
 const getCachedRelatedBlogs = unstable_cache(
   async (blogId: string, category: string) => {
     await dbConnect();
-    const related = await Blog.find({
+    
+    const latestBlogs = await Blog.find({
       status: "published",
       _id: { $ne: blogId },
       category: category
-    }).sort({ publishAt: -1 }).limit(3).lean();
+    }).sort({ publishAt: -1 }).limit(4).lean();
+
+    const latestIds = latestBlogs.map(b => b._id);
+
+    const mostViewedBlogs = await Blog.find({
+      status: "published",
+      _id: { $ne: blogId, $nin: latestIds },
+      category: category
+    }).sort({ "analytics.views": -1 }).limit(2).lean();
+
+    const related = [...latestBlogs, ...mostViewedBlogs];
     return JSON.parse(JSON.stringify(related));
   },
-  ["related-blogs-cache"],
+  ["related-blogs-cache-v2"],
   { revalidate: 3600, tags: ["blogs"] }
 );
 
@@ -357,14 +368,14 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
           </article>
 
           {/* Sidebar */}
-          <aside className="xl:col-span-4 sticky top-32 flex-col gap-8 hidden xl:flex">
+          <aside className="xl:col-span-4 sticky top-32 max-h-[calc(100vh-128px)] overflow-y-auto custom-scrollbar flex-col gap-8 hidden xl:flex pb-8 pr-4">
             {/* TOC */}
             {toc.length > 0 && (
-              <div className="glass-card rounded-sm p-6">
+              <div className="glass-card rounded-sm p-6 shrink-0">
                 <h3 className="text-[12px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-6 border-b border-[var(--border)] pb-4">
                   <Crosshair className="w-4 h-4 text-[var(--gold)]" /> Executive Summary
                 </h3>
-                <nav className="flex flex-col gap-3 max-h-[calc(100vh-250px)] overflow-y-auto pr-2 custom-scrollbar">
+                <nav className="flex flex-col gap-3">
                   {toc.map((item) => (
                     <a 
                       key={item.id} 
@@ -380,7 +391,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
 
             {/* Related Reports */}
             {relatedBlogs.length > 0 && (
-              <div className="glass-card rounded-sm p-6">
+              <div className="glass-card rounded-sm p-6 shrink-0">
                 <h3 className="text-[12px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-6 border-b border-[var(--border)] pb-4">
                   <Newspaper className="w-4 h-4 text-[var(--cyan)]" /> Related Intelligence
                 </h3>
