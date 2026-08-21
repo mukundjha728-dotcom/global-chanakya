@@ -37,7 +37,19 @@ export default function BlogClientTracker({
       posthog.capture("article_read", { title, category, author });
       
       // Send initial view hit to backend
-      fetch(`/api/blogs/${slug}/view`, { method: "POST" }).catch(() => {});
+      fetch(`/api/blogs/${slug}/view`, { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isPing: false })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.formattedViews) {
+          const els = document.querySelectorAll('.blog-view-count');
+          els.forEach(el => el.textContent = data.formattedViews);
+        }
+      })
+      .catch(() => {});
       
       trackedInitial.current = true;
     }

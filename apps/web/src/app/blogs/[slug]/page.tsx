@@ -283,7 +283,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             <div className="w-px h-8 bg-[var(--border)] hidden sm:block"></div>
             <span className="flex items-center gap-2"><Calendar className="w-4 h-4 text-[var(--secondary)]" /> {publishDate}</span>
             <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-[var(--secondary)]" /> {readTime} min read</span>
-            <span className="flex items-center gap-2"><Eye className="w-4 h-4 text-[var(--secondary)]" /> {formatViews(blog.analytics?.views || 0)} views</span>
+            <span className="flex items-center gap-2"><Eye className="w-4 h-4 text-[var(--secondary)]" /> <span className="blog-view-count">{formatViews(blog.analytics?.views || 0)}</span> views</span>
           </div>
         </div>
       </header>

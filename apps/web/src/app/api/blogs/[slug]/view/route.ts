@@ -3,6 +3,7 @@ import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
 import { auth } from "@/auth";
 import { ReadingHistory } from "@/lib/models/ReadingHistory";
+import { formatViews } from "@/lib/formatViews";
 import * as Sentry from "@sentry/nextjs";
 
 export async function POST(
@@ -70,7 +71,11 @@ export async function POST(
       );
     }
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ 
+      success: true, 
+      views: blog.analytics?.views,
+      formattedViews: blog.analytics?.views ? formatViews(blog.analytics.views) : "0"
+    });
   } catch (error: any) {
     Sentry.captureException(error, { extra: { slug, action: "process_view_route" } });
     console.error({ event: "process_view_failure", error: error.message, timestamp: new Date().toISOString() });
