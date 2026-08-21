@@ -134,7 +134,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
   }
 
   // Get related blogs from cache
-  const relatedBlogs = await getCachedRelatedBlogs(blog);
+  const relatedBlogs = await getCachedRelatedBlogs(blog._id.toString(), blog.category);
 
   const readTime = Math.max(1, calculateReadingTime(blog.content.replace(/<[^>]*>/g, "")));
   const publishDate = formatDate(blog.publishAt, "long");
@@ -364,7 +364,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
                 <h3 className="text-[12px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-6 border-b border-[var(--border)] pb-4">
                   <Crosshair className="w-4 h-4 text-[var(--gold)]" /> Executive Summary
                 </h3>
-                <nav className="flex flex-col gap-3 max-h-[400px] overflow-y-auto pr-2">
+                <nav className="flex flex-col gap-3 max-h-[calc(100vh-250px)] overflow-y-auto pr-2 custom-scrollbar">
                   {toc.map((item) => (
                     <a 
                       key={item.id} 

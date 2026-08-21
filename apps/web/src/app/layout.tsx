@@ -184,7 +184,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
             <Providers>
               <ConditionalShell navbar={<Navbar />} footer={<Footer />}>
-                <div className="overflow-x-hidden w-full">
+                <div className="w-full">
                   {children}
                 </div>
               </ConditionalShell>
