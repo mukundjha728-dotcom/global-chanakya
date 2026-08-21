@@ -109,61 +109,6 @@ function optimizeSEO(data: any): Partial<any> {
   const safePublishDate = getSafeIso(data.publishAt);
   const safeUpdateDate = getSafeIso(data.updatedAt);
 
-  // ── Schema Markup (JSON-LD) ───────────────────────────────────────────────
-  const schemaGraph: any[] = [];
-
-  // Main article schema
-  const articleType = category === "Op-Ed" ? "OpinionNewsArticle" : "NewsArticle";
-  schemaGraph.push({
-    "@type": articleType,
-    "headline": seoTitle,
-    "description": seoDescription,
-    "keywords": keywords.join(", "),
-    "publisher": {
-      "@type": "Organization",
-      "name": "Global Chanakya",
-      "url": "https://www.globalchanakya.in",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://www.globalchanakya.in/brand/logo.svg"
-      }
-    },
-    ...(safePublishDate ? { "datePublished": safePublishDate } : {}),
-    ...(safeUpdateDate ? { "dateModified": safeUpdateDate } : {}),
-    ...(data.featuredImage ? { "image": data.featuredImage } : {}),
-    ...(canonicalUrl ? { "mainEntityOfPage": { "@type": "WebPage", "@id": canonicalUrl } } : {}),
-  });
-
-  // BreadcrumbList
-  schemaGraph.push({
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.globalchanakya.in/" },
-      { "@type": "ListItem", "position": 2, "name": "Reports", "item": "https://www.globalchanakya.in/blogs" },
-      ...(category ? [{ "@type": "ListItem", "position": 3, "name": category, "item": `https://www.globalchanakya.in/blogs?category=${encodeURIComponent(category)}` }] : []),
-      ...(slug ? [{ "@type": "ListItem", "position": category ? 4 : 3, "name": seoTitle, "item": canonicalUrl }] : []),
-    ]
-  });
-
-  // FAQPage schema if FAQs exist
-  if (Array.isArray(data.faq) && data.faq.length > 0) {
-    const validFaqs = data.faq.filter((f: any) => f.question && f.answer);
-    if (validFaqs.length > 0) {
-      schemaGraph.push({
-        "@type": "FAQPage",
-        "mainEntity": validFaqs.map((f: any) => ({
-          "@type": "Question",
-          "name": f.question,
-          "acceptedAnswer": { "@type": "Answer", "text": f.answer }
-        }))
-      });
-    }
-  }
-
-  const schemaMarkup = JSON.stringify({
-    "@context": "https://schema.org",
-    "@graph": schemaGraph,
-  }, null, 2);
 
   return {
     seo: {
@@ -173,7 +118,6 @@ function optimizeSEO(data: any): Partial<any> {
       keywords,
       canonicalUrl,
       robots: data.seo?.robots || "index,follow",
-      schemaMarkup,
     },
     aiSummary,
     // Suggest ogImage = featuredImage if not set

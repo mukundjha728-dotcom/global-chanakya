@@ -19,22 +19,7 @@ import { ArrowLeft, Clock, Eye, Calendar, Tag, Crown, TrendingUp, Crosshair, New
 import { SITE_URL } from "@/constants";
 import AdUnit, { InArticleAd, SidebarAd } from "@/components/ads/AdUnit";
 
-/**
- * Strips hotlinked Google TBN (gstatic) thumbnail URLs before they are emitted
- * as OG/Twitter image tags. gstatic encrypted-tbn0 URLs block direct access by
- * social crawlers (Twitter, LinkedIn, Googlebot) and return 403, silently
- * breaking Open Graph previews. Returns a static fallback image if the URL is
- * invalid or missing.
- */
-function sanitizeOgImageUrl(url: string | undefined | null): string {
-  const fallback = `${SITE_URL}/default-og.jpg`;
-  if (!url) return fallback;
-  // Block Google encrypted TBN hotlinks — they expire and block crawlers
-  if (url.includes('encrypted-tbn0.gstatic.com') || url.includes('gstatic.com/images')) {
-    return fallback;
-  }
-  return url;
-}
+import { generateBlogJsonLd, sanitizeOgImageUrl } from "@/lib/seo/generateBlogJsonLd";
 
 // Global cache across requests
 const getCachedBlog = unstable_cache(
@@ -161,82 +146,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
     return `<h${level} id="${id}"${attrs} style="scroll-margin-top: 100px;">${text}</h${level}>`;
   });
 
-  const authorData = (blog.author && blog.author.name && blog.author.name !== "Global Chanakya Editorial")
-    ? {
-        "@type": "Person",
-        name: blog.author.name,
-        ...(blog.author.avatar && { image: blog.author.avatar }),
-        ...(blog.author.bio && { description: blog.author.bio }),
-        ...(blog.author.socialLinks && Object.keys(blog.author.socialLinks).length > 0 && { 
-          sameAs: Object.values(blog.author.socialLinks).filter(v => v) 
-        })
-      }
-    : {
-        "@type": "Organization",
-        "@id": `${SITE_URL}/#organization`,
-        name: "Global Chanakya"
-      };
-
-  const jsonLd = [
-    {
-      "@context": "https://schema.org",
-      "@type": "BlogPosting",
-      headline: blog.title,
-      description: blog.excerpt,
-      image: blog.featuredImage ? [sanitizeOgImageUrl(blog.featuredImage)] : [sanitizeOgImageUrl(null)],
-      datePublished: blog.publishAt ? new Date(blog.publishAt).toISOString() : undefined,
-      dateModified: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
-      author: authorData,
-      publisher: {
-        "@id": `${SITE_URL}/#organization`
-      },
-      mainEntityOfPage: {
-        "@type": "WebPage",
-        "@id": `${SITE_URL}/blogs/${blog.slug}`,
-      },
-      keywords: blog.tags?.join(", ") || (blog.seo?.keywords && Array.isArray(blog.seo.keywords) ? blog.seo.keywords.join(", ") : ""),
-      articleSection: blog.category,
-    },
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: [
-        {
-          "@type": "ListItem",
-          position: 1,
-          name: "Home",
-          item: `${SITE_URL}`
-        },
-        {
-          "@type": "ListItem",
-          position: 2,
-          name: "Blogs",
-          item: `${SITE_URL}/blogs`
-        },
-        {
-          "@type": "ListItem",
-          position: 3,
-          name: blog.title,
-          item: `${SITE_URL}/blogs/${blog.slug}`
-        }
-      ]
-    }
-  ];
-
-  if (blog.faq && Array.isArray(blog.faq) && blog.faq.length > 0) {
-    jsonLd.push({
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: blog.faq.map((q: any) => ({
-        "@type": "Question",
-        name: q.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: q.answer
-        }
-      }))
-    } as any);
-  }
+  const jsonLd = generateBlogJsonLd(blog);
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">

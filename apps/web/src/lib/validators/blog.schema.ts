@@ -8,13 +8,7 @@ const seoSchema = z.object({
   keywords: z.array(z.string()).max(20, "Max 20 keywords").optional(),
   canonicalUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   robots: z.enum(["index,follow", "noindex,follow", "index,nofollow", "noindex,nofollow"]).optional(),
-  schemaMarkup: z.string().optional().refine(
-    (val) => {
-      if (!val || val.trim() === "") return true;
-      try { JSON.parse(val); return true; } catch { return false; }
-    },
-    { message: "Schema markup must be valid JSON" }
-  ),
+  schemaMarkup: z.string().optional(),
 }).optional();
 
 // ─── Citations Sub-Schema ─────────────────────────────────────────────────────
