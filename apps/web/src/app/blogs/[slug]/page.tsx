@@ -23,14 +23,15 @@ import AdUnit, { InArticleAd, SidebarAd } from "@/components/ads/AdUnit";
  * Strips hotlinked Google TBN (gstatic) thumbnail URLs before they are emitted
  * as OG/Twitter image tags. gstatic encrypted-tbn0 URLs block direct access by
  * social crawlers (Twitter, LinkedIn, Googlebot) and return 403, silently
- * breaking Open Graph previews. Returns undefined so the tag is omitted rather
- * than emitting a broken image reference.
+ * breaking Open Graph previews. Returns a static fallback image if the URL is
+ * invalid or missing.
  */
-function sanitizeOgImageUrl(url: string | undefined | null): string | undefined {
-  if (!url) return undefined;
+function sanitizeOgImageUrl(url: string | undefined | null): string {
+  const fallback = `${SITE_URL}/default-og.jpg`;
+  if (!url) return fallback;
   // Block Google encrypted TBN hotlinks — they expire and block crawlers
   if (url.includes('encrypted-tbn0.gstatic.com') || url.includes('gstatic.com/images')) {
-    return undefined;
+    return fallback;
   }
   return url;
 }
@@ -171,7 +172,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
       "@type": "BlogPosting",
       headline: blog.title,
       description: blog.excerpt,
-      image: blog.featuredImage ? [blog.featuredImage] : [],
+      image: blog.featuredImage ? [sanitizeOgImageUrl(blog.featuredImage)] : [sanitizeOgImageUrl(null)],
       datePublished: blog.publishAt ? new Date(blog.publishAt).toISOString() : undefined,
       dateModified: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
       author: authorData,

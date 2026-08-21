@@ -31,6 +31,36 @@ const nextConfig: NextConfig = {
         destination: '/topics/:slug',
         permanent: true,
       },
+      {
+        source: '/blogs/%20australia-strategic-role-against-china-2026',
+        destination: '/blogs/australia-strategic-role-against-china-2026',
+        permanent: true,
+      },
+      {
+        source: '/blogs/%20india-china-border-tensions-future-risks-2026',
+        destination: '/blogs/india-china-border-tensions-future-risks-2026',
+        permanent: true,
+      },
+      {
+        source: '/blogs/%20japan-military-expansion-regional-security-2026',
+        destination: '/blogs/japan-military-expansion-regional-security-2026',
+        permanent: true,
+      },
+      {
+        source: '/blogs/%20nato-future-unstable-europe-2026',
+        destination: '/blogs/nato-future-unstable-europe-2026',
+        permanent: true,
+      },
+      {
+        source: '/blogs/%20recep-tayyip-erdogan-strategic-role-2026',
+        destination: '/blogs/recep-tayyip-erdogan-strategic-role-2026',
+        permanent: true,
+      },
+      {
+        source: '/blogs/%20taiwan-crisis-strategic-scenarios-explained-2026',
+        destination: '/blogs/taiwan-crisis-strategic-scenarios-explained-2026',
+        permanent: true,
+      },
 
       {
         source: '/:path*',
