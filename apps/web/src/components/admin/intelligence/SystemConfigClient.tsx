@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { Database, Zap, RefreshCcw, Activity } from "lucide-react";
+import { Database, Zap, RefreshCcw, Activity, Key } from "lucide-react";
 
 export default function SystemConfigClient() {
   const [loading, setLoading] = useState(false);
@@ -97,6 +97,40 @@ export default function SystemConfigClient() {
             </div>
           ) : (
             <p className="text-white/40 text-[13px]">Loading provider health...</p>
+          )}
+        </div>
+
+        {/* Groq Key Health */}
+        <div className="bg-[var(--surface)]/50 backdrop-blur-xl border border-[var(--border)] rounded-2xl p-6 relative overflow-hidden md:col-span-2">
+          <div className="absolute top-0 left-0 w-1 h-full bg-[var(--gold)]" />
+          <h2 className="text-white text-[16px] font-bold uppercase tracking-[0.1em] flex items-center gap-2 mb-4">
+            <Key className="w-5 h-5 text-[var(--gold)]" /> Groq Key Pool Health
+          </h2>
+          {health?.groqHealth ? (
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-center">
+                <div className="text-[24px] font-bold text-white mb-1">{health.groqHealth.totalKeys}</div>
+                <div className="text-[10px] uppercase tracking-[0.1em] text-white/50">Configured</div>
+              </div>
+              <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-center">
+                <div className="text-[24px] font-bold text-emerald-400 mb-1">{health.groqHealth.healthy}</div>
+                <div className="text-[10px] uppercase tracking-[0.1em] text-white/50">Healthy</div>
+              </div>
+              <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-center">
+                <div className="text-[24px] font-bold text-orange-400 mb-1">{health.groqHealth.cooldown}</div>
+                <div className="text-[10px] uppercase tracking-[0.1em] text-white/50">Cooldown</div>
+              </div>
+              <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-center">
+                <div className="text-[24px] font-bold text-[var(--danger)] mb-1">{health.groqHealth.failed}</div>
+                <div className="text-[10px] uppercase tracking-[0.1em] text-white/50">Failed</div>
+              </div>
+              <div className="bg-white/5 p-4 rounded-xl border border-white/10 text-center">
+                <div className="text-[24px] font-bold text-blue-400 mb-1">{health.groqHealth.totalRateLimits}</div>
+                <div className="text-[10px] uppercase tracking-[0.1em] text-white/50">Rate Limits</div>
+              </div>
+            </div>
+          ) : (
+            <p className="text-white/40 text-[13px]">Loading Groq health...</p>
           )}
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { liveIngestionService } from "@/lib/intelligence/live/ingestion.service";
 import dbConnect from "@/lib/mongoose";
+import { markIngestionComplete } from "@/lib/intelligence/live/demandRefresh";
 
 export async function GET(request: Request) {
   return handleRefresh(request);
@@ -24,6 +25,9 @@ async function handleRefresh(request: Request) {
 
     await dbConnect();
     const stats = await liveIngestionService.pollAllProviders();
+
+    // Safely mark ingestion as completed (releases lock and updates timestamp)
+    await markIngestionComplete().catch(err => console.error("[InternalRefreshAPI] Error releasing lock:", err));
 
     return NextResponse.json({
       success: true,

@@ -12,6 +12,7 @@ import { BannerAd } from "@/components/ads/AdUnit";
 import { IntelligenceCard } from "@/components/intelligence/IntelligenceCard";
 import { IntelligenceEvent } from "@/lib/models/IntelligenceEvent";
 import dbConnect from "@/lib/mongoose";
+import { ensureFreshLiveIntelligence } from "@/lib/intelligence/live/demandRefresh";
 
 export const revalidate = 60;
 
@@ -188,6 +189,9 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
 
 export default async function Home() {
   await dbConnect();
+  
+  // Trigger demand-driven refresh safely in the background
+  await ensureFreshLiveIntelligence().catch(err => console.error("[Home] Demand refresh error:", err));
   
   const [trendingBlogs, latestBlogs, mostViewedBlog7Days, rawLiveEvents] = await Promise.all([
     BlogService.getTrendingBlogs(6),
