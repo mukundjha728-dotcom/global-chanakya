@@ -25,7 +25,7 @@ import { generateBlogJsonLd, sanitizeOgImageUrl } from "@/lib/seo/generateBlogJs
 const getCachedBlog = unstable_cache(
   async (slug: string) => {
     await dbConnect();
-    const blog = await Blog.findOne({ slug })
+    const blog = await Blog.findOne({ slug, contentType: { $ne: "platform-seo" } })
       .populate("author", "name authorSlug bio expertise socialLinks avatar")
       .populate("categoryId", "name slug")
       .populate("topics", "name slug")

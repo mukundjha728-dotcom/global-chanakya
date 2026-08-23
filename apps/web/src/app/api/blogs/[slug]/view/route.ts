@@ -33,10 +33,10 @@ export async function POST(
 
     let blog;
     if (isPing) {
-      blog = await Blog.findOne({ slug, status: "published" }).lean();
+      blog = await Blog.findOne({ slug, status: "published", contentType: { $ne: "platform-seo" } }).lean();
     } else {
       blog = await Blog.findOneAndUpdate(
-        { slug, status: "published" },
+        { slug, status: "published", contentType: { $ne: "platform-seo" } },
         { $inc: { "analytics.views": 1 } },
         { new: true, timestamps: false }
       ).lean();

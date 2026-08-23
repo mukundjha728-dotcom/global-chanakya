@@ -32,7 +32,7 @@ export class BlogRepository {
   static async findBySlug(slug: string): Promise<IBlog | null> {
     await dbConnect();
     const decodedSlug = decodeURIComponent(slug);
-    return Blog.findOne({ slug: decodedSlug }).lean();
+    return Blog.findOne({ slug: decodedSlug, contentType: { $ne: "platform-seo" } }).lean();
   }
 
   static async searchBlogs(query: string, limit: number = 5): Promise<IBlog[]> {
