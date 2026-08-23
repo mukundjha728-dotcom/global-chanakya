@@ -1,14 +1,4 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/status-sync",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/internal/intelligence/refresh",
-      "schedule": "*/15 * * * *"
-    }
-  ],
   "headers": [
     {
       "source": "/sitemap.xml",
