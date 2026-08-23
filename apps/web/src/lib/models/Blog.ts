@@ -73,6 +73,7 @@ export interface IBlog extends Document {
   isDeleted: boolean;
   deletedAt?: Date;
   deletedBy?: mongoose.Types.ObjectId;
+  contentType: "standard" | "platform-seo";
 }
 
 const BlogRevisionSchema = new Schema<IBlogRevision>(
@@ -162,6 +163,12 @@ const BlogSchema = new Schema<IBlog>(
     leaders: [{ type: Schema.Types.ObjectId, ref: "Leader" }],
     conflicts: [{ type: Schema.Types.ObjectId, ref: "Conflict" }],
     organizations: [{ type: Schema.Types.ObjectId, ref: "Organization" }],
+    contentType: {
+      type: String,
+      enum: ["standard", "platform-seo"],
+      default: "standard",
+      index: true,
+    },
 
   },
   { timestamps: true }

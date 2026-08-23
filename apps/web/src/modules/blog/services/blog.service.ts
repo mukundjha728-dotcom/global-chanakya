@@ -7,7 +7,7 @@ export class BlogService {
   static getActiveCategories = unstable_cache(
     async () => {
       await dbConnect();
-      const categories = await Blog.distinct("category", { status: "published" });
+      const categories = await Blog.distinct("category", { status: "published", contentType: { $ne: "platform-seo" } });
       return categories.filter(Boolean);
     },
     ['blogs-active-categories'],

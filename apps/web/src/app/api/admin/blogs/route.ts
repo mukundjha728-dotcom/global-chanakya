@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
     }
 
     const { title, slug, excerpt, content, category, countrySlug, tags, visibility, status,
-      isTrending, commentsEnabled, seo, featuredImage } = validation.data;
+      isTrending, commentsEnabled, seo, featuredImage, contentType } = validation.data;
 
     // Get author ObjectId
     let authorObjectId: mongoose.Types.ObjectId;
@@ -111,6 +111,7 @@ export async function POST(req: NextRequest) {
       isTrending: isTrending ?? false,
       commentsEnabled: commentsEnabled ?? true,
       featuredImage: featuredImage ?? "",
+      contentType: contentType ?? "standard",
       seo: {
         title: seo?.title || title,
         description: seo?.description || excerpt,
@@ -148,7 +149,7 @@ export async function PATCH(req: NextRequest) {
       "visibility", "status", "isTrending", "commentsEnabled",
       "featuredImage", "ogImage", "seo", "aiSummary", "reportType",
       "publishAt", "unpublishAt", "isBreaking", "breakingUntil",
-      "isFeatured", "featuredUntil", "citations",
+      "isFeatured", "featuredUntil", "citations", "contentType",
       "entityRelations", "draftSnapshot", "previousVersions",
     ];
 

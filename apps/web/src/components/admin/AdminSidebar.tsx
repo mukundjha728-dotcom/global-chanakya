@@ -3,7 +3,7 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { LayoutDashboard, Users, Newspaper, PenTool, Settings, LogOut, ShieldAlert, TrendingUp, FileText, Activity, Image as ImageIcon, Zap, Radio, Database } from "lucide-react";
+import { LayoutDashboard, Users, Newspaper, PenTool, Settings, LogOut, ShieldAlert, TrendingUp, FileText, Activity, Image as ImageIcon, Zap, Radio, Database, Globe } from "lucide-react";
 
 export const navItems = [
   // Dashboard
@@ -12,6 +12,10 @@ export const navItems = [
   // Content
   { href: "/admin/blogs", label: "Intelligence Archive", icon: Newspaper, group: "Content" },
   { href: "/admin/write", label: "Write Report", icon: PenTool, group: "Content" },
+
+  // Platform SEO
+  { href: "/gc-control-9x7k/platform-seo", label: "All Platform SEO", icon: Globe, group: "Platform SEO" },
+  { href: "/gc-control-9x7k/platform-seo/new", label: "Create Platform SEO", icon: PenTool, group: "Platform SEO" },
 
   // Intelligence
   { href: "/gc-control-9x7k/intelligence", label: "Live Events", icon: Zap, group: "Intelligence" },

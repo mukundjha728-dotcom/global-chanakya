@@ -40,6 +40,7 @@ export class BlogRepository {
     return Blog.find(
       {
         status: "published",
+        contentType: { $ne: "platform-seo" },
         visibility: { $in: ["public", "premium", "private"] },
         $or: [
           { title: { $regex: query, $options: "i" } },
@@ -66,6 +67,7 @@ export class BlogRepository {
       {
         $match: {
           status: "published",
+          contentType: { $ne: "platform-seo" },
           visibility: { $in: ["public", "premium", "private"] },
         },
       },
@@ -96,7 +98,7 @@ export class BlogRepository {
 
   static async getLatest(limit: number = 6): Promise<IBlog[]> {
     await dbConnect();
-    return Blog.find({ status: "published" }, {
+    return Blog.find({ status: "published", contentType: { $ne: "platform-seo" } }, {
       title: 1, slug: 1, excerpt: 1, category: 1, visibility: 1,
       featuredImage: 1, isTrending: 1, analytics: 1, publishAt: 1, createdAt: 1
     })
@@ -107,7 +109,7 @@ export class BlogRepository {
 
   static async getBlogsByCategory(category: string, limit: number = 4): Promise<IBlog[]> {
     await dbConnect();
-    return Blog.find({ status: "published", category: new RegExp(`^${category}$`, 'i') }, {
+    return Blog.find({ status: "published", contentType: { $ne: "platform-seo" }, category: new RegExp(`^${category}$`, 'i') }, {
       title: 1, slug: 1, excerpt: 1, category: 1, visibility: 1,
       featuredImage: 1, isTrending: 1, analytics: 1, publishAt: 1, createdAt: 1
     })
@@ -118,7 +120,7 @@ export class BlogRepository {
 
   static async getMostViewed(): Promise<IBlog | null> {
     await dbConnect();
-    const result = await Blog.find({ status: "published", visibility: { $in: ["public", "premium", "private"] } }, {
+    const result = await Blog.find({ status: "published", contentType: { $ne: "platform-seo" }, visibility: { $in: ["public", "premium", "private"] } }, {
       title: 1, slug: 1, excerpt: 1, category: 1, visibility: 1,
       featuredImage: 1, isTrending: 1, analytics: 1, publishAt: 1, createdAt: 1
     })
@@ -135,6 +137,7 @@ export class BlogRepository {
     
     const result = await Blog.find({ 
       status: "published", 
+      contentType: { $ne: "platform-seo" },
       visibility: { $in: ["public", "premium", "private"] },
       publishAt: { $gte: sevenDaysAgo }
     }, {
@@ -216,6 +219,7 @@ export class BlogRepository {
     const now = new Date();
     return Blog.find({ 
       status: "published", 
+      contentType: { $ne: "platform-seo" },
       isBreaking: true,
       $or: [
         { breakingUntil: { $exists: false } },

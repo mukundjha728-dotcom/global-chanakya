@@ -39,7 +39,7 @@ export const createBlogSchema = z.object({
   seo: seoSchema,
   aiSummary: z.string().max(500, "AI Summary max 500 chars").optional(),
   citations: z.array(z.any()).optional(), // Flexible — validated on display
-
+  contentType: z.enum(["standard", "platform-seo"]).optional().default("standard"),
 });
 
 // ─── Update Blog Schema ──────────────────────────────────────────────────────
