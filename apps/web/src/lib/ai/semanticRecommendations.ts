@@ -18,7 +18,7 @@ export async function getSemanticRecommendations(sourceBlogId: string, limit: nu
   const matches = await findSemanticMatches(blog.embedding, limit + 1, 0.75);
   
   // Filter out the source blog itself
-  const filtered = matches.filter(m => m._id.toString() !== sourceBlogId).slice(0, limit);
+  const filtered = matches.filter(m => m.blogId !== sourceBlogId).slice(0, limit);
   
-  return filtered as IBlog[];
+  return filtered as unknown as IBlog[];
 }

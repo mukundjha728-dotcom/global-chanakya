@@ -4,6 +4,7 @@ import dbConnect from "@/lib/mongoose";
 import { BlogService } from "@/modules/blog/services/blog.service";
 import mongoose from "mongoose";
 import { createBlogSchema } from "@/lib/validators/blog.schema";
+import { ragIndexerService } from "@/modules/intelligence/services/ragIndexer.service";
 
 // Give Vercel 30s before cutting off the function
 export const maxDuration = 30;
@@ -86,6 +87,11 @@ export async function POST(req: NextRequest) {
           publishAt: new Date(),
         };
         const updated = await BlogService.updateBlog(existing._id.toString(), updateData);
+        if (updated?.status === "published") {
+          ragIndexerService.indexBlog(updated._id.toString()).catch(e => console.error("RAG Indexing Failed:", e));
+        } else {
+          ragIndexerService.unindexBlog(existing._id.toString()).catch(e => console.error("RAG Unindexing Failed:", e));
+        }
         return NextResponse.json({ success: true, id: updated!._id.toString(), slug: updated!.slug }, { status: 200 });
       }
       // Otherwise auto-fix slug with timestamp
@@ -114,6 +120,10 @@ export async function POST(req: NextRequest) {
       publishAt: new Date(),
       analytics: { views: 0, likes: 0, bookmarks: 0, readTime: 0, ctr: 0 },
     });
+
+    if (blog.status === "published") {
+      ragIndexerService.indexBlog(blog._id.toString()).catch(e => console.error("RAG Indexing Failed:", e));
+    }
 
     return NextResponse.json({ success: true, id: blog._id.toString(), slug: blog.slug }, { status: 201 });
   } catch (err) {
@@ -169,6 +179,12 @@ export async function PATCH(req: NextRequest) {
     const updated = await BlogService.updateBlog(id, updateData);
     if (!updated) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
 
+    if (updated.status === "published") {
+      ragIndexerService.indexBlog(id).catch(e => console.error("RAG Indexing Failed:", e));
+    } else {
+      ragIndexerService.unindexBlog(id).catch(e => console.error("RAG Unindexing Failed:", e));
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[PATCH /api/admin/blogs]", err);
@@ -186,6 +202,7 @@ export async function DELETE(req: NextRequest) {
     const id = req.nextUrl.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Blog ID required" }, { status: 400 });
 
+    await ragIndexerService.unindexBlog(id).catch(e => console.error("RAG Unindexing Failed:", e));
     const deleted = await BlogService.deleteBlog(id);
     if (!deleted) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
 

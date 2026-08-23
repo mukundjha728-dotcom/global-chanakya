@@ -156,5 +156,57 @@ export const SCHEMAS: Record<string, EntitySchema> = {
       VERSIONING_TAB
     ]
   },
+  countries: {
+    id: "countries",
+    name: "Country",
+    apiPath: "/api/admin/intelligence/countries",
+    tabs: [
+      {
+        id: "main",
+        label: "General",
+        fields: [
+          { name: "name", label: "Name", type: "text", required: true },
+          { name: "slug", label: "Slug", type: "text", required: true },
+          { name: "status", label: "Status", type: "select", options: [{label: "Active", value: "active"}, {label: "Inactive", value: "inactive"}] },
+          { name: "aliases", label: "Aliases", type: "string-array" }
+        ]
+      }
+    ]
+  },
+  leaders: {
+    id: "leaders",
+    name: "Leader",
+    apiPath: "/api/admin/intelligence/leaders",
+    tabs: [
+      {
+        id: "main",
+        label: "General",
+        fields: [
+          { name: "name", label: "Name", type: "text", required: true },
+          { name: "slug", label: "Slug", type: "text", required: true },
+          { name: "status", label: "Status", type: "select", options: [{label: "Active", value: "active"}, {label: "Inactive", value: "inactive"}] },
+          { name: "countryId", label: "Country", type: "text", description: "ObjectId of the Country" },
+          { name: "aliases", label: "Aliases", type: "string-array" }
+        ]
+      }
+    ]
+  },
+  conflicts: {
+    id: "conflicts",
+    name: "Conflict",
+    apiPath: "/api/admin/intelligence/conflicts",
+    tabs: [
+      {
+        id: "main",
+        label: "General",
+        fields: [
+          { name: "name", label: "Name", type: "text", required: true },
+          { name: "slug", label: "Slug", type: "text", required: true },
+          { name: "status", label: "Status", type: "select", options: [{label: "Active", value: "active"}, {label: "Inactive", value: "inactive"}] },
+          { name: "aliases", label: "Aliases", type: "string-array" }
+        ]
+      }
+    ]
+  }
 };
 

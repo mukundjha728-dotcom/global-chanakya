@@ -10,6 +10,7 @@ export interface IConflict extends Document {
     description?: string;
   };
   featuredImage?: string;
+  aliases?: string[];
   status: "active" | "inactive";
   createdAt: Date;
   updatedAt: Date;
@@ -26,6 +27,7 @@ const ConflictSchema = new Schema(
       description: { type: String },
     },
     featuredImage: { type: String },
+    aliases: [{ type: String }],
     status: { type: String, enum: ["active", "inactive"], default: "active", index: true },
   },
   { timestamps: true }

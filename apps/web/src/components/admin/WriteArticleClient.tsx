@@ -4,7 +4,7 @@ import { useArticleEditor } from "./useArticleEditor";
 import { WriteArticleContentTab } from "./WriteArticleContentTab";
 import { WriteArticleSeoTab } from "./WriteArticleSeoTab";
 import { WriteArticleSettingsTab } from "./WriteArticleSettingsTab";
-import { PenTool, Search, Settings, Save, Send, ChevronLeft } from "lucide-react";
+import { PenTool, Search, Settings, Save, Send, ChevronLeft, BrainCircuit } from "lucide-react";
 
 export default function WriteArticleClient({ authorId }: { authorId: string }) {
   const searchParams = useSearchParams();
@@ -70,6 +70,50 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
 
       <div className="flex flex-1 overflow-hidden relative z-10">
         <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar max-w-5xl mx-auto w-full">
+
+          {/* Intelligence Status Card */}
+          {editId && (
+            <div className="mb-8 p-5 bg-[var(--surface)]/50 backdrop-blur-xl border border-[var(--border)] rounded-2xl flex items-center justify-between gap-6 relative overflow-hidden shadow-lg">
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-[var(--gold)] to-[var(--cyan)]" />
+              
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-white/5 rounded-xl border border-white/10">
+                  <BrainCircuit className="w-6 h-6 text-[var(--gold)]" />
+                </div>
+                <div>
+                  <h3 className="text-white text-[13px] font-bold tracking-wide uppercase">Content Intelligence</h3>
+                  <p className="text-white/40 text-[11px] font-medium mt-0.5">RAG System Synchronization Status</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-8">
+                <div className="flex flex-col items-end">
+                  <span className="text-white/40 text-[10px] font-bold uppercase tracking-[0.1em] mb-1">RAG Status</span>
+                  {form.chunkCount > 0 ? (
+                    <span className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-bold uppercase tracking-[0.1em] bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full w-fit">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_5px_#34d399]" />
+                      Indexed ({form.chunkCount} Chunks)
+                    </span>
+                  ) : form.status === "published" ? (
+                    <span className="flex items-center gap-1.5 text-[var(--gold)] text-[11px] font-bold uppercase tracking-[0.1em] bg-[var(--gold)]/10 border border-[var(--gold)]/30 px-3 py-1 rounded-full w-fit">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)] shadow-[0_0_5px_var(--gold)]" />
+                      Pending Index
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 text-white/40 text-[11px] font-bold uppercase tracking-[0.1em] bg-white/5 border border-white/10 px-3 py-1 rounded-full w-fit">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+                      Not Indexed
+                    </span>
+                  )}
+                </div>
+                
+                <div className="flex flex-col items-end">
+                  <span className="text-white/40 text-[10px] font-bold uppercase tracking-[0.1em] mb-1">Embedding</span>
+                  <span className="text-white text-[12px] font-medium font-mono">384-dim (Local)</span>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Tabs */}
           <div className="flex gap-2 mb-8 bg-[var(--surface)]/50 backdrop-blur-md border border-[var(--border)] rounded-xl p-1.5 w-fit shadow-lg">

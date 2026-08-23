@@ -1,10 +1,32 @@
 import { Blog, IBlog } from "@/lib/models/Blog";
 import dbConnect from "@/lib/mongoose";
+import mongoose from "mongoose";
 
 export class BlogRepository {
-  static async findById(id: string): Promise<IBlog | null> {
+  static async findById(id: string): Promise<any | null> {
     await dbConnect();
-    return Blog.findById(id).lean();
+    const result = await Blog.aggregate([
+      { $match: { _id: new mongoose.Types.ObjectId(id) } },
+      {
+        $lookup: {
+          from: "blogchunks",
+          localField: "_id",
+          foreignField: "blogId",
+          as: "chunks"
+        }
+      },
+      {
+        $addFields: {
+          chunkCount: { $size: "$chunks" }
+        }
+      },
+      {
+        $project: {
+          chunks: 0
+        }
+      }
+    ]);
+    return result[0] || null;
   }
 
   static async findBySlug(slug: string): Promise<IBlog | null> {
@@ -125,11 +147,31 @@ export class BlogRepository {
     return result[0] || null;
   }
 
-  static async getAdminBlogs(limit: number = 0): Promise<IBlog[]> {
+  static async getAdminBlogs(limit: number = 0): Promise<any[]> {
     await dbConnect();
-    const query = Blog.find({}).sort({ createdAt: -1 });
-    if (limit > 0) query.limit(limit);
-    return query.lean();
+    const pipeline: any[] = [
+      { $sort: { createdAt: -1 } },
+      ...(limit > 0 ? [{ $limit: limit }] : []),
+      {
+        $lookup: {
+          from: "blogchunks",
+          localField: "_id",
+          foreignField: "blogId",
+          as: "chunks"
+        }
+      },
+      {
+        $addFields: {
+          chunkCount: { $size: { $ifNull: ["$chunks", []] } }
+        }
+      },
+      {
+        $project: {
+          chunks: 0
+        }
+      }
+    ];
+    return Blog.aggregate(pipeline);
   }
 
   static async findBlogsByStatus(status: string, limit: number): Promise<IBlog[]> {

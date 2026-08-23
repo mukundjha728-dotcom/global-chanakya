@@ -3,7 +3,7 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { LayoutDashboard, Users, Newspaper, PenTool, Settings, LogOut, ShieldAlert, TrendingUp, FileText, Activity, Image as ImageIcon } from "lucide-react";
+import { LayoutDashboard, Users, Newspaper, PenTool, Settings, LogOut, ShieldAlert, TrendingUp, FileText, Activity, Image as ImageIcon, Zap, Radio, Database } from "lucide-react";
 
 export const navItems = [
   // Dashboard
@@ -12,6 +12,14 @@ export const navItems = [
   // Content
   { href: "/admin/blogs", label: "Intelligence Archive", icon: Newspaper, group: "Content" },
   { href: "/admin/write", label: "Write Report", icon: PenTool, group: "Content" },
+
+  // Intelligence
+  { href: "/gc-control-9x7k/intelligence", label: "Live Events", icon: Zap, group: "Intelligence" },
+  { href: "/gc-control-9x7k/intelligence/countries", label: "Countries", icon: Database, group: "Intelligence" },
+  { href: "/gc-control-9x7k/intelligence/leaders", label: "Leaders", icon: Database, group: "Intelligence" },
+  { href: "/gc-control-9x7k/intelligence/conflicts", label: "Conflicts", icon: Database, group: "Intelligence" },
+  { href: "/gc-control-9x7k/intelligence/entity-resolution", label: "Entity Resolution", icon: Database, group: "Intelligence" },
+  { href: "/gc-control-9x7k/intelligence/config", label: "System Config", icon: Database, group: "Intelligence" },
 
   // Media & Growth
   { href: "/admin/media", label: "Media Library", icon: ImageIcon, group: "Assets" },

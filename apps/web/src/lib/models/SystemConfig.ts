@@ -9,6 +9,8 @@ export interface ILink {
 export interface ISystemConfig extends Document {
   version: number;
   isActive: boolean;
+  ragCorpusVersion: number;
+  liveCorpusVersion: number;
   
   navigation: {
     mainLinks: ILink[];
@@ -73,6 +75,8 @@ const LinkSchema = new Schema<ILink>({
 const SystemConfigSchema = new Schema<ISystemConfig>({
   version: { type: Number, default: 1 },
   isActive: { type: Boolean, default: false },
+  ragCorpusVersion: { type: Number, default: 1 },
+  liveCorpusVersion: { type: Number, default: 1 },
 
   navigation: {
     mainLinks: [LinkSchema],

@@ -3,12 +3,15 @@ import Image from "next/image";
 import {
   ArrowRight, ArrowUpRight, Globe, Shield, Clock,
   TrendingUp, Eye, Heart, Bookmark, ChevronRight, Crosshair,
-  Newspaper, Flame, Activity
+  Newspaper, Flame, Activity, TriangleAlert
 } from "lucide-react";
 import { BlogService } from "@/modules/blog/services/blog.service";
 import { formatViews } from "@/lib/formatViews";
 import type { TrendingBlog } from "@/lib/trending";
 import { BannerAd } from "@/components/ads/AdUnit";
+import { IntelligenceCard } from "@/components/intelligence/IntelligenceCard";
+import { IntelligenceEvent } from "@/lib/models/IntelligenceEvent";
+import dbConnect from "@/lib/mongoose";
 
 export const revalidate = 60;
 
@@ -184,11 +187,40 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
 }
 
 export default async function Home() {
-  const [trendingBlogs, latestBlogs, mostViewedBlog7Days] = await Promise.all([
+  await dbConnect();
+  
+  const [trendingBlogs, latestBlogs, mostViewedBlog7Days, rawLiveEvents] = await Promise.all([
     BlogService.getTrendingBlogs(6),
     BlogService.getLatestBlogs(6),
     BlogService.getMostViewedBlogPast7Days(),
+    IntelligenceEvent.find({ status: "published", enrichmentStatus: "COMPLETED" }).sort({ publishedAt: -1 }).limit(3).lean()
   ]);
+
+  const liveEvents = rawLiveEvents.map((event: any) => ({
+    id: event.slug,
+    headline: event.title,
+    timestamp: event.publishedAt?.toISOString() || new Date().toISOString(),
+    region: event.region || "Global",
+    topic: event.category || "Intelligence",
+    summary: event.summary,
+    whyItMatters: event.whyItMatters || "No strategic summary available.",
+    indiaImpact: event.indiaImpact || "NEUTRAL",
+    riskLevel: event.riskLevel || "LOW",
+    confidence: event.confidence || "MODERATE",
+    entities: [],
+    sourceMetadata: {
+      sources: event.sourceNames?.map((name: string, idx: number) => ({
+        name,
+        url: event.sourceUrls?.[idx],
+        publishedTime: event.publishedAt?.toISOString(),
+        retrievedTime: event.discoveredAt?.toISOString(),
+        type: "Media"
+      })) || [],
+      sourceCount: event.sourceNames?.length || 1,
+      freshness: "Recently Updated",
+      methodology: "Real-time AI enriched extraction"
+    }
+  }));
 
   const theatres = await BlogService.getActiveCategories();
 
@@ -291,6 +323,51 @@ export default async function Home() {
               )}
             </div>
             
+          </div>
+        </div>
+      </section>
+
+      {/* ─── GLOBAL INTELLIGENCE LIVE (INJECTED) ─── */}
+      <section className="py-16 md:py-24 border-b border-[var(--border)] bg-[var(--surface)]/10 relative">
+        <div className="container mx-auto max-w-7xl px-6 md:px-8 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 border-b border-[var(--border)] pb-6 gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
+                <TriangleAlert className="w-5 h-5 md:w-6 md:h-6 text-[var(--gold)]" />
+              </div>
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                  Global Intelligence Live
+                  <span className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[var(--danger)]/10 text-[var(--danger)] border border-[var(--danger)]/30 text-[9px] font-bold uppercase tracking-[0.15em] animate-pulse">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--danger)]"></span> Live
+                  </span>
+                </h2>
+                <p className="text-[var(--muted)] text-[10px] md:text-sm mt-1 uppercase tracking-[0.14em] font-semibold">Real-time risk assessments & India impact</p>
+              </div>
+            </div>
+            <Link
+              href={`/intelligence`}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--surface)] border border-[var(--border)] text-xs font-bold uppercase tracking-[0.06em] text-white hover:bg-[var(--elevated)] hover:border-[var(--gold)]/50 transition-all duration-300"
+            >
+              Open Command Center <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 items-stretch mb-10">
+             {liveEvents.map((item: any) => (
+                <IntelligenceCard key={item.id} item={item} />
+             ))}
+          </div>
+
+          {/* Ask Chanakya CTA */}
+          <div className="p-8 rounded-2xl glass-card border border-[var(--gold)]/20 bg-[var(--gold)]/5 flex flex-col md:flex-row items-center justify-between gap-6">
+             <div>
+               <h3 className="text-xl font-bold text-white mb-2">Have a strategic question?</h3>
+               <p className="text-sm text-white/70 max-w-xl">Get a structured geopolitical assessment, scenario timeline, and multi-dimensional India impact analysis.</p>
+             </div>
+             <Link href="/intelligence/ask" className="shrink-0 px-6 py-3 bg-[var(--gold)] text-[var(--bg)] font-extrabold uppercase tracking-widest rounded-xl hover:bg-yellow-400 transition-colors flex items-center gap-2 text-sm">
+                Ask Chanakya <ArrowRight className="w-4 h-4" />
+             </Link>
           </div>
         </div>
       </section>

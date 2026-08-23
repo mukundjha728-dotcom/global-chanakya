@@ -17,6 +17,7 @@ export interface FormData {
   seoDescription: string;
   seoKeywords: string;
   featuredImage: string;
+  chunkCount: number;
 }
 
 export function useArticleEditor(authorId: string, editId: string | null) {
@@ -31,6 +32,7 @@ export function useArticleEditor(authorId: string, editId: string | null) {
     title: "", slug: "", excerpt: "", content: "", category: "Geopolitics", countrySlug: "",
     tags: "", visibility: "public", status: "draft", isTrending: false,
     commentsEnabled: true, seoTitle: "", seoDescription: "", seoKeywords: "", featuredImage: "",
+    chunkCount: 0,
   });
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export function useArticleEditor(authorId: string, editId: string | null) {
               status: blog.status ?? "draft", isTrending: blog.isTrending ?? false,
               commentsEnabled: blog.commentsEnabled ?? true, seoTitle: blog.seo?.title ?? "",
               seoDescription: blog.seo?.description ?? "", seoKeywords: (blog.seo?.keywords ?? []).join(", "),
-              featuredImage: blog.featuredImage ?? "",
+              featuredImage: blog.featuredImage ?? "", chunkCount: blog.chunkCount ?? 0,
             });
           }
         });

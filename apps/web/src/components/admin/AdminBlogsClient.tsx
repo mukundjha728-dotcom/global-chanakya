@@ -15,6 +15,7 @@ interface BlogRow {
   analytics: { views: number };
   createdAt: string;
   publishAt: string;
+  chunkCount?: number;
 }
 
 const statusColors: Record<string, { bg: string, text: string, border: string }> = {
@@ -144,7 +145,7 @@ export default function AdminBlogsClient({ blogs }: { blogs: BlogRow[] }) {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-[var(--border)] bg-[var(--bg)]/50">
-                  {["Directive / Subject", "Classification", "Status", "Access", "Telemetry", "Timestamp", "Actions"].map((h) => (
+                  {["Directive / Subject", "Classification", "Status", "RAG Status", "Access", "Telemetry", "Timestamp", "Actions"].map((h) => (
                     <th key={h} className="px-6 py-4 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 whitespace-nowrap">
                       {h}
                     </th>
@@ -176,6 +177,24 @@ export default function AdminBlogsClient({ blogs }: { blogs: BlogRow[] }) {
                       <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.15em] border ${statusColors[b.status]?.border ?? statusColors.draft.border} ${statusColors[b.status]?.text ?? statusColors.draft.text} ${statusColors[b.status]?.bg ?? statusColors.draft.bg}`}>
                         {b.status}
                       </span>
+                    </td>
+                    <td className="px-6 py-5">
+                      {(b.chunkCount ?? 0) > 0 ? (
+                        <span className="flex items-center gap-1.5 text-emerald-400 text-[11px] font-bold uppercase tracking-[0.1em] bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full w-fit">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_5px_#34d399]" />
+                          Indexed ({b.chunkCount})
+                        </span>
+                      ) : b.status === "published" ? (
+                        <span className="flex items-center gap-1.5 text-[var(--gold)] text-[11px] font-bold uppercase tracking-[0.1em] bg-[var(--gold)]/10 border border-[var(--gold)]/30 px-3 py-1 rounded-full w-fit">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[var(--gold)] shadow-[0_0_5px_var(--gold)]" />
+                          Pending Index
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-white/40 text-[11px] font-bold uppercase tracking-[0.1em] bg-white/5 border border-white/10 px-3 py-1 rounded-full w-fit">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white/40" />
+                          Not Indexed
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-5">
                       <span className={`text-[11px] font-bold uppercase tracking-[0.1em] flex items-center gap-1.5 ${visibilityColors[b.visibility] ?? "text-white/50"}`}>
