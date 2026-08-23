@@ -192,7 +192,8 @@ export default async function Home() {
   
   // Trigger demand-driven refresh safely in the background
   ensureFreshLiveIntelligence().catch(err => console.error("[Home] Demand refresh error:", err));
-    const theatresPromise = BlogService.getActiveCategories().then(async (categories) => {
+  
+  const theatresPromise = BlogService.getActiveCategories().then(async (categories) => {
     const map = await Promise.all(
       categories.map(async (category) => {
         const blogs = await BlogService.getBlogsByCategory(category, 4);

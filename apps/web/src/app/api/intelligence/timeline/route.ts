@@ -2,6 +2,57 @@ import { NextResponse } from "next/server";
 import { IntelligenceEvent } from "@/lib/models/IntelligenceEvent";
 import dbConnect from "@/lib/mongoose";
 import { ensureFreshLiveIntelligence } from "@/lib/intelligence/live/demandRefresh";
+import { unstable_cache } from "next/cache";
+
+export const revalidate = 60; // Cache timeline API for 60 seconds
+
+const getCachedTimeline = unstable_cache(
+  async (query: any, sortOption: any, skip: number, limit: number) => {
+    await dbConnect();
+    const events = await IntelligenceEvent.find(query)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limit + 1) // Fetch one extra to determine hasMore
+      .select("-embedding -contentHash -rawExtractedData -internalTaxonomy -rawContext") // Aggressive payload reduction
+      .lean();
+
+    const hasMore = events.length > limit;
+    const paginatedEvents = hasMore ? events.slice(0, limit) : events;
+
+    const formattedEvents = paginatedEvents.map((event: any) => ({
+      id: event.slug,
+      headline: event.title,
+      timestamp: event.publishedAt,
+      region: event.region || "Global",
+      topic: event.category || "Intelligence",
+      summary: event.summary,
+      whyItMatters: event.whyItMatters || "No strategic summary available.",
+      indiaImpact: event.indiaImpact || "NEUTRAL",
+      riskLevel: event.riskLevel || "LOW",
+      confidence: event.confidence || "MODERATE",
+      entities: [], // Would need populated entities if desired
+      sourceMetadata: {
+        sources: event.sourceNames?.map((name: string, idx: number) => ({
+          name,
+          url: event.sourceUrls?.[idx],
+          publishedTime: event.publishedAt,
+          retrievedTime: event.discoveredAt,
+          type: "Media"
+        })) || [],
+        sourceCount: event.sourceNames?.length || 1,
+        freshness: "Recently Updated",
+        methodology: "Real-time AI enriched extraction"
+      }
+    }));
+
+    return {
+      formattedEvents,
+      hasMore
+    };
+  },
+  ['intelligence-timeline-v1'],
+  { revalidate: 60, tags: ['intelligence'] }
+);
 
 export async function GET(request: Request) {
   try {
@@ -34,49 +85,16 @@ export async function GET(request: Request) {
       sortOption = { importance: -1, publishedAt: -1 };
     }
 
-    const events = await IntelligenceEvent.find(query)
-      .sort(sortOption)
-      .skip(skip)
-      .limit(limit)
-      .select("-embedding -contentHash") // Omit heavy/internal fields
-      .lean();
-
-    const total = await IntelligenceEvent.countDocuments(query);
-
-    const formattedEvents = events.map((event: any) => ({
-      id: event.slug,
-      headline: event.title,
-      timestamp: event.publishedAt,
-      region: event.region || "Global",
-      topic: event.category || "Intelligence",
-      summary: event.summary,
-      whyItMatters: event.whyItMatters || "No strategic summary available.",
-      indiaImpact: event.indiaImpact || "NEUTRAL",
-      riskLevel: event.riskLevel || "LOW",
-      confidence: event.confidence || "MODERATE",
-      entities: [], // Would need populated entities if desired
-      sourceMetadata: {
-        sources: event.sourceNames?.map((name: string, idx: number) => ({
-          name,
-          url: event.sourceUrls?.[idx],
-          publishedTime: event.publishedAt,
-          retrievedTime: event.discoveredAt,
-          type: "Media"
-        })) || [],
-        sourceCount: event.sourceNames?.length || 1,
-        freshness: "Recently Updated",
-        methodology: "Real-time AI enriched extraction"
-      }
-    }));
+    const { formattedEvents, hasMore } = await getCachedTimeline(query, sortOption, skip, limit);
 
     return NextResponse.json({
       success: true,
       data: formattedEvents,
       pagination: {
-        total,
+        total: 0, // Deprecated expensive count
         skip,
         limit,
-        hasMore: total > skip + limit
+        hasMore
       }
     });
   } catch (error: any) {
@@ -87,3 +105,4 @@ export async function GET(request: Request) {
     );
   }
 }
+
