@@ -191,14 +191,32 @@ export default async function Home() {
   await dbConnect();
   
   // Trigger demand-driven refresh safely in the background
-  await ensureFreshLiveIntelligence().catch(err => console.error("[Home] Demand refresh error:", err));
-  
-  const [trendingBlogs, latestBlogs, mostViewedBlog7Days, rawLiveEvents] = await Promise.all([
+  ensureFreshLiveIntelligence().catch(err => console.error("[Home] Demand refresh error:", err));
+    const theatresPromise = BlogService.getActiveCategories().then(async (categories) => {
+    const map = await Promise.all(
+      categories.map(async (category) => {
+        const blogs = await BlogService.getBlogsByCategory(category, 4);
+        return { category, blogs };
+      })
+    );
+    return { theatres: categories, categoryBlogsMap: map };
+  });
+
+  const [
+    trendingBlogs, 
+    latestBlogs, 
+    mostViewedBlog7Days, 
+    rawLiveEvents,
+    theatresData
+  ] = await Promise.all([
     BlogService.getTrendingBlogs(6),
     BlogService.getLatestBlogs(6),
     BlogService.getMostViewedBlogPast7Days(),
-    IntelligenceEvent.find({ status: "published", enrichmentStatus: "COMPLETED" }).sort({ publishedAt: -1 }).limit(3).lean()
+    IntelligenceEvent.find({ status: "published", enrichmentStatus: "COMPLETED" }).sort({ publishedAt: -1 }).limit(3).lean(),
+    theatresPromise
   ]);
+
+  const { theatres, categoryBlogsMap } = theatresData;
 
   const liveEvents = rawLiveEvents.map((event: any) => ({
     id: event.slug,
@@ -225,15 +243,6 @@ export default async function Home() {
       methodology: "Real-time AI enriched extraction"
     }
   }));
-
-  const theatres = await BlogService.getActiveCategories();
-
-  const categoryBlogsMap = await Promise.all(
-    theatres.map(async (category) => {
-      const blogs = await BlogService.getBlogsByCategory(category, 4);
-      return { category, blogs };
-    })
-  );
 
   const mostViewedBlogId = mostViewedBlog7Days?._id;
   const featuredBlog = mostViewedBlog7Days || latestBlogs[0] || trendingBlogs[0];

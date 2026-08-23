@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     await dbConnect();
     
     // Trigger demand-driven refresh safely in the background (will exit early if fresh)
-    await ensureFreshLiveIntelligence().catch(err => console.error("[Timeline] Demand refresh error:", err));
+    ensureFreshLiveIntelligence().catch(err => console.error("[Timeline] Demand refresh error:", err));
 
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "20", 10);

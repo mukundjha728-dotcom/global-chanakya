@@ -76,6 +76,7 @@ const IntelligenceEventSchema = new Schema<IIntelligenceEvent>(
 // Taxonomy / performance indexes
 IntelligenceEventSchema.index({ status: 1, publishedAt: -1 });
 IntelligenceEventSchema.index({ importance: -1, status: 1, publishedAt: -1 });
+IntelligenceEventSchema.index({ status: 1, enrichmentStatus: 1, publishedAt: -1 });
 
 export const IntelligenceEvent =
   mongoose.models.IntelligenceEvent ||
