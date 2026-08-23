@@ -13,6 +13,20 @@ import { IntelligenceCard } from "@/components/intelligence/IntelligenceCard";
 import { IntelligenceEvent } from "@/lib/models/IntelligenceEvent";
 import dbConnect from "@/lib/mongoose";
 import { ensureFreshLiveIntelligence } from "@/lib/intelligence/live/demandRefresh";
+import { unstable_cache } from "next/cache";
+
+const getCachedLiveEvents = unstable_cache(
+  async () => {
+    await dbConnect();
+    return IntelligenceEvent.find({ status: "published", enrichmentStatus: "COMPLETED" })
+      .sort({ publishedAt: -1 })
+      .limit(3)
+      .select("slug title publishedAt region category summary whyItMatters indiaImpact riskLevel confidence sourceNames sourceUrls discoveredAt")
+      .lean();
+  },
+  ["homepage-live-events"],
+  { revalidate: 60 }
+);
 
 export const revalidate = 60;
 
@@ -213,7 +227,7 @@ export default async function Home() {
     BlogService.getTrendingBlogs(6),
     BlogService.getLatestBlogs(6),
     BlogService.getMostViewedBlogPast7Days(),
-    IntelligenceEvent.find({ status: "published", enrichmentStatus: "COMPLETED" }).sort({ publishedAt: -1 }).limit(3).lean(),
+    getCachedLiveEvents(),
     theatresPromise
   ]);
 
@@ -222,7 +236,7 @@ export default async function Home() {
   const liveEvents = rawLiveEvents.map((event: any) => ({
     id: event.slug,
     headline: event.title,
-    timestamp: event.publishedAt?.toISOString() || new Date().toISOString(),
+    timestamp: event.publishedAt ? new Date(event.publishedAt).toISOString() : new Date().toISOString(),
     region: event.region || "Global",
     topic: event.category || "Intelligence",
     summary: event.summary,
@@ -235,8 +249,8 @@ export default async function Home() {
       sources: event.sourceNames?.map((name: string, idx: number) => ({
         name,
         url: event.sourceUrls?.[idx],
-        publishedTime: event.publishedAt?.toISOString(),
-        retrievedTime: event.discoveredAt?.toISOString(),
+        publishedTime: event.publishedAt ? new Date(event.publishedAt).toISOString() : undefined,
+        retrievedTime: event.discoveredAt ? new Date(event.discoveredAt).toISOString() : undefined,
         type: "Media"
       })) || [],
       sourceCount: event.sourceNames?.length || 1,
