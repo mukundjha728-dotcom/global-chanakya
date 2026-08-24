@@ -1,6 +1,6 @@
 import { IntelligenceEvent } from "../../models/IntelligenceEvent";
 import { SystemConfig } from "../../models/SystemConfig";
-import { redisCache } from "../../cache/redis.cache";
+import { redis } from "../../redis";
 import { RSSProvider } from "./providers/rss.provider";
 import { EventNormalizer, EntityDictionary } from "./eventNormalizer";
 import { generateEmbeddings } from "@/lib/ai/embeddings";
@@ -10,9 +10,9 @@ import { liveEventEnrichmentJsonSchema, liveEventEnrichmentSchema } from "../val
 import { Country } from "../../models/Country";
 import { Leader } from "../../models/Leader";
 import { Conflict } from "../../models/Conflict";
-import mongoose from "mongoose";
 
-const MAX_EXECUTION_BUDGET_MS = 50000; // 50s total budget
+// For standalone worker this can run much longer. For Vercel/edge keep at 50s.
+const MAX_EXECUTION_BUDGET_MS = Number(process.env.INGESTION_BUDGET_MS) || 300000; // 5 min for worker, override to 50s in Vercel env
 
 export class LiveIngestionService {
   private providers = [
@@ -28,6 +28,9 @@ export class LiveIngestionService {
 
     const dict = await this.loadEntityDictionary();
     stats.archived = await this.pruneStaleEvents();
+
+    // Process retry queue for stranded drafts (Phase 7.0: also catches null enrichmentStatus)
+    await this.processRetryQueue(tStart, stats);
 
     const fetchPromises: Promise<any>[] = [];
     const executing = new Set<Promise<any>>();
@@ -71,10 +74,7 @@ export class LiveIngestionService {
   private async pollProviderSafe(provider: RSSProvider, dict: EntityDictionary, tStart: number) {
     const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, failed: 0, status: 'healthy' };
     const circuitBreakerKey = `circuit_breaker:rss:${provider.name.replace(/\s+/g, '_')}`;
-    const failures = await redisCache.get<number>(circuitBreakerKey) || 0;
-    
-    // RETRY QUEUE PROCESS
-    await this.processRetryQueue(tStart, stats);
+    const failures = await redis.get<number>(circuitBreakerKey) || 0;
     
     if (failures >= 3) {
       console.warn(`[LiveIngestionService] Circuit Breaker open for ${provider.name}. Skipping.`);
@@ -87,11 +87,13 @@ export class LiveIngestionService {
       
       const rawEvents = await Promise.race([
         provider.fetchLatestEvents(),
-        new Promise<any[]>((_, reject) => setTimeout(() => reject(new Error("RSS Fetch Timeout")), 10000))
+        new Promise<any[]>((_, reject) => setTimeout(() => reject(new Error("RSS Fetch Timeout")), 15000))
       ]);
       
       stats.fetched += rawEvents.length;
-      if (failures > 0) await redisCache.set(circuitBreakerKey, 0, 86400);
+      if (failures > 0) await redis.set(circuitBreakerKey, 0, "EX", 86400);
+
+      console.log(`[LiveIngestionService] ${provider.name}: ${rawEvents.length} items received from feed.`);
 
       const itemsToEmbed: any[] = [];
 
@@ -118,13 +120,15 @@ export class LiveIngestionService {
         }
       }
 
+      console.log(`[LiveIngestionService] ${provider.name}: ${itemsToEmbed.length} new items to process after exact dedup.`);
+
       for (let i = 0; i < itemsToEmbed.length; i += 5) {
         if (performance.now() - tStart > MAX_EXECUTION_BUDGET_MS) break;
 
         const batch = itemsToEmbed.slice(i, i + 5);
         for (const normalized of batch) {
           try {
-            // 1. Vector Duplicate Check First
+            // 1. Generate embedding for vector dedup
             const embedding = await generateEmbeddings(normalized.content);
             const semanticMatches = await findLiveSemanticMatches(embedding, 1, 0.95);
             
@@ -136,35 +140,32 @@ export class LiveIngestionService {
               if (existingEvent) {
                 let hasChanges = false;
                 
-                // Add new sourceUrl if not present
-                if (normalized.sourceUrls && normalized.sourceUrls[0] && !existingEvent.sourceUrls.includes(normalized.sourceUrls[0])) {
+                if (normalized.sourceUrls?.[0] && !existingEvent.sourceUrls.includes(normalized.sourceUrls[0])) {
                   existingEvent.sourceUrls.push(normalized.sourceUrls[0]);
                   hasChanges = true;
                 }
                 
-                // Add new sourceName if not present
-                if (normalized.sourceNames && normalized.sourceNames[0] && !existingEvent.sourceNames.includes(normalized.sourceNames[0])) {
+                if (normalized.sourceNames?.[0] && !existingEvent.sourceNames.includes(normalized.sourceNames[0])) {
                   existingEvent.sourceNames.push(normalized.sourceNames[0]);
                   hasChanges = true;
                 }
                 
-                // REACTIVATION: if it was archived, it means the story is active again
+                // Reactivate if archived and properly enriched
                 if (existingEvent.status === "archived" && existingEvent.enrichmentStatus === "COMPLETED") {
                   existingEvent.status = "published";
                   hasChanges = true;
                 }
                 
                 if (hasChanges) {
-                  // This naturally bumps updatedAt through Mongoose
-                  await existingEvent.save();
+                  await existingEvent.save(); // bumps updatedAt
                 }
                 
                 stats.duplicates++;
-                continue; // Move to the next item! Do NOT insert a new eventDoc.
+                continue;
               }
             }
             
-            // 2. Only enrich if it's genuinely new
+            // 2. Genuinely new event — enrich
             let finalEnrichment: any = null;
             let enrichmentStatus = "PENDING";
             
@@ -187,6 +188,7 @@ export class LiveIngestionService {
 
             stats.inserted++;
             await eventDoc.save();
+            console.log(`[LiveIngestionService] ✅ Published: "${normalized.title.substring(0, 60)}..."`);
           } catch (err: any) {
             console.warn(`[LiveIngestionService] Insert failed for item from ${provider.name}:`, err.message);
             stats.failed++;
@@ -197,7 +199,7 @@ export class LiveIngestionService {
     } catch (err: any) {
       console.error(`[LiveIngestionService] Provider ${provider.name} failed entirely:`, err.message);
       stats.status = 'failed';
-      await redisCache.set(circuitBreakerKey, failures + 1, 86400);
+      await redis.set(circuitBreakerKey, failures + 1, "EX", 86400);
     }
 
     return stats;
@@ -205,26 +207,37 @@ export class LiveIngestionService {
 
   private async processRetryQueue(tStart: number, stats: any) {
     try {
-      // Find up to 10 failed/draft events to retry
+      // PHASE 7.0 FIX: catch null/undefined enrichmentStatus AND FAILED status
       const failedEvents = await IntelligenceEvent.find({ 
-        enrichmentStatus: "FAILED", 
-        status: "draft" 
-      }).limit(10);
+        status: "draft",
+        $or: [
+          { enrichmentStatus: "FAILED" },
+          { enrichmentStatus: null },
+          { enrichmentStatus: { $exists: false } }
+        ]
+      }).limit(5); // Limit to 5 per cycle to avoid overwhelming the budget
+      
+      if (failedEvents.length > 0) {
+        console.log(`[LiveIngestionService] Retrying ${failedEvents.length} stranded draft events...`);
+      }
       
       for (const event of failedEvents) {
         if (performance.now() - tStart > MAX_EXECUTION_BUDGET_MS) break;
 
         const finalEnrichment = await this.enrichEvent(event, tStart);
         if (finalEnrichment) {
-           // Retry success
            Object.assign(event, finalEnrichment);
            event.enrichmentStatus = "COMPLETED";
            event.status = "published";
            await event.save();
-           stats.inserted++; // Log as new successful insertion for corpus increment
-           console.log(`[LiveIngestionService] Retry success for event: ${event.slug}`);
+           stats.inserted++;
+           console.log(`[LiveIngestionService] Retry success: "${event.slug}"`);
         } else {
-           console.log(`[LiveIngestionService] Retry failed again for event: ${event.slug}`);
+           // Mark as explicitly FAILED so we can track them properly
+           if (!event.enrichmentStatus) {
+             event.enrichmentStatus = "FAILED";
+             await event.save();
+           }
         }
       }
     } catch (e: any) {
@@ -233,7 +246,8 @@ export class LiveIngestionService {
   }
 
   private async enrichEvent(normalized: any, tStart: number): Promise<any> {
-    const TOTAL_TIMEOUT_BUDGET = 15000;
+    // For standalone worker, use a much more generous timeout
+    const TOTAL_TIMEOUT_BUDGET = MAX_EXECUTION_BUDGET_MS > 100000 ? 30000 : 15000;
     const maxRetries = 2;
     let attempt = 0;
     let enrichmentData = null;
@@ -262,10 +276,10 @@ Extract the structured intelligence fields from the source data above.
       if (elapsedTotal > TOTAL_TIMEOUT_BUDGET) break;
 
       try {
-        const remainingBudget = Math.max(5000, TOTAL_TIMEOUT_BUDGET - elapsedTotal);
+        const remainingBudget = Math.max(10000, TOTAL_TIMEOUT_BUDGET - elapsedTotal);
         const response = await Promise.race([
           groqProvider.generateStructured({
-            model: process.env.GROQ_DEFAULT_MODEL || "llama3-8b-8192", // Ensure fast JSON generation
+            model: process.env.GROQ_DEFAULT_MODEL || "llama3-8b-8192",
             systemPrompt,
             userPrompt,
             schema: liveEventEnrichmentJsonSchema as Record<string, unknown>,
@@ -281,7 +295,7 @@ Extract the structured intelligence fields from the source data above.
         }
         
         enrichmentData = validationResult.data;
-        break; // Success
+        break;
       } catch (err: any) {
         console.warn(`[LiveIngestionService] Enrichment attempt ${attempt + 1} failed:`, err.message);
         attempt++;
@@ -319,15 +333,20 @@ Extract the structured intelligence fields from the source data above.
   private async pruneStaleEvents(): Promise<number> {
     try {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      // Phase 6.9: Use updatedAt + publishedAt to protect ongoing stories from archival
+      // Phase 6.9: dual condition — both publishedAt AND updatedAt must be stale
+      // Phase 7.0 FIX: Only archive COMPLETED events. Never archive PENDING (awaiting enrichment).
       const result = await IntelligenceEvent.updateMany(
         { 
-          status: "published", 
+          status: "published",
+          enrichmentStatus: "COMPLETED",   // ← CRITICAL: never archive pending/failed
           publishedAt: { $lt: sevenDaysAgo },
           updatedAt: { $lt: sevenDaysAgo }
         },
         { $set: { status: "archived" } }
       );
+      if (result.modifiedCount > 0) {
+        console.log(`[LiveIngestionService] Archived ${result.modifiedCount} stale events.`);
+      }
       return result.modifiedCount || 0;
     } catch (e) {
       console.warn("[LiveIngestionService] Failed to prune stale events", e);
@@ -343,7 +362,7 @@ Extract the structured intelligence fields from the source data above.
         { new: true }
       );
       if (config) {
-        await redisCache.set("live_corpus_version", config.liveCorpusVersion, 86400);
+        await redis.set("live_corpus_version", config.liveCorpusVersion, "EX", 86400);
       }
     } catch (err) {
       console.error("[LiveIngestionService] Failed to increment liveCorpusVersion:", err);
@@ -364,7 +383,7 @@ Extract the structured intelligence fields from the source data above.
     };
     console.log(`[LIVE_INGESTION_LATENCY] \n${JSON.stringify(telemetry, null, 2)}`);
     try {
-      await redisCache.set("live_ingestion_stats", telemetry, 86400 * 7);
+      await redis.set("live_ingestion_stats", telemetry, "EX", 86400 * 7);
     } catch (e) {}
   }
 }

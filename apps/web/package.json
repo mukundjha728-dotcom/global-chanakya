@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "worker:intelligence": "tsx workers/intelligence-worker.ts",
+    "worker:intelligence:test": "INTELLIGENCE_POLL_INTERVAL_MS=10000 tsx workers/intelligence-worker.ts"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.2",
