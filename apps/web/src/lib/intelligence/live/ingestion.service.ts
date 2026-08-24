@@ -128,17 +128,51 @@ export class LiveIngestionService {
             const embedding = await generateEmbeddings(normalized.content);
             const semanticMatches = await findLiveSemanticMatches(embedding, 1, 0.95);
             
+            if (semanticMatches.length > 0) {
+              // PHASE 6.9: UPDATE EXISTING INSTEAD OF DUPLICATING
+              const matchedId = semanticMatches[0].blogId;
+              const existingEvent = await IntelligenceEvent.findById(matchedId);
+              
+              if (existingEvent) {
+                let hasChanges = false;
+                
+                // Add new sourceUrl if not present
+                if (normalized.sourceUrls && normalized.sourceUrls[0] && !existingEvent.sourceUrls.includes(normalized.sourceUrls[0])) {
+                  existingEvent.sourceUrls.push(normalized.sourceUrls[0]);
+                  hasChanges = true;
+                }
+                
+                // Add new sourceName if not present
+                if (normalized.sourceNames && normalized.sourceNames[0] && !existingEvent.sourceNames.includes(normalized.sourceNames[0])) {
+                  existingEvent.sourceNames.push(normalized.sourceNames[0]);
+                  hasChanges = true;
+                }
+                
+                // REACTIVATION: if it was archived, it means the story is active again
+                if (existingEvent.status === "archived" && existingEvent.enrichmentStatus === "COMPLETED") {
+                  existingEvent.status = "published";
+                  hasChanges = true;
+                }
+                
+                if (hasChanges) {
+                  // This naturally bumps updatedAt through Mongoose
+                  await existingEvent.save();
+                }
+                
+                stats.duplicates++;
+                continue; // Move to the next item! Do NOT insert a new eventDoc.
+              }
+            }
+            
+            // 2. Only enrich if it's genuinely new
             let finalEnrichment: any = null;
             let enrichmentStatus = "PENDING";
             
-            if (semanticMatches.length === 0) {
-              // 2. Only enrich if it's NOT a duplicate
-              finalEnrichment = await this.enrichEvent(normalized, tStart);
-              if (finalEnrichment) {
-                 enrichmentStatus = "COMPLETED";
-              } else {
-                 enrichmentStatus = "FAILED";
-              }
+            finalEnrichment = await this.enrichEvent(normalized, tStart);
+            if (finalEnrichment) {
+               enrichmentStatus = "COMPLETED";
+            } else {
+               enrichmentStatus = "FAILED";
             }
 
             const eventDoc = new IntelligenceEvent({
@@ -151,14 +185,7 @@ export class LiveIngestionService {
               status: enrichmentStatus === "COMPLETED" ? "published" : "draft"
             });
 
-            if (semanticMatches.length > 0) {
-              eventDoc.duplicateOf = semanticMatches[0].blogId;
-              eventDoc.status = "archived";
-              stats.duplicates++;
-            } else {
-              stats.inserted++;
-            }
-
+            stats.inserted++;
             await eventDoc.save();
           } catch (err: any) {
             console.warn(`[LiveIngestionService] Insert failed for item from ${provider.name}:`, err.message);
@@ -292,8 +319,13 @@ Extract the structured intelligence fields from the source data above.
   private async pruneStaleEvents(): Promise<number> {
     try {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      // Phase 6.9: Use updatedAt + publishedAt to protect ongoing stories from archival
       const result = await IntelligenceEvent.updateMany(
-        { status: "published", publishedAt: { $lt: sevenDaysAgo } },
+        { 
+          status: "published", 
+          publishedAt: { $lt: sevenDaysAgo },
+          updatedAt: { $lt: sevenDaysAgo }
+        },
         { $set: { status: "archived" } }
       );
       return result.modifiedCount || 0;
