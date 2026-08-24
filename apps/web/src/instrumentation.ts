@@ -6,6 +6,12 @@ export function register() {
       dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
       tracesSampleRate: 1,
     });
+
+    if (process.env.NODE_ENV !== "test") {
+      import("./lib/intelligence/live/daemon").then(({ startLiveIntelligenceDaemon }) => {
+        startLiveIntelligenceDaemon();
+      });
+    }
   }
 
   if (process.env.NEXT_RUNTIME === "edge") {

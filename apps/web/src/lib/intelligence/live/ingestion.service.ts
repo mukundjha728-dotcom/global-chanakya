@@ -280,9 +280,9 @@ Extract the structured intelligence fields from the source data above.
         Leader.find({ status: { $ne: "inactive" } }).select("_id name aliases").lean(),
         Conflict.find({ status: { $ne: "inactive" } }).select("_id name aliases").lean()
       ]);
-      dict.countries = countries.map(c => ({ id: (c as any)._id, name: (c as any).name, aliases: (c as any).aliases || [] }));
-      dict.leaders = leaders.map(l => ({ id: (l as any)._id, name: (l as any).name, aliases: (l as any).aliases || [] }));
-      dict.conflicts = conflicts.map(c => ({ id: (c as any)._id, name: (c as any).name, aliases: (c as any).aliases || [] }));
+      dict.countries = countries.map(c => ({ _id: (c as any)._id, name: (c as any).name, aliases: (c as any).aliases || [] }));
+      dict.leaders = leaders.map(l => ({ _id: (l as any)._id, name: (l as any).name, aliases: (l as any).aliases || [] }));
+      dict.conflicts = conflicts.map(c => ({ _id: (c as any)._id, name: (c as any).name, aliases: (c as any).aliases || [] }));
     } catch (e) {
       console.warn("[LiveIngestionService] Failed to load entity dictionary", e);
     }

@@ -22,9 +22,9 @@ export interface NormalizedIntelligenceEvent {
 }
 
 export interface EntityDictionary {
-  countries: { id: mongoose.Types.ObjectId; name: string; aliases?: string[] }[];
-  leaders: { id: mongoose.Types.ObjectId; name: string; aliases?: string[] }[];
-  conflicts: { id: mongoose.Types.ObjectId; name: string; aliases?: string[] }[];
+  countries: { _id: mongoose.Types.ObjectId; name: string; aliases?: string[] }[];
+  leaders: { _id: mongoose.Types.ObjectId; name: string; aliases?: string[] }[];
+  conflicts: { _id: mongoose.Types.ObjectId; name: string; aliases?: string[] }[];
 }
 
 export class EventNormalizer {
