@@ -25,7 +25,8 @@ export class GroqProvider implements IAIProvider {
       schema, 
       schemaName, 
       temperature = 0, 
-      maxTokens = 4000 
+      maxTokens = 4000,
+      signal
     } = options;
 
     let attempts = 0;
@@ -58,7 +59,7 @@ export class GroqProvider implements IAIProvider {
               schema: schema
             }
           }
-        });
+        }, { signal });
         
         // Success
         await GroqKeyManager.markSuccess(keyConfig.id);

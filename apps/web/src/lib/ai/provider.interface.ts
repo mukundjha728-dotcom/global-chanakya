@@ -7,6 +7,7 @@ export interface StructuredGenerateOptions {
   schemaDescription?: string;
   temperature?: number;
   maxTokens?: number;
+  signal?: AbortSignal;
 }
 
 export interface IAIProvider {

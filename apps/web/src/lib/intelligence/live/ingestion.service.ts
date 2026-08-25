@@ -11,8 +11,13 @@ import { Country } from "../../models/Country";
 import { Leader } from "../../models/Leader";
 import { Conflict } from "../../models/Conflict";
 
-// For standalone worker this can run much longer. For Vercel/edge keep at 50s.
-const MAX_EXECUTION_BUDGET_MS = Number(process.env.INGESTION_BUDGET_MS) || 300000; // 5 min for worker, override to 50s in Vercel env
+// For standalone worker this can run much longer. For Vercel/edge keep at 50s max default.
+const DEFAULT_EXECUTION_BUDGET_MS = Number(process.env.INGESTION_BUDGET_MS) || 50000;
+
+export interface IngestionOptions {
+  maxDurationMs?: number;
+  maxCandidates?: number;
+}
 
 export class LiveIngestionService {
   private providers = [
@@ -21,22 +26,28 @@ export class LiveIngestionService {
     new RSSProvider("UN News", "https://news.un.org/feed/subscribe/en/news/all/rss.xml")
   ];
 
-  async pollAllProviders() {
-    console.log("[LiveIngestionService] Starting live intelligence ingestion...");
-    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, published: 0, failed: 0, archived: 0, providersHealthy: 0, providersFailed: 0 };
-    const tStart = performance.now();
+  async pollAllProviders(options?: IngestionOptions) {
+    console.log(`[LiveIngestionService] Starting live intelligence ingestion. Options:`, options);
+    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, published: 0, failed: 0, archived: 0, providersHealthy: 0, providersFailed: 0, status: 'completed', error: null as string | null };
+    const startedAt = Date.now();
+    const budgetMs = options?.maxDurationMs || DEFAULT_EXECUTION_BUDGET_MS;
 
     const dict = await this.loadEntityDictionary();
     stats.archived = await this.pruneStaleEvents();
 
-    // Process retry queue for stranded drafts (Phase 7.0: also catches null enrichmentStatus)
-    await this.processRetryQueue(tStart, stats);
+    // Process retry queue for stranded drafts
+    await this.processRetryQueue(startedAt, budgetMs, stats);
 
     const fetchPromises: Promise<any>[] = [];
     const executing = new Set<Promise<any>>();
     
     for (const p of this.providers) {
-      const prm = this.pollProviderSafe(p, dict, tStart).then(r => {
+      if (Date.now() - startedAt > budgetMs) {
+         stats.status = 'partial';
+         stats.error = "Execution budget reached before starting all providers";
+         break;
+      }
+      const prm = this.pollProviderSafe(p, dict, startedAt, budgetMs, options?.maxCandidates).then(r => {
         executing.delete(prm);
         return r;
       });
@@ -59,6 +70,7 @@ export class LiveIngestionService {
       stats.failed += r.failed;
       if (r.status === 'healthy') stats.providersHealthy++;
       if (r.status === 'failed') stats.providersFailed++;
+      if (r.status === 'partial') stats.status = 'partial';
       if (r.inserted > 0) hasNewInserts = true;
     }
 
@@ -66,14 +78,18 @@ export class LiveIngestionService {
       await this.incrementLiveCorpusVersion();
     }
 
-    const durationMs = performance.now() - tStart;
+    const durationMs = Date.now() - startedAt;
+    if (stats.status === 'completed' && durationMs > budgetMs) {
+       stats.status = 'partial';
+       stats.error = "Execution budget reached";
+    }
     await this.logTelemetry(stats, durationMs);
     
     return stats;
   }
 
-  private async pollProviderSafe(provider: RSSProvider, dict: EntityDictionary, tStart: number) {
-    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, published: 0, failed: 0, status: 'healthy' };
+  private async pollProviderSafe(provider: RSSProvider, dict: EntityDictionary, startedAt: number, budgetMs: number, maxCandidates?: number) {
+    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, published: 0, failed: 0, status: 'healthy', error: null as string | null };
     const circuitBreakerKey = `circuit_breaker:rss:${provider.name.replace(/\s+/g, '_')}`;
     const failures = await redis.get<number>(circuitBreakerKey) || 0;
     
@@ -97,10 +113,17 @@ export class LiveIngestionService {
       console.log(`[LiveIngestionService] ${provider.name}: ${rawEvents.length} items received from feed.`);
 
       const itemsToEmbed: any[] = [];
+      let candidateCount = 0;
 
       for (const item of rawEvents) {
-        if (performance.now() - tStart > MAX_EXECUTION_BUDGET_MS) {
+        if (Date.now() - startedAt > budgetMs) {
           console.warn(`[LiveIngestionService] Execution budget exceeded. Stopping ingestion for ${provider.name}.`);
+          stats.status = 'partial';
+          stats.error = "Execution budget reached";
+          break;
+        }
+        if (maxCandidates && candidateCount >= maxCandidates) {
+          console.log(`[LiveIngestionService] Max candidates (${maxCandidates}) reached for ${provider.name}.`);
           break;
         }
 
@@ -115,6 +138,7 @@ export class LiveIngestionService {
           }
 
           itemsToEmbed.push(normalized);
+          candidateCount++;
         } catch (err: any) {
           console.warn(`[LiveIngestionService] Normalization failed for ${provider.name}:`, err.message);
           stats.failed++;
@@ -123,11 +147,20 @@ export class LiveIngestionService {
 
       console.log(`[LiveIngestionService] ${provider.name}: ${itemsToEmbed.length} new items to process after exact dedup.`);
 
-      for (let i = 0; i < itemsToEmbed.length; i += 5) {
-        if (performance.now() - tStart > MAX_EXECUTION_BUDGET_MS) break;
+      for (let i = 0; i < itemsToEmbed.length; i += 2) { // smaller batch size
+        if (Date.now() - startedAt > budgetMs) {
+           stats.status = 'partial';
+           stats.error = "Execution budget reached";
+           break;
+        }
 
-        const batch = itemsToEmbed.slice(i, i + 5);
+        const batch = itemsToEmbed.slice(i, i + 2);
         for (const normalized of batch) {
+          if (Date.now() - startedAt > budgetMs) {
+             stats.status = 'partial';
+             stats.error = "Execution budget reached";
+             break;
+          }
           try {
             // 1. Generate embedding for vector dedup
             const embedding = await generateEmbeddings(normalized.content);
@@ -170,7 +203,7 @@ export class LiveIngestionService {
             let finalEnrichment: any = null;
             let enrichmentStatus = "PENDING";
             
-            finalEnrichment = await this.enrichEvent(normalized, tStart);
+            finalEnrichment = await this.enrichEvent(normalized, startedAt, budgetMs);
             if (finalEnrichment) {
                enrichmentStatus = "COMPLETED";
             } else {
@@ -213,7 +246,7 @@ export class LiveIngestionService {
     return stats;
   }
 
-  private async processRetryQueue(tStart: number, stats: any) {
+  private async processRetryQueue(startedAt: number, budgetMs: number, stats: any) {
     try {
       // PHASE 7.0 FIX: catch null/undefined enrichmentStatus AND FAILED status
       const failedEvents = await IntelligenceEvent.find({ 
@@ -223,16 +256,20 @@ export class LiveIngestionService {
           { enrichmentStatus: null },
           { enrichmentStatus: { $exists: false } }
         ]
-      }).limit(5); // Limit to 5 per cycle to avoid overwhelming the budget
+      }).limit(2); // Limit to 2 per cycle to avoid overwhelming the budget
       
       if (failedEvents.length > 0) {
         console.log(`[LiveIngestionService] Retrying ${failedEvents.length} stranded draft events...`);
       }
       
       for (const event of failedEvents) {
-        if (performance.now() - tStart > MAX_EXECUTION_BUDGET_MS) break;
+        if (Date.now() - startedAt > budgetMs) {
+           stats.status = 'partial';
+           stats.error = "Execution budget reached during retry queue";
+           break;
+        }
 
-        const finalEnrichment = await this.enrichEvent(event, tStart);
+        const finalEnrichment = await this.enrichEvent(event, startedAt, budgetMs);
         if (finalEnrichment) {
            Object.assign(event, finalEnrichment);
            event.enrichmentStatus = "COMPLETED";
@@ -254,10 +291,9 @@ export class LiveIngestionService {
     }
   }
 
-  private async enrichEvent(normalized: any, tStart: number): Promise<any> {
-    // For standalone worker, use a much more generous timeout
-    const TOTAL_TIMEOUT_BUDGET = MAX_EXECUTION_BUDGET_MS > 100000 ? 30000 : 15000;
-    const maxRetries = 2;
+  private async enrichEvent(normalized: any, startedAt: number, budgetMs: number): Promise<any> {
+    const TOTAL_TIMEOUT_BUDGET = 15000; // max time allowed for a single event enrichment
+    const maxRetries = 1;
     let attempt = 0;
     let enrichmentData = null;
 
@@ -281,11 +317,19 @@ Extract the structured intelligence fields from the source data above.
     `.trim();
 
     while (attempt <= maxRetries) {
-      const elapsedTotal = performance.now() - tStart;
-      if (elapsedTotal > TOTAL_TIMEOUT_BUDGET) break;
+      const elapsedTotal = Date.now() - startedAt;
+      if (elapsedTotal > budgetMs) {
+         console.warn(`[LiveIngestionService] Aborting enrichment, global budget exceeded.`);
+         break;
+      }
 
       try {
-        const remainingBudget = Math.max(10000, TOTAL_TIMEOUT_BUDGET - elapsedTotal);
+        const remainingBudget = Math.max(3000, Math.min(TOTAL_TIMEOUT_BUDGET, budgetMs - elapsedTotal - 500));
+        
+        // Pass AbortSignal to Groq so it cancels the network request cleanly
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), remainingBudget);
+        
         const response = await Promise.race([
           groqProvider.generateStructured({
             model: process.env.GROQ_DEFAULT_MODEL || "llama3-8b-8192",
@@ -294,9 +338,10 @@ Extract the structured intelligence fields from the source data above.
             schema: liveEventEnrichmentJsonSchema as Record<string, unknown>,
             schemaName: "LiveEventEnrichment",
             temperature: 0.1,
+            signal: controller.signal
           }),
           new Promise((_, reject) => setTimeout(() => reject(new Error("Groq Timeout")), remainingBudget))
-        ]);
+        ]).finally(() => clearTimeout(timeoutId));
 
         const validationResult = liveEventEnrichmentSchema.safeParse((response as any).data);
         if (!validationResult.success) {

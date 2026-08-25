@@ -56,7 +56,11 @@ export async function POST() {
 
     try {
       await dbConnect();
-      cycleStats = await liveIngestionService.pollAllProviders();
+      // Use strict Vercel Hobby execution budget (7s) to guarantee completion before timeout
+      cycleStats = await liveIngestionService.pollAllProviders({
+        maxDurationMs: 7000,
+        maxCandidates: 2
+      });
       
       if (cycleStats && cycleStats.published > 0) {
         try {
@@ -86,8 +90,11 @@ export async function POST() {
         }
       }
 
+      const isPartial = cycleStats?.status === 'partial';
+      const statusString = lastError ? "FAILED" : isPartial ? "PARTIAL" : "SUCCESS";
+      
       const finalStatus = {
-        status: lastError ? "FAILED" : "SUCCESS",
+        status: statusString,
         lastRun: new Date(tStart).toISOString(),
         lastSuccessfulRun: lastError ? undefined : new Date().toISOString(),
         processed: cycleStats?.fetched || 0,
@@ -95,7 +102,7 @@ export async function POST() {
         deduplicated: cycleStats?.duplicates || 0,
         failed: cycleStats?.failed || 0,
         duration: durationMs,
-        error: lastError || null,
+        error: lastError || (isPartial ? cycleStats?.error : null),
       };
 
       // Persist final status
@@ -112,7 +119,7 @@ export async function POST() {
       } else {
         return NextResponse.json({
           success: true,
-          status: "SUCCESS",
+          status: statusString,
           stats: finalStatus
         });
       }

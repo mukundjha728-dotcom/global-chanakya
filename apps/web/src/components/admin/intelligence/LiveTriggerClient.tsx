@@ -120,13 +120,24 @@ export default function LiveTriggerClient() {
         </div>
       )}
 
+      {/* Partial State Banner */}
+      {!error && statusData?.status === "PARTIAL" && (
+        <div className="mb-8 p-4 bg-[var(--cyan)]/10 border border-[var(--cyan)]/20 rounded-xl flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-[var(--cyan)] shrink-0 mt-0.5" />
+          <div className="text-white">
+            <p className="font-bold">Partial Completion</p>
+            <p className="text-sm opacity-90">Partial intelligence run completed before the execution limit.</p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Status Card */}
         <div className="bg-[var(--surface)]/60 border border-[var(--border)] rounded-2xl p-6 relative overflow-hidden flex flex-col">
           <div className="absolute top-0 right-0 p-6 pointer-events-none">
             {isRunning ? (
               <RefreshCw className="w-24 h-24 text-[var(--gold)]/5 animate-spin-slow" />
-            ) : statusData?.status === "SUCCESS" || statusData?.status === "WAITING" ? (
+            ) : statusData?.status === "SUCCESS" || statusData?.status === "WAITING" || statusData?.status === "PARTIAL" ? (
               <CheckCircle2 className="w-24 h-24 text-green-500/5" />
             ) : statusData?.status === "FAILED" || statusData?.status === "ERROR" ? (
               <XCircle className="w-24 h-24 text-[var(--danger)]/5" />
@@ -141,6 +152,7 @@ export default function LiveTriggerClient() {
             <div className={`w-3 h-3 rounded-full shadow-[0_0_12px_currentColor] ${
               isRunning ? "bg-[var(--gold)] animate-pulse" : 
               (statusData?.status === "FAILED" || statusData?.status === "ERROR") ? "bg-[var(--danger)]" : 
+              statusData?.status === "PARTIAL" ? "bg-[var(--cyan)]" : 
               statusData?.status === "IDLE" ? "bg-white/20" :
               "bg-green-500"
             }`} />
