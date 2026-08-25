@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { sanitizeInternalCitations } from "@/lib/utils/contentSanitizer";
+import { sanitizeBlogContent } from "@/lib/utils/contentSanitizer";
 
 export interface IBlogRevision {
   content: string;
@@ -192,26 +192,42 @@ BlogSchema.pre("save", async function () {
   }
 });
 
+// Sanitize BEFORE validation
+BlogSchema.pre("validate", function () {
+  if (this.isModified("title") && this.title) this.title = sanitizeBlogContent(this.title, "text");
+  if (this.isModified("excerpt") && this.excerpt) this.excerpt = sanitizeBlogContent(this.excerpt, "text");
+  if (this.isModified("content") && this.content) this.content = sanitizeBlogContent(this.content, "html");
+  if (this.isModified("markdown") && this.markdown) this.markdown = sanitizeBlogContent(this.markdown, "markdown");
+  
+  if (this.seo) {
+    if (this.isModified("seo.title") && this.seo.title) this.seo.title = sanitizeBlogContent(this.seo.title, "seo");
+    if (this.isModified("seo.description") && this.seo.description) this.seo.description = sanitizeBlogContent(this.seo.description, "seo");
+  }
+});
+
 // Final publication guard
 BlogSchema.pre("validate", function () {
   if (this.status === "published") {
     const artifactRegex = /:antCitation\s*\[.*?\]\s*\{.*?\}/;
+    const aiSymbolRegex = /[—]/; // At least check for EM DASH
+    
     if (this.content && artifactRegex.test(this.content)) {
       throw new Error("Validation Error: Internal citation artifacts detected in content during publication attempt.");
     }
     if (this.markdown && artifactRegex.test(this.markdown)) {
       throw new Error("Validation Error: Internal citation artifacts detected in markdown during publication attempt.");
     }
-  }
-});
 
-// Sanitize on save
-BlogSchema.pre("save", function () {
-  if (this.isModified("content") && this.content) {
-    this.content = sanitizeInternalCitations(this.content);
-  }
-  if (this.isModified("markdown") && this.markdown) {
-    this.markdown = sanitizeInternalCitations(this.markdown);
+    const fieldsToCheck = [
+      this.title, this.excerpt, this.content, this.markdown, 
+      this.seo?.title, this.seo?.description, this.seo?.keywords?.join(" ")
+    ];
+
+    for (const field of fieldsToCheck) {
+      if (field && aiSymbolRegex.test(field)) {
+        throw new Error("Blog contains prohibited AI-generated formatting symbols.");
+      }
+    }
   }
 });
 
@@ -219,12 +235,26 @@ BlogSchema.pre("save", function () {
 const sanitizeUpdate = function (this: any) {
   const update = this.getUpdate();
   if (update) {
-    if (update.$set) {
-      if (update.$set.content) update.$set.content = sanitizeInternalCitations(update.$set.content);
-      if (update.$set.markdown) update.$set.markdown = sanitizeInternalCitations(update.$set.markdown);
-    }
-    if (update.content) update.content = sanitizeInternalCitations(update.content);
-    if (update.markdown) update.markdown = sanitizeInternalCitations(update.markdown);
+    const sanitizeObj = (obj: any) => {
+      if (!obj) return;
+      if (typeof obj.title === 'string') obj.title = sanitizeBlogContent(obj.title, 'text');
+      if (typeof obj.excerpt === 'string') obj.excerpt = sanitizeBlogContent(obj.excerpt, 'text');
+      if (typeof obj.content === 'string') obj.content = sanitizeBlogContent(obj.content, 'html');
+      if (typeof obj.markdown === 'string') obj.markdown = sanitizeBlogContent(obj.markdown, 'markdown');
+      
+      // Dot notation
+      if (typeof obj['seo.title'] === 'string') obj['seo.title'] = sanitizeBlogContent(obj['seo.title'], 'seo');
+      if (typeof obj['seo.description'] === 'string') obj['seo.description'] = sanitizeBlogContent(obj['seo.description'], 'seo');
+      
+      // Nested object
+      if (obj.seo && typeof obj.seo === 'object') {
+        if (typeof obj.seo.title === 'string') obj.seo.title = sanitizeBlogContent(obj.seo.title, 'seo');
+        if (typeof obj.seo.description === 'string') obj.seo.description = sanitizeBlogContent(obj.seo.description, 'seo');
+      }
+    };
+
+    if (update.$set) sanitizeObj(update.$set);
+    sanitizeObj(update);
   }
 };
 
