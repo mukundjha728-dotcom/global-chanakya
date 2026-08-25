@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
+import { sanitizeInternalCitations } from "@/lib/utils/contentSanitizer";
 
 export interface IBlogRevision {
   content: string;
@@ -190,6 +191,46 @@ BlogSchema.pre("save", async function () {
     this.earlyAccessUntil = new Date(publishDate.getTime() + 24 * 60 * 60 * 1000);
   }
 });
+
+// Final publication guard
+BlogSchema.pre("validate", function () {
+  if (this.status === "published") {
+    const artifactRegex = /:antCitation\s*\[.*?\]\s*\{.*?\}/;
+    if (this.content && artifactRegex.test(this.content)) {
+      throw new Error("Validation Error: Internal citation artifacts detected in content during publication attempt.");
+    }
+    if (this.markdown && artifactRegex.test(this.markdown)) {
+      throw new Error("Validation Error: Internal citation artifacts detected in markdown during publication attempt.");
+    }
+  }
+});
+
+// Sanitize on save
+BlogSchema.pre("save", function () {
+  if (this.isModified("content") && this.content) {
+    this.content = sanitizeInternalCitations(this.content);
+  }
+  if (this.isModified("markdown") && this.markdown) {
+    this.markdown = sanitizeInternalCitations(this.markdown);
+  }
+});
+
+// Sanitize on update
+const sanitizeUpdate = function (this: any) {
+  const update = this.getUpdate();
+  if (update) {
+    if (update.$set) {
+      if (update.$set.content) update.$set.content = sanitizeInternalCitations(update.$set.content);
+      if (update.$set.markdown) update.$set.markdown = sanitizeInternalCitations(update.$set.markdown);
+    }
+    if (update.content) update.content = sanitizeInternalCitations(update.content);
+    if (update.markdown) update.markdown = sanitizeInternalCitations(update.markdown);
+  }
+};
+
+BlogSchema.pre("findOneAndUpdate", sanitizeUpdate);
+BlogSchema.pre("updateOne", sanitizeUpdate);
+BlogSchema.pre("updateMany", sanitizeUpdate);
 
 // Compound indexes for performance
 BlogSchema.index({ status: 1, publishAt: -1 });

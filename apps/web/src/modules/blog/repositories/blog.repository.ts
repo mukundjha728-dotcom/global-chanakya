@@ -1,6 +1,7 @@
 import { Blog, IBlog } from "@/lib/models/Blog";
 import dbConnect from "@/lib/mongoose";
 import mongoose from "mongoose";
+import { sanitizeInternalCitations } from "@/lib/utils/contentSanitizer";
 
 export class BlogRepository {
   static async findById(id: string): Promise<any | null> {
@@ -188,11 +189,15 @@ export class BlogRepository {
 
   static async create(data: Partial<IBlog>): Promise<IBlog> {
     await dbConnect();
+    if (data.content) data.content = sanitizeInternalCitations(data.content);
+    if (data.markdown) data.markdown = sanitizeInternalCitations(data.markdown);
     return Blog.create(data);
   }
 
   static async update(id: string, data: Partial<IBlog>): Promise<IBlog | null> {
     await dbConnect();
+    if (data.content) data.content = sanitizeInternalCitations(data.content);
+    if (data.markdown) data.markdown = sanitizeInternalCitations(data.markdown);
     return Blog.findByIdAndUpdate(id, { $set: data }, { new: true }).lean();
   }
 
