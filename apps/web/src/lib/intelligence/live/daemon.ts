@@ -1,6 +1,6 @@
 import { liveIngestionService } from "./ingestion.service";
 import dbConnect from "@/lib/mongoose";
-import { redisCache } from "../../cache/redis.cache";
+import { redis } from "../../redis";
 
 const WORKER_LOCK_KEY = "intelligence:worker:lock";
 const WORKER_STATUS_KEY = "intelligence:worker:status";
@@ -34,9 +34,7 @@ export function startLiveIntelligenceDaemon() {
       // 2. Redis Distributed Lock check
       // Try to acquire lock. NX means set only if it doesn't exist. EX sets expiry in seconds.
       // We set expiration to slightly less than interval to guarantee release, but safely cover the cycle.
-      const lockExpirySeconds = Math.max(Math.floor(POLL_INTERVAL_MS / 1000) - 10, 60); 
-      
-      const acquired = await redisCache.set(WORKER_LOCK_KEY, `worker-${Date.now()}`, lockExpirySeconds, { NX: true });
+      const acquired = await redis.setNX(WORKER_LOCK_KEY, `worker-${Date.now()}`, lockExpirySeconds);
       
       if (!acquired) {
         // Another worker instance holds the lock.
@@ -78,7 +76,7 @@ export function startLiveIntelligenceDaemon() {
       // Ensure lock is released if we acquired it
       if (lockAcquired) {
         try {
-          await redisCache.delete(WORKER_LOCK_KEY);
+          await redis.del(WORKER_LOCK_KEY);
           
           // Write completion status to Redis
           await updateWorkerStatus("WAITING", tStart, tEnd, durationMs, cycleStats, nextPollAt, lastError);
@@ -108,7 +106,7 @@ async function updateWorkerStatus(
   lastError?: string | null
 ) {
   try {
-    const currentState = (await redisCache.get<any>(WORKER_STATUS_KEY)) || {};
+    const currentState = (await redis.get<any>(WORKER_STATUS_KEY)) || {};
     
     const newState = {
       ...currentState,
@@ -133,7 +131,7 @@ async function updateWorkerStatus(
       }
     }
 
-    await redisCache.set(WORKER_STATUS_KEY, newState);
+    await redis.set(WORKER_STATUS_KEY, newState);
   } catch (e) {
     // silently fail status update to protect worker loop
   }

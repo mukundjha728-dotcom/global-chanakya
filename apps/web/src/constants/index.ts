@@ -74,11 +74,11 @@ export const NAV_LINKS = [
 
 // Admin sidebar links
 export const ADMIN_NAV_LINKS = [
-  { label: "Dashboard", href: "/admin", icon: "LayoutDashboard" },
-  { label: "Blogs", href: "/admin/blogs", icon: "FileText" },
-  { label: "Users", href: "/admin/users", icon: "Users" },
-  { label: "Analytics", href: "/admin/analytics", icon: "BarChart3" },
-  { label: "Security", href: "/admin/security", icon: "ShieldAlert" },
-  { label: "Media", href: "/admin/media", icon: "Image" },
-  { label: "Settings", href: "/admin/settings", icon: "Settings" },
+  { label: "Dashboard", href: "/gc-control-9x7k", icon: "LayoutDashboard" },
+  { label: "Blogs", href: "/gc-control-9x7k/blogs", icon: "FileText" },
+  { label: "Users", href: "/gc-control-9x7k/users", icon: "Users" },
+  { label: "Analytics", href: "/gc-control-9x7k/analytics", icon: "BarChart3" },
+  { label: "Security", href: "/gc-control-9x7k/security", icon: "ShieldAlert" },
+  { label: "Media", href: "/gc-control-9x7k/media", icon: "Image" },
+  { label: "Settings", href: "/gc-control-9x7k/settings", icon: "Settings" },
 ] as const;

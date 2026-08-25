@@ -97,10 +97,12 @@ export class GroqProvider implements IAIProvider {
               }
             }
           }
+          console.warn(`[GroqProvider] Rate limit hit on key ${keyConfig.id.substring(0, 6)}... Retrying with fallback.`);
           await GroqKeyManager.markRateLimited(keyConfig.id, retryAfterMs);
           continue;
         } else if (e.status >= 500 || e.code === 'ECONNRESET' || e.code === 'ETIMEDOUT') {
           // Provider error or network timeout
+          console.warn(`[GroqProvider] Network/Provider error on key ${keyConfig.id.substring(0, 6)}... Retrying with fallback.`);
           await GroqKeyManager.markFailure(keyConfig.id);
           continue;
         }

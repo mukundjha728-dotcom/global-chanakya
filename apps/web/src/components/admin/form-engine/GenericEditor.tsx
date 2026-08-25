@@ -380,7 +380,7 @@ export default function GenericEditor({
       setTimeout(() => setSaveStatus("idle"), 3000);
 
       if (!entityId && data.id) {
-        router.push(`/admin/${schema.id}/${data.id}`);
+        router.push(`${schema.frontendBasePath || '/admin/' + schema.id}/${data.id}`);
       }
     } catch (err) {
       setSaveStatus("error");

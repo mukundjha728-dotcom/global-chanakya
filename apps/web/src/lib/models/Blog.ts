@@ -194,14 +194,14 @@ BlogSchema.pre("save", async function () {
 
 // Sanitize BEFORE validation
 BlogSchema.pre("validate", function () {
-  if (this.isModified("title") && this.title) this.title = sanitizeBlogContent(this.title, "text");
-  if (this.isModified("excerpt") && this.excerpt) this.excerpt = sanitizeBlogContent(this.excerpt, "text");
-  if (this.isModified("content") && this.content) this.content = sanitizeBlogContent(this.content, "html");
-  if (this.isModified("markdown") && this.markdown) this.markdown = sanitizeBlogContent(this.markdown, "markdown");
+  if (this.title) this.title = sanitizeBlogContent(this.title, "text");
+  if (this.excerpt) this.excerpt = sanitizeBlogContent(this.excerpt, "text");
+  if (this.content) this.content = sanitizeBlogContent(this.content, "html");
+  if (this.markdown) this.markdown = sanitizeBlogContent(this.markdown, "markdown");
   
   if (this.seo) {
-    if (this.isModified("seo.title") && this.seo.title) this.seo.title = sanitizeBlogContent(this.seo.title, "seo");
-    if (this.isModified("seo.description") && this.seo.description) this.seo.description = sanitizeBlogContent(this.seo.description, "seo");
+    if (this.seo.title) this.seo.title = sanitizeBlogContent(this.seo.title, "seo");
+    if (this.seo.description) this.seo.description = sanitizeBlogContent(this.seo.description, "seo");
   }
 });
 

@@ -118,7 +118,7 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
             <RefreshCw className="w-4 h-4" />
           </button>
           <Link
-            href={`/admin/${schema.id}/new`}
+            href={`${schema.frontendBasePath || '/admin/' + schema.id}/new`}
             className="flex items-center gap-2 px-4 py-2 bg-[var(--gold)] text-black font-bold text-sm uppercase tracking-wider rounded-lg hover:bg-yellow-400 transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -314,7 +314,7 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
                             </a>
                           )}
                           <Link
-                            href={`/admin/${schema.id}/${itemId}`}
+                            href={`${schema.frontendBasePath || '/admin/' + schema.id}/${itemId}`}
                             className="p-1.5 text-[var(--gold)] hover:bg-[var(--gold)]/10 bg-[var(--bg)] rounded-lg border border-[var(--gold)]/30 transition-colors"
                             title="Edit"
                           >

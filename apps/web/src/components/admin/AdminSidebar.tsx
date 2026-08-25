@@ -10,8 +10,8 @@ export const navItems = [
   { href: "/gc-control-9x7k", label: "Dashboard", icon: LayoutDashboard, group: "Overview" },
 
   // Content
-  { href: "/admin/blogs", label: "Intelligence Archive", icon: Newspaper, group: "Content" },
-  { href: "/admin/write", label: "Write Report", icon: PenTool, group: "Content" },
+  { href: "/gc-control-9x7k/blogs", label: "Intelligence Archive", icon: Newspaper, group: "Content" },
+  { href: "/gc-control-9x7k/write", label: "Write Report", icon: PenTool, group: "Content" },
 
   // Platform SEO
   { href: "/gc-control-9x7k/platform-seo", label: "All Platform SEO", icon: Globe, group: "Platform SEO" },
@@ -27,14 +27,14 @@ export const navItems = [
   { href: "/gc-control-9x7k/intelligence/trigger", label: "Manual Trigger", icon: Zap, group: "Intelligence" },
 
   // Media & Growth
-  { href: "/admin/media", label: "Media Library", icon: ImageIcon, group: "Assets" },
-  { href: "/admin/growth", label: "Growth", icon: TrendingUp, group: "Assets" },
+  { href: "/gc-control-9x7k/media", label: "Media Library", icon: ImageIcon, group: "Assets" },
+  { href: "/gc-control-9x7k/growth", label: "Growth", icon: TrendingUp, group: "Assets" },
 
   // Admin
-  { href: "/admin/users", label: "Operatives", icon: Users, group: "Admin" },
-  { href: "/admin/audit", label: "Audit Logs", icon: FileText, group: "Admin" },
-  { href: "/admin/health", label: "Health", icon: Activity, group: "Admin" },
-  { href: "/admin/settings", label: "Settings", icon: Settings, group: "Admin" },
+  { href: "/gc-control-9x7k/users", label: "Operatives", icon: Users, group: "Admin" },
+  { href: "/gc-control-9x7k/audit", label: "Audit Logs", icon: FileText, group: "Admin" },
+  { href: "/gc-control-9x7k/health", label: "Health", icon: Activity, group: "Admin" },
+  { href: "/gc-control-9x7k/settings", label: "Settings", icon: Settings, group: "Admin" },
 ];
 
 export default function AdminSidebar({ user }: { user: { name?: string; email?: string; image?: string } }) {

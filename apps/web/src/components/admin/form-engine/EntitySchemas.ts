@@ -30,6 +30,7 @@ export interface EntitySchema {
   id: string;
   name: string;
   apiPath: string; // e.g. "/api/admin/blogs"
+  frontendBasePath?: string; // Correct path for the admin UI e.g. "/gc-control-9x7k/blogs"
   tabs: FormTab[];
 }
 
@@ -122,6 +123,7 @@ export const SCHEMAS: Record<string, EntitySchema> = {
     id: "blogs",
     name: "Blog / Report",
     apiPath: "/api/admin/blogs",
+    frontendBasePath: "/gc-control-9x7k/blogs",
     tabs: [
       {
         id: "main",
@@ -160,6 +162,7 @@ export const SCHEMAS: Record<string, EntitySchema> = {
     id: "countries",
     name: "Country",
     apiPath: "/api/admin/intelligence/countries",
+    frontendBasePath: "/gc-control-9x7k/intelligence/countries",
     tabs: [
       {
         id: "main",
@@ -177,6 +180,7 @@ export const SCHEMAS: Record<string, EntitySchema> = {
     id: "leaders",
     name: "Leader",
     apiPath: "/api/admin/intelligence/leaders",
+    frontendBasePath: "/gc-control-9x7k/intelligence/leaders",
     tabs: [
       {
         id: "main",
@@ -195,6 +199,7 @@ export const SCHEMAS: Record<string, EntitySchema> = {
     id: "conflicts",
     name: "Conflict",
     apiPath: "/api/admin/intelligence/conflicts",
+    frontendBasePath: "/gc-control-9x7k/intelligence/conflicts",
     tabs: [
       {
         id: "main",

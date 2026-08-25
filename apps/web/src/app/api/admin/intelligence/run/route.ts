@@ -65,8 +65,7 @@ export async function POST() {
       console.log("[INTELLIGENCE_TRIGGER] INGESTION_STARTED");
       // Use strict Vercel Hobby execution budget (7s) to guarantee completion before timeout
       cycleStats = await liveIngestionService.pollAllProviders({
-        maxDurationMs: 7000,
-        maxCandidates: 2
+        maxDurationMs: 8000
       });
       
       console.log("[INTELLIGENCE_TRIGGER] INGESTION_COMPLETED");
@@ -113,6 +112,7 @@ export async function POST() {
         lastSuccessfulRun: lastError ? undefined : new Date().toISOString(),
         processed: cycleStats?.fetched || 0,
         published: cycleStats?.published || 0,
+        pending: cycleStats?.pending || 0,
         deduplicated: cycleStats?.duplicates || 0,
         failed: cycleStats?.failed || 0,
         duration: durationMs,

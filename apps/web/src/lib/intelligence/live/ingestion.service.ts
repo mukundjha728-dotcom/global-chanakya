@@ -11,7 +11,6 @@ import { Country } from "../../models/Country";
 import { Leader } from "../../models/Leader";
 import { Conflict } from "../../models/Conflict";
 
-// For standalone worker this can run much longer. For Vercel/edge keep at 50s max default.
 const DEFAULT_EXECUTION_BUDGET_MS = Number(process.env.INGESTION_BUDGET_MS) || 50000;
 
 export interface IngestionOptions {
@@ -28,50 +27,186 @@ export class LiveIngestionService {
 
   async pollAllProviders(options?: IngestionOptions) {
     console.log(`[LiveIngestionService] Starting live intelligence ingestion. Options:`, options);
-    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, published: 0, failed: 0, archived: 0, providersHealthy: 0, providersFailed: 0, status: 'completed', error: null as string | null };
+    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, published: 0, failed: 0, pending: 0, archived: 0, providersHealthy: 0, providersFailed: 0, status: 'completed', error: null as string | null };
     const startedAt = Date.now();
     const budgetMs = options?.maxDurationMs || DEFAULT_EXECUTION_BUDGET_MS;
 
     const dict = await this.loadEntityDictionary();
     stats.archived = await this.pruneStaleEvents();
 
-    // Process retry queue for stranded drafts
-    await this.processRetryQueue(startedAt, budgetMs, stats);
-
-    const fetchPromises: Promise<any>[] = [];
-    const executing = new Set<Promise<any>>();
-    
-    for (const p of this.providers) {
-      if (Date.now() - startedAt > budgetMs) {
-         stats.status = 'partial';
-         stats.error = "Execution budget reached before starting all providers";
-         break;
-      }
-      const prm = this.pollProviderSafe(p, dict, startedAt, budgetMs, options?.maxCandidates).then(r => {
-        executing.delete(prm);
-        return r;
-      });
-      fetchPromises.push(prm);
-      executing.add(prm);
-      if (executing.size >= 2) {
-        await Promise.race(executing);
-      }
-    }
-    
+    // 1. Fetch from all providers in parallel (fast network requests)
+    const fetchPromises = this.providers.map(p => this.fetchFromProvider(p, dict));
     const providerResults = await Promise.all(fetchPromises);
 
-    let hasNewInserts = false;
+    let newItemsToProcess: any[] = [];
     for (const r of providerResults) {
       stats.fetched += r.fetched;
       stats.normalized += r.normalized;
       stats.duplicates += r.duplicates;
-      stats.inserted += r.inserted;
-      stats.published += (r.published || 0);
-      stats.failed += r.failed;
       if (r.status === 'healthy') stats.providersHealthy++;
       if (r.status === 'failed') stats.providersFailed++;
-      if (r.status === 'partial') stats.status = 'partial';
-      if (r.inserted > 0) hasNewInserts = true;
+      newItemsToProcess = newItemsToProcess.concat(r.items);
+    }
+
+    // 2. Fetch retry items (limited to 2)
+    const retryEvents = await IntelligenceEvent.find({
+      status: "draft",
+      $or: [
+        { enrichmentStatus: "FAILED" },
+        { enrichmentStatus: "PENDING" },
+        { enrichmentStatus: "BUDGET_EXHAUSTED" },
+        { enrichmentStatus: null },
+        { enrichmentStatus: { $exists: false } }
+      ]
+    }).limit(2);
+
+    // 3. Combine into a single global queue
+    const processingQueue = [...retryEvents, ...newItemsToProcess];
+    if (options?.maxCandidates && processingQueue.length > options.maxCandidates) {
+      processingQueue.splice(options.maxCandidates);
+    }
+
+    let hasNewInserts = false;
+
+    // 4. Process sequentially enforcing a strict global budget
+    for (const item of processingQueue) {
+      const elapsedTotal = Date.now() - startedAt;
+      const remainingBudget = budgetMs - elapsedTotal;
+
+      // Budget exhaustion check BEFORE Groq
+      if (remainingBudget < 4000) {
+        console.warn(`[LiveIngestionService] Budget exhausted (${remainingBudget}ms left). Saving as PENDING.`);
+        if (!item._id) {
+          // New item, save it to DB as PENDING
+          try {
+            const embedding = await generateEmbeddings(item.content);
+            const eventDoc = new IntelligenceEvent({
+              ...item,
+              embedding,
+              embeddingModel: "Xenova/all-MiniLM-L6-v2",
+              embeddingDimensions: 384,
+              enrichmentStatus: "PENDING",
+              status: "draft"
+            });
+            await eventDoc.save();
+            stats.inserted++;
+          } catch (e) {
+             console.error("Failed to save pending item", e);
+          }
+        } else {
+          // Retry item, ensure status is PENDING so it can be retried without being classed as permanent failure
+          if (item.enrichmentStatus !== "PENDING") {
+            item.enrichmentStatus = "PENDING";
+            item.status = "draft";
+            await item.save();
+          }
+        }
+        stats.pending++;
+        stats.status = 'partial';
+        stats.error = "Execution budget reached";
+        continue;
+      }
+
+      // We have enough budget, proceed
+      if (!item._id) {
+        // --- NEW ITEM ---
+        try {
+          const embedding = await generateEmbeddings(item.content);
+          const semanticMatches = await findLiveSemanticMatches(embedding, 1, 0.95);
+          
+          if (semanticMatches.length > 0) {
+            const matchedId = semanticMatches[0].blogId;
+            const existingEvent = await IntelligenceEvent.findById(matchedId);
+            if (existingEvent) {
+              let hasChanges = false;
+              if (item.sourceUrls?.[0] && !existingEvent.sourceUrls.includes(item.sourceUrls[0])) {
+                existingEvent.sourceUrls.push(item.sourceUrls[0]);
+                hasChanges = true;
+              }
+              if (item.sourceNames?.[0] && !existingEvent.sourceNames.includes(item.sourceNames[0])) {
+                existingEvent.sourceNames.push(item.sourceNames[0]);
+                hasChanges = true;
+              }
+              if (existingEvent.status === "archived" && existingEvent.enrichmentStatus === "COMPLETED") {
+                existingEvent.status = "published";
+                hasChanges = true;
+              }
+              if (hasChanges) await existingEvent.save();
+              stats.duplicates++;
+              continue; // skip enrichment
+            }
+          }
+
+          // New event - Enrich
+          let enrichmentStatus = "PENDING";
+          const finalEnrichment = await this.enrichEvent(item, startedAt, budgetMs);
+          
+          if (finalEnrichment) {
+            enrichmentStatus = "COMPLETED";
+          } else {
+            // Check if failure was due to budget exhaustion in enrichEvent
+            if ((Date.now() - startedAt) > budgetMs - 1500) {
+              enrichmentStatus = "PENDING";
+            } else {
+              enrichmentStatus = "FAILED";
+            }
+          }
+
+          const eventDoc = new IntelligenceEvent({
+            ...item,
+            embedding,
+            embeddingModel: "Xenova/all-MiniLM-L6-v2",
+            embeddingDimensions: 384,
+            ...(finalEnrichment || {}),
+            enrichmentStatus,
+            status: enrichmentStatus === "COMPLETED" ? "published" : "draft"
+          });
+          await eventDoc.save();
+          stats.inserted++;
+          hasNewInserts = true;
+
+          if (enrichmentStatus === "COMPLETED") {
+             stats.published++;
+             console.log(`[LiveIngestionService] ✅ Published: "${item.title.substring(0, 60)}..."`);
+          } else if (enrichmentStatus === "PENDING") {
+             stats.pending++;
+             console.warn(`[LiveIngestionService] ⏸️ Pending: "${item.title.substring(0, 60)}..."`);
+          } else {
+             stats.failed++;
+             console.warn(`[LiveIngestionService] ⚠️ Failed: "${item.title.substring(0, 60)}..."`);
+          }
+
+        } catch (e: any) {
+           console.error("Failed to process new item", e);
+           stats.failed++;
+        }
+      } else {
+        // --- RETRY ITEM ---
+        try {
+          const finalEnrichment = await this.enrichEvent(item, startedAt, budgetMs);
+          if (finalEnrichment) {
+             Object.assign(item, finalEnrichment);
+             item.enrichmentStatus = "COMPLETED";
+             item.status = "published";
+             await item.save();
+             stats.published++;
+             console.log(`[LiveIngestionService] ✅ Retry Published: "${item.slug}"`);
+          } else {
+             if ((Date.now() - startedAt) > budgetMs - 1500) {
+                item.enrichmentStatus = "PENDING";
+                stats.pending++;
+             } else {
+                item.enrichmentStatus = "FAILED";
+                stats.failed++;
+             }
+             item.status = "draft";
+             await item.save();
+          }
+        } catch (e: any) {
+           console.error("Failed to process retry item", e);
+           stats.failed++;
+        }
+      }
     }
 
     if (hasNewInserts) {
@@ -88,8 +223,8 @@ export class LiveIngestionService {
     return stats;
   }
 
-  private async pollProviderSafe(provider: RSSProvider, dict: EntityDictionary, startedAt: number, budgetMs: number, maxCandidates?: number) {
-    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, published: 0, failed: 0, status: 'healthy', error: null as string | null };
+  private async fetchFromProvider(provider: RSSProvider, dict: EntityDictionary) {
+    const stats = { fetched: 0, normalized: 0, duplicates: 0, items: [] as any[], status: 'healthy' };
     const circuitBreakerKey = `circuit_breaker:rss:${provider.name.replace(/\s+/g, '_')}`;
     const failures = await redis.get<number>(circuitBreakerKey) || 0;
     
@@ -100,33 +235,15 @@ export class LiveIngestionService {
     }
 
     try {
-      console.log(`[LiveIngestionService] Polling ${provider.name}...`);
-      
       const rawEvents = await Promise.race([
         provider.fetchLatestEvents(),
-        new Promise<any[]>((_, reject) => setTimeout(() => reject(new Error("RSS Fetch Timeout")), 15000))
+        new Promise<any[]>((_, reject) => setTimeout(() => reject(new Error("RSS Fetch Timeout")), 4000))
       ]);
       
       stats.fetched += rawEvents.length;
       if (failures > 0) await redis.set(circuitBreakerKey, 0, "EX", 86400);
 
-      console.log(`[LiveIngestionService] ${provider.name}: ${rawEvents.length} items received from feed.`);
-
-      const itemsToEmbed: any[] = [];
-      let candidateCount = 0;
-
       for (const item of rawEvents) {
-        if (Date.now() - startedAt > budgetMs) {
-          console.warn(`[LiveIngestionService] Execution budget exceeded. Stopping ingestion for ${provider.name}.`);
-          stats.status = 'partial';
-          stats.error = "Execution budget reached";
-          break;
-        }
-        if (maxCandidates && candidateCount >= maxCandidates) {
-          console.log(`[LiveIngestionService] Max candidates (${maxCandidates}) reached for ${provider.name}.`);
-          break;
-        }
-
         try {
           const normalized = EventNormalizer.normalize(item, dict);
           stats.normalized++;
@@ -137,162 +254,20 @@ export class LiveIngestionService {
             continue;
           }
 
-          itemsToEmbed.push(normalized);
-          candidateCount++;
+          stats.items.push(normalized);
         } catch (err: any) {
-          console.warn(`[LiveIngestionService] Normalization failed for ${provider.name}:`, err.message);
-          stats.failed++;
+           // Skip bad items
         }
       }
-
-      console.log(`[LiveIngestionService] ${provider.name}: ${itemsToEmbed.length} new items to process after exact dedup.`);
-
-      for (let i = 0; i < itemsToEmbed.length; i += 2) { // smaller batch size
-        if (Date.now() - startedAt > budgetMs) {
-           stats.status = 'partial';
-           stats.error = "Execution budget reached";
-           break;
-        }
-
-        const batch = itemsToEmbed.slice(i, i + 2);
-        for (const normalized of batch) {
-          if (Date.now() - startedAt > budgetMs) {
-             stats.status = 'partial';
-             stats.error = "Execution budget reached";
-             break;
-          }
-          try {
-            // 1. Generate embedding for vector dedup
-            const embedding = await generateEmbeddings(normalized.content);
-            const semanticMatches = await findLiveSemanticMatches(embedding, 1, 0.95);
-            
-            if (semanticMatches.length > 0) {
-              // PHASE 6.9: UPDATE EXISTING INSTEAD OF DUPLICATING
-              const matchedId = semanticMatches[0].blogId;
-              const existingEvent = await IntelligenceEvent.findById(matchedId);
-              
-              if (existingEvent) {
-                let hasChanges = false;
-                
-                if (normalized.sourceUrls?.[0] && !existingEvent.sourceUrls.includes(normalized.sourceUrls[0])) {
-                  existingEvent.sourceUrls.push(normalized.sourceUrls[0]);
-                  hasChanges = true;
-                }
-                
-                if (normalized.sourceNames?.[0] && !existingEvent.sourceNames.includes(normalized.sourceNames[0])) {
-                  existingEvent.sourceNames.push(normalized.sourceNames[0]);
-                  hasChanges = true;
-                }
-                
-                // Reactivate if archived and properly enriched
-                if (existingEvent.status === "archived" && existingEvent.enrichmentStatus === "COMPLETED") {
-                  existingEvent.status = "published";
-                  hasChanges = true;
-                }
-                
-                if (hasChanges) {
-                  await existingEvent.save(); // bumps updatedAt
-                }
-                
-                stats.duplicates++;
-                continue;
-              }
-            }
-            
-            // 2. Genuinely new event — enrich
-            let finalEnrichment: any = null;
-            let enrichmentStatus = "PENDING";
-            
-            finalEnrichment = await this.enrichEvent(normalized, startedAt, budgetMs);
-            if (finalEnrichment) {
-               enrichmentStatus = "COMPLETED";
-            } else {
-               enrichmentStatus = "FAILED";
-            }
-
-            const eventDoc = new IntelligenceEvent({
-              ...normalized,
-              embedding,
-              embeddingModel: "Xenova/all-MiniLM-L6-v2",
-              embeddingDimensions: 384,
-              ...(finalEnrichment || {}),
-              enrichmentStatus,
-              status: enrichmentStatus === "COMPLETED" ? "published" : "draft"
-            });
-
-            stats.inserted++;
-            if (enrichmentStatus === "COMPLETED") {
-              stats.published++;
-              console.log(`[LiveIngestionService] ✅ Published: "${normalized.title.substring(0, 60)}..."`);
-            } else {
-              stats.failed++; // Count enrichment failure as a failure metric
-              console.warn(`[LiveIngestionService] ⚠️ Enrichment failed. Saved as draft: "${normalized.title.substring(0, 60)}..."`);
-            }
-
-            await eventDoc.save();
-          } catch (err: any) {
-            console.warn(`[LiveIngestionService] Insert/Embed failed for item from ${provider.name}:`, err.message);
-            stats.failed++;
-          }
-        }
-      }
-
     } catch (err: any) {
       console.error(`[LiveIngestionService] Provider ${provider.name} failed entirely:`, err.message);
       stats.status = 'failed';
       await redis.set(circuitBreakerKey, failures + 1, "EX", 86400);
     }
-
     return stats;
   }
 
-  private async processRetryQueue(startedAt: number, budgetMs: number, stats: any) {
-    try {
-      // PHASE 7.0 FIX: catch null/undefined enrichmentStatus AND FAILED status
-      const failedEvents = await IntelligenceEvent.find({ 
-        status: "draft",
-        $or: [
-          { enrichmentStatus: "FAILED" },
-          { enrichmentStatus: null },
-          { enrichmentStatus: { $exists: false } }
-        ]
-      }).limit(2); // Limit to 2 per cycle to avoid overwhelming the budget
-      
-      if (failedEvents.length > 0) {
-        console.log(`[LiveIngestionService] Retrying ${failedEvents.length} stranded draft events...`);
-      }
-      
-      for (const event of failedEvents) {
-        if (Date.now() - startedAt > budgetMs) {
-           stats.status = 'partial';
-           stats.error = "Execution budget reached during retry queue";
-           break;
-        }
-
-        const finalEnrichment = await this.enrichEvent(event, startedAt, budgetMs);
-        if (finalEnrichment) {
-           Object.assign(event, finalEnrichment);
-           event.enrichmentStatus = "COMPLETED";
-           event.status = "published";
-           await event.save();
-           stats.inserted++;
-           stats.published++; // Also increment published on successful retry
-           console.log(`[LiveIngestionService] Retry success: "${event.slug}"`);
-        } else {
-           // Mark as explicitly FAILED so we can track them properly
-           if (!event.enrichmentStatus) {
-             event.enrichmentStatus = "FAILED";
-             await event.save();
-           }
-        }
-      }
-    } catch (e: any) {
-      console.warn("[LiveIngestionService] Failed to process retry queue:", e.message);
-    }
-  }
-
   private async enrichEvent(normalized: any, startedAt: number, budgetMs: number): Promise<any> {
-    const TOTAL_TIMEOUT_BUDGET = 15000; // max time allowed for a single event enrichment
     const maxRetries = 1;
     let attempt = 0;
     let enrichmentData = null;
@@ -324,7 +299,7 @@ Extract the structured intelligence fields from the source data above.
       }
 
       try {
-        const remainingBudget = Math.max(3000, Math.min(TOTAL_TIMEOUT_BUDGET, budgetMs - elapsedTotal - 500));
+        const remainingBudget = Math.max(2000, budgetMs - elapsedTotal - 500);
         
         // Pass AbortSignal to Groq so it cancels the network request cleanly
         const controller = new AbortController();
@@ -359,7 +334,12 @@ Extract the structured intelligence fields from the source data above.
              delayMs = err.retryAfterMs;
            }
            const jitter = delayMs * 0.1 * (Math.random() * 2 - 1);
-           await new Promise(res => setTimeout(res, Math.max(delayMs + jitter, 100)));
+           const elapsed = Date.now() - startedAt;
+           if (budgetMs - elapsed > delayMs + 3000) {
+               await new Promise(res => setTimeout(res, Math.max(delayMs + jitter, 100)));
+           } else {
+               break; // No time to retry
+           }
         }
       }
     }
@@ -387,12 +367,10 @@ Extract the structured intelligence fields from the source data above.
   private async pruneStaleEvents(): Promise<number> {
     try {
       const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-      // Phase 6.9: dual condition — both publishedAt AND updatedAt must be stale
-      // Phase 7.0 FIX: Only archive COMPLETED events. Never archive PENDING (awaiting enrichment).
       const result = await IntelligenceEvent.updateMany(
         { 
           status: "published",
-          enrichmentStatus: "COMPLETED",   // ← CRITICAL: never archive pending/failed
+          enrichmentStatus: "COMPLETED",
           publishedAt: { $lt: sevenDaysAgo },
           updatedAt: { $lt: sevenDaysAgo }
         },
@@ -433,6 +411,7 @@ Extract the structured intelligence fields from the source data above.
       inserted: stats.inserted,
       published: stats.published,
       failed: stats.failed,
+      pending: stats.pending,
       archived: stats.archived,
       durationMs: Math.round(durationMs)
     };

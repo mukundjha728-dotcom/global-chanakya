@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: validation.error.issues[0].message, details: validation.error.format() }, { status: 400 });
     }
 
-    const { title, slug, excerpt, content, category, countrySlug, tags, visibility, status,
+    const { title, slug, excerpt, content, category, tags, visibility, status,
       isTrending, commentsEnabled, seo, featuredImage, contentType } = validation.data;
 
     // Get author ObjectId
@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
       // If it's a draft with same slug, just update it instead of creating duplicate
       if (existing.status === "draft") {
         const updateData: Record<string, unknown> = {
-          title, excerpt, content, category, countrySlug: countrySlug || "",
+          title, excerpt, content, category,
           tags: tags ?? [],
           visibility: visibility ?? "public",
           status: status ?? "published",
@@ -104,7 +104,6 @@ export async function POST(req: NextRequest) {
       excerpt,
       content,
       category,
-      countrySlug: countrySlug || "",
       tags: tags ?? [],
       visibility: visibility ?? "public",
       status: status ?? "draft",
@@ -145,7 +144,7 @@ export async function PATCH(req: NextRequest) {
 
     // Allowlist updatable fields (everything from the editor)
     const ALLOWED = [
-      "title", "slug", "excerpt", "content", "category", "countrySlug", "tags",
+      "title", "slug", "excerpt", "content", "category", "tags",
       "visibility", "status", "isTrending", "commentsEnabled",
       "featuredImage", "ogImage", "seo", "aiSummary", "reportType",
       "publishAt", "unpublishAt", "isBreaking", "breakingUntil",
