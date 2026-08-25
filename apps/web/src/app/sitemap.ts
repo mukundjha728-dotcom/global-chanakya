@@ -12,7 +12,7 @@ const BLOGS_PER_SITEMAP = 1000;
 export async function generateSitemaps() {
   try {
     await dbConnect();
-    const count = await Blog.countDocuments({ status: 'published' });
+    const count = await Blog.countDocuments({ status: 'published', contentType: { $ne: 'platform-seo' } });
     const blogSitemaps = Math.ceil(count / BLOGS_PER_SITEMAP);
     
     const chunks = [
@@ -72,7 +72,7 @@ export default async function sitemap({
     const skip = chunkIndex * BLOGS_PER_SITEMAP;
     
     try {
-      const blogs = await Blog.find({ status: 'published' })
+      const blogs = await Blog.find({ status: 'published', contentType: { $ne: 'platform-seo' } })
         .select('slug updatedAt publishAt')
         .sort({ publishAt: -1 })
         .skip(skip)

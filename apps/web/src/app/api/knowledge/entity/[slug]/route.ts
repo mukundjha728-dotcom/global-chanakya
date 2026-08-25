@@ -22,7 +22,8 @@ export async function GET(
         { slug },
         { tags: { $regex: new RegExp(slug.replace(/-/g, '.*'), 'i') } }
       ],
-      status: "published"
+      status: "published",
+      contentType: { $ne: "platform-seo" }
     })
     .select("title slug aiSummary keyInsights tags publishAt")
     .sort({ publishAt: -1 })

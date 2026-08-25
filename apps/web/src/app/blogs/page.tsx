@@ -46,7 +46,10 @@ import { unstable_cache } from "next/cache";
 const getCachedBlogs = unstable_cache(
   async (category?: string, trending?: boolean) => {
     await dbConnect();
-    const query: Record<string, unknown> = { status: "published" };
+    const query: Record<string, unknown> = {
+      status: "published",
+      contentType: { $ne: "platform-seo" },
+    };
     if (category) query.category = category;
     if (trending) query.isTrending = true;
 

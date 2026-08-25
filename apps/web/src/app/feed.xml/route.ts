@@ -8,7 +8,7 @@ export async function GET() {
     await dbConnect();
 
     // Fetch the 50 most recent published blogs for a richer feed
-    const blogs = await Blog.find({ status: "published" })
+    const blogs = await Blog.find({ status: "published", contentType: { $ne: "platform-seo" } })
       .sort({ publishAt: -1 })
       .limit(50)
       .populate("author", "name email")
