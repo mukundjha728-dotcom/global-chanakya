@@ -11,6 +11,8 @@ const WORKER_STATUS_KEY = "intelligence:worker:status";
 const LOCK_TTL_SECONDS = 300; // 5 minutes max for manual run lock
 const WORKER_ID = `admin-manual-${Date.now()}`;
 
+export const maxDuration = 300; // Prevent Vercel from timing out this API route prematurely
+
 export async function POST() {
   try {
     const session = await auth();
@@ -56,6 +58,17 @@ export async function POST() {
       try {
         await dbConnect();
         cycleStats = await liveIngestionService.pollAllProviders();
+        
+        if (cycleStats && cycleStats.published > 0) {
+          try {
+            const { revalidateTag, revalidatePath } = require("next/cache");
+            revalidateTag("intelligence");
+            revalidatePath("/intelligence"); // Assuming public path
+            revalidatePath("/gc-control-9x7k/intelligence");
+          } catch (e) {
+            console.warn("[IntelligenceAdminAPI] Revalidation failed:", e);
+          }
+        }
       } catch (err: any) {
         console.error("[IntelligenceAdminAPI] Execution failed:", err);
         lastError = err.message || "Unknown Error";
@@ -79,7 +92,8 @@ export async function POST() {
           ...(cycleStats ? {
             eventsDiscovered: cycleStats.fetched,
             eventsDeduplicated: cycleStats.duplicates,
-            eventsPublished: cycleStats.inserted,
+            eventsPublished: cycleStats.published,
+            eventsInserted: cycleStats.inserted,
             eventsArchived: cycleStats.archived,
             eventsFailed: cycleStats.failed,
             providersHealthy: cycleStats.providersHealthy,

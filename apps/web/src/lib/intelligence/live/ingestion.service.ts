@@ -23,7 +23,7 @@ export class LiveIngestionService {
 
   async pollAllProviders() {
     console.log("[LiveIngestionService] Starting live intelligence ingestion...");
-    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, failed: 0, archived: 0, providersHealthy: 0, providersFailed: 0 };
+    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, published: 0, failed: 0, archived: 0, providersHealthy: 0, providersFailed: 0 };
     const tStart = performance.now();
 
     const dict = await this.loadEntityDictionary();
@@ -55,6 +55,7 @@ export class LiveIngestionService {
       stats.normalized += r.normalized;
       stats.duplicates += r.duplicates;
       stats.inserted += r.inserted;
+      stats.published += (r.published || 0);
       stats.failed += r.failed;
       if (r.status === 'healthy') stats.providersHealthy++;
       if (r.status === 'failed') stats.providersFailed++;
@@ -72,7 +73,7 @@ export class LiveIngestionService {
   }
 
   private async pollProviderSafe(provider: RSSProvider, dict: EntityDictionary, tStart: number) {
-    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, failed: 0, status: 'healthy' };
+    const stats = { fetched: 0, normalized: 0, duplicates: 0, inserted: 0, published: 0, failed: 0, status: 'healthy' };
     const circuitBreakerKey = `circuit_breaker:rss:${provider.name.replace(/\s+/g, '_')}`;
     const failures = await redis.get<number>(circuitBreakerKey) || 0;
     
@@ -187,10 +188,17 @@ export class LiveIngestionService {
             });
 
             stats.inserted++;
+            if (enrichmentStatus === "COMPLETED") {
+              stats.published++;
+              console.log(`[LiveIngestionService] ✅ Published: "${normalized.title.substring(0, 60)}..."`);
+            } else {
+              stats.failed++; // Count enrichment failure as a failure metric
+              console.warn(`[LiveIngestionService] ⚠️ Enrichment failed. Saved as draft: "${normalized.title.substring(0, 60)}..."`);
+            }
+
             await eventDoc.save();
-            console.log(`[LiveIngestionService] ✅ Published: "${normalized.title.substring(0, 60)}..."`);
           } catch (err: any) {
-            console.warn(`[LiveIngestionService] Insert failed for item from ${provider.name}:`, err.message);
+            console.warn(`[LiveIngestionService] Insert/Embed failed for item from ${provider.name}:`, err.message);
             stats.failed++;
           }
         }
@@ -231,6 +239,7 @@ export class LiveIngestionService {
            event.status = "published";
            await event.save();
            stats.inserted++;
+           stats.published++; // Also increment published on successful retry
            console.log(`[LiveIngestionService] Retry success: "${event.slug}"`);
         } else {
            // Mark as explicitly FAILED so we can track them properly
@@ -377,6 +386,7 @@ Extract the structured intelligence fields from the source data above.
       normalized: stats.normalized,
       duplicates: stats.duplicates,
       inserted: stats.inserted,
+      published: stats.published,
       failed: stats.failed,
       archived: stats.archived,
       durationMs: Math.round(durationMs)

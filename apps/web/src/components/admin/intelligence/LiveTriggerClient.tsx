@@ -199,7 +199,11 @@ export default function LiveTriggerClient() {
             <p className="text-xs text-white/50 font-medium mb-1">Deduplicated</p>
             <p className="text-2xl font-bold text-white/80">{statusData?.eventsDeduplicated ?? 0}</p>
           </div>
-          <div className="bg-white/5 rounded-xl p-4">
+          <div className="bg-[var(--danger)]/5 rounded-xl p-4 border border-[var(--danger)]/20">
+            <p className="text-xs text-[var(--danger)]/70 font-medium mb-1">Failed (Draft)</p>
+            <p className="text-2xl font-bold text-[var(--danger)]">{statusData?.eventsFailed ?? 0}</p>
+          </div>
+          <div className="bg-white/5 rounded-xl p-4 col-span-2 md:col-span-1">
             <p className="text-xs text-white/50 font-medium mb-1">Duration</p>
             <p className="text-2xl font-bold text-white/80">
               {statusData?.lastCycleDurationMs 
