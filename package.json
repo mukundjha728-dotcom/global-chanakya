@@ -5,7 +5,8 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "worker:intelligence": "pnpm --filter web worker:intelligence"
   },
   "devDependencies": {
     "prettier": "^3.0.0",

@@ -7,8 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "worker:intelligence": "tsx workers/intelligence-worker.ts",
-    "worker:intelligence:test": "INTELLIGENCE_POLL_INTERVAL_MS=10000 tsx workers/intelligence-worker.ts"
+    "worker:intelligence": "npx tsx workers/intelligence-worker.ts",
+    "worker:intelligence:test": "INTELLIGENCE_POLL_INTERVAL_MS=10000 npx tsx workers/intelligence-worker.ts"
   },
   "dependencies": {
     "@auth/mongodb-adapter": "^3.11.2",
@@ -62,6 +62,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.15",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5"
   }
 }
