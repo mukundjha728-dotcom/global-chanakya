@@ -24,6 +24,7 @@ export const navItems = [
   { href: "/gc-control-9x7k/intelligence/conflicts", label: "Conflicts", icon: Database, group: "Intelligence" },
   { href: "/gc-control-9x7k/intelligence/entity-resolution", label: "Entity Resolution", icon: Database, group: "Intelligence" },
   { href: "/gc-control-9x7k/intelligence/config", label: "System Config", icon: Database, group: "Intelligence" },
+  { href: "/gc-control-9x7k/intelligence/trigger", label: "Manual Trigger", icon: Zap, group: "Intelligence" },
 
   // Media & Growth
   { href: "/admin/media", label: "Media Library", icon: ImageIcon, group: "Assets" },
