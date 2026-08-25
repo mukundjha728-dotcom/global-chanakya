@@ -34,6 +34,7 @@ export function startLiveIntelligenceDaemon() {
       // 2. Redis Distributed Lock check
       // Try to acquire lock. NX means set only if it doesn't exist. EX sets expiry in seconds.
       // We set expiration to slightly less than interval to guarantee release, but safely cover the cycle.
+      const lockExpirySeconds = Math.max(Math.floor(POLL_INTERVAL_MS / 1000) - 10, 60); 
       const acquired = await redis.setNX(WORKER_LOCK_KEY, `worker-${Date.now()}`, lockExpirySeconds);
       
       if (!acquired) {

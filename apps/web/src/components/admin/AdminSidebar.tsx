@@ -26,14 +26,14 @@ export const navItems = [
   { href: "/gc-control-9x7k/intelligence/config", label: "System Config", icon: Database, group: "Intelligence" },
   { href: "/gc-control-9x7k/intelligence/trigger", label: "Manual Trigger", icon: Zap, group: "Intelligence" },
 
-  // Media & Growth
-  { href: "/gc-control-9x7k/media", label: "Media Library", icon: ImageIcon, group: "Assets" },
-  { href: "/gc-control-9x7k/growth", label: "Growth", icon: TrendingUp, group: "Assets" },
+  // Media & Growth (Temporarily disabled due to 404s)
+  // { href: "/gc-control-9x7k/media", label: "Media Library", icon: ImageIcon, group: "Assets" },
+  // { href: "/gc-control-9x7k/growth", label: "Growth", icon: TrendingUp, group: "Assets" },
 
   // Admin
   { href: "/gc-control-9x7k/users", label: "Operatives", icon: Users, group: "Admin" },
-  { href: "/gc-control-9x7k/audit", label: "Audit Logs", icon: FileText, group: "Admin" },
-  { href: "/gc-control-9x7k/health", label: "Health", icon: Activity, group: "Admin" },
+  // { href: "/gc-control-9x7k/audit", label: "Audit Logs", icon: FileText, group: "Admin" },
+  // { href: "/gc-control-9x7k/health", label: "Health", icon: Activity, group: "Admin" },
   { href: "/gc-control-9x7k/settings", label: "Settings", icon: Settings, group: "Admin" },
 ];
 

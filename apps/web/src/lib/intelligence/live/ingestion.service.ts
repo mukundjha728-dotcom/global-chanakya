@@ -79,7 +79,9 @@ export class LiveIngestionService {
         if (!item._id) {
           // New item, save it to DB as PENDING
           try {
+            console.log(`[INTELLIGENCE_DIAGNOSTIC] EMBEDDING_STARTED candidate=${item.slug}`);
             const embedding = await generateEmbeddings(item.content);
+            console.log(`[INTELLIGENCE_DIAGNOSTIC] EMBEDDING_SUCCESS candidate=${item.slug}`);
             const eventDoc = new IntelligenceEvent({
               ...item,
               embedding,
@@ -111,7 +113,9 @@ export class LiveIngestionService {
       if (!item._id) {
         // --- NEW ITEM ---
         try {
+          console.log(`[INTELLIGENCE_DIAGNOSTIC] EMBEDDING_STARTED candidate=${item.slug}`);
           const embedding = await generateEmbeddings(item.content);
+          console.log(`[INTELLIGENCE_DIAGNOSTIC] EMBEDDING_SUCCESS candidate=${item.slug}`);
           const semanticMatches = await findLiveSemanticMatches(embedding, 1, 0.95);
           
           if (semanticMatches.length > 0) {
@@ -162,11 +166,13 @@ export class LiveIngestionService {
             status: enrichmentStatus === "COMPLETED" ? "published" : "draft"
           });
           await eventDoc.save();
+          console.log(`[INTELLIGENCE_DIAGNOSTIC] EVENT_SAVED candidate=${item.slug}`);
           stats.inserted++;
           hasNewInserts = true;
 
           if (enrichmentStatus === "COMPLETED") {
              stats.published++;
+             console.log(`[INTELLIGENCE_DIAGNOSTIC] EVENT_PUBLISHED candidate=${item.slug}`);
              console.log(`[LiveIngestionService] ✅ Published: "${item.title.substring(0, 60)}..."`);
           } else if (enrichmentStatus === "PENDING") {
              stats.pending++;
@@ -301,6 +307,7 @@ Extract the structured intelligence fields from the source data above.
       try {
         const remainingBudget = Math.max(2000, budgetMs - elapsedTotal - 500);
         
+        console.log(`[INTELLIGENCE_DIAGNOSTIC] GROQ_STARTED candidate=${normalized.slug} attempt=${attempt}`);
         // Pass AbortSignal to Groq so it cancels the network request cleanly
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), remainingBudget);
@@ -323,6 +330,7 @@ Extract the structured intelligence fields from the source data above.
            throw new Error("AI Validation Error: " + validationResult.error.message);
         }
         
+        console.log(`[INTELLIGENCE_DIAGNOSTIC] GROQ_SUCCESS candidate=${normalized.slug} attempt=${attempt}`);
         enrichmentData = validationResult.data;
         break;
       } catch (err: any) {

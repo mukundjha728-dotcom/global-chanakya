@@ -2,8 +2,8 @@ import { pipeline, env } from "@huggingface/transformers";
 
 // Optional: Optimize for serverless by disabling local caching if not on Vercel
 // On Vercel, node_modules is cached but /tmp is temporary. By default Transformers.js downloads to ./models or node_modules
-// We will let it use its default caching which works on most environments including Vercel
 env.allowLocalModels = false; 
+env.cacheDir = "/tmp/transformers-cache";
 
 /**
  * Singleton factory for the embedding pipeline to prevent reloading the model on every call
