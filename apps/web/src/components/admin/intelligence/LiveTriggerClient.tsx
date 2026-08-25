@@ -49,7 +49,14 @@ export default function LiveTriggerClient() {
     
     try {
       // 4. Wait for the actual API result
-      const res = await fetch("/api/admin/intelligence/run", { method: "POST" });
+      const res = await fetch("/api/admin/intelligence/run", { 
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({})
+      });
       const data = await res.json();
       
       if (!res.ok || !data.success) {
@@ -190,6 +197,7 @@ export default function LiveTriggerClient() {
           </p>
           
           <button
+            type="button"
             onClick={handleRunIntelligence}
             disabled={triggering || isRunning}
             className={`flex items-center gap-2 px-8 py-4 rounded-xl font-bold uppercase tracking-wider text-sm transition-all shadow-xl ${
