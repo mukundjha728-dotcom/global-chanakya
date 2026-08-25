@@ -76,30 +76,36 @@ describe("Admin Intelligence Run Trigger", () => {
     const data = await response.json();
     
     expect(data.success).toBe(false);
-    expect(data.status).toBe("already_running");
+    expect(data.status).toBe("ALREADY_RUNNING");
     expect(mockPollAllProviders).not.toHaveBeenCalled();
   });
 
   it("acquires shared lock and executes pipeline", async () => {
-    mockAuth.mockResolvedValue({ user: { role: "admin" } });
-    // Simulate successful lock acquisition
-    mockRedisSetNx.mockResolvedValue("OK");
-    
-    mockPollAllProviders.mockResolvedValue({
-      fetched: 12,
-      duplicates: 10,
-      inserted: 2,
-      archived: 0,
-      failed: 0,
-      providersHealthy: 5,
-      providersFailed: 0
+    // 1. Mock auth success
+    mockAuth.mockResolvedValue({
+      user: { id: "123", email: "admin@globalchanakya.in", role: "admin" },
+      expires: "2099-01-01T00:00:00.000Z"
     });
-    
-    const response: any = await POST();
-    const data = await response.json();
-    
+
+    // 3. Mock Redis lock acquisition success
+    mockRedisSetNx.mockResolvedValue(true);
+
+    // 4. Mock pipeline stats return
+    mockPollAllProviders.mockResolvedValue({
+      fetched: 10,
+      duplicates: 5,
+      inserted: 5,
+      published: 3,
+      failed: 2
+    });
+
+
+
+    const res = await POST();
+    const data = await res.json();
+
     expect(data.success).toBe(true);
-    expect(data.status).toBe("started");
+    expect(data.status).toBe("SUCCESS");
     
     // Verify lock was requested with the correct key
     expect(mockRedisSetNx).toHaveBeenCalledWith("intelligence:worker:lock", expect.any(String), 300);

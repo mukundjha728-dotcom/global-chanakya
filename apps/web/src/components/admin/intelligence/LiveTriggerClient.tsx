@@ -44,30 +44,37 @@ export default function LiveTriggerClient() {
     setTriggering(true);
     setError(null);
     
+    // 1. Immediately change UI to RUNNING
+    setStatusData((prev: any) => ({ ...prev, status: "RUNNING" }));
+    
     try {
+      // 4. Wait for the actual API result
       const res = await fetch("/api/admin/intelligence/run", { method: "POST" });
       const data = await res.json();
       
       if (!res.ok || !data.success) {
-        if (data.status === "already_running") {
+        if (data.status === "ALREADY_RUNNING") {
           setError("An intelligence cycle is already running.");
-          fetchStatus(); // Immediately refresh to show RUNNING state
         } else {
           setError(data.error || "Failed to trigger intelligence cycle");
         }
+        // Update stats if provided in error response
+        if (data.stats) setStatusData(data.stats);
+        else fetchStatus(); 
       } else {
-        // Optimistic UI update to RUNNING
-        setStatusData((prev: any) => ({ ...prev, status: "RUNNING" }));
-        setTimeout(fetchStatus, 1000);
+        // Success: 7. Show accurate final statistics
+        setStatusData(data.stats);
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred");
+      fetchStatus();
     } finally {
+      // 6. Re-enable the button
       setTriggering(false);
     }
   };
 
-  const isRunning = statusData?.status === "RUNNING";
+  const isRunning = statusData?.status === "RUNNING" || triggering;
 
   return (
     <div className="max-w-4xl mx-auto py-12 px-6">
@@ -102,15 +109,26 @@ export default function LiveTriggerClient() {
         </div>
       )}
 
+      {/* Zero State Fallback Banner */}
+      {!error && statusData?.status === "SUCCESS" && statusData?.published === 0 && (
+        <div className="mb-8 p-4 bg-white/10 border border-white/20 rounded-xl flex items-start gap-3">
+          <CheckCircle2 className="w-5 h-5 text-white/50 shrink-0 mt-0.5" />
+          <div className="text-white">
+            <p className="font-bold">Completed</p>
+            <p className="text-sm opacity-90">No new eligible intelligence was available.</p>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         {/* Status Card */}
         <div className="bg-[var(--surface)]/60 border border-[var(--border)] rounded-2xl p-6 relative overflow-hidden flex flex-col">
           <div className="absolute top-0 right-0 p-6 pointer-events-none">
             {isRunning ? (
               <RefreshCw className="w-24 h-24 text-[var(--gold)]/5 animate-spin-slow" />
-            ) : statusData?.status === "WAITING" || statusData?.status === "IDLE" ? (
+            ) : statusData?.status === "SUCCESS" || statusData?.status === "WAITING" ? (
               <CheckCircle2 className="w-24 h-24 text-green-500/5" />
-            ) : statusData?.status === "ERROR" ? (
+            ) : statusData?.status === "FAILED" || statusData?.status === "ERROR" ? (
               <XCircle className="w-24 h-24 text-[var(--danger)]/5" />
             ) : (
               <Clock className="w-24 h-24 text-white/5" />
@@ -122,11 +140,12 @@ export default function LiveTriggerClient() {
           <div className="flex items-center gap-3 mb-8">
             <div className={`w-3 h-3 rounded-full shadow-[0_0_12px_currentColor] ${
               isRunning ? "bg-[var(--gold)] animate-pulse" : 
-              statusData?.status === "ERROR" ? "bg-[var(--danger)]" : 
+              (statusData?.status === "FAILED" || statusData?.status === "ERROR") ? "bg-[var(--danger)]" : 
+              statusData?.status === "IDLE" ? "bg-white/20" :
               "bg-green-500"
             }`} />
             <span className="text-2xl font-bold tracking-tight text-white capitalize">
-              {statusData?.status || "Unknown"}
+              {isRunning ? "Running" : (statusData?.status || "Unknown")}
             </span>
           </div>
 
@@ -134,14 +153,14 @@ export default function LiveTriggerClient() {
             <div className="flex justify-between items-center pb-4 border-b border-white/5">
               <span className="text-sm text-white/50">Last Run</span>
               <span className="text-sm font-medium text-white/90">
-                {statusData?.lastPollAt ? new Date(statusData.lastPollAt).toLocaleString() : "Never"}
+                {statusData?.lastRun ? new Date(statusData.lastRun).toLocaleString() : "Never"}
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-white/50">Last Successful Run</span>
               <span className="text-sm font-medium text-white/90">
-                {statusData?.lastSuccessAt 
-                  ? `${formatDistanceToNow(new Date(statusData.lastSuccessAt))} ago` 
+                {statusData?.lastSuccessfulRun 
+                  ? `${formatDistanceToNow(new Date(statusData.lastSuccessfulRun))} ago` 
                   : "Never"}
               </span>
             </div>
@@ -189,34 +208,34 @@ export default function LiveTriggerClient() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white/5 rounded-xl p-4">
             <p className="text-xs text-white/50 font-medium mb-1">Processed</p>
-            <p className="text-2xl font-bold text-white">{statusData?.eventsDiscovered ?? 0}</p>
+            <p className="text-2xl font-bold text-white">{statusData?.processed ?? 0}</p>
           </div>
           <div className="bg-white/5 rounded-xl p-4">
             <p className="text-xs text-white/50 font-medium mb-1">Generated / Published</p>
-            <p className="text-2xl font-bold text-[var(--gold)]">{statusData?.eventsPublished ?? 0}</p>
+            <p className="text-2xl font-bold text-[var(--gold)]">{statusData?.published ?? 0}</p>
           </div>
           <div className="bg-white/5 rounded-xl p-4">
             <p className="text-xs text-white/50 font-medium mb-1">Deduplicated</p>
-            <p className="text-2xl font-bold text-white/80">{statusData?.eventsDeduplicated ?? 0}</p>
+            <p className="text-2xl font-bold text-white/80">{statusData?.deduplicated ?? 0}</p>
           </div>
           <div className="bg-[var(--danger)]/5 rounded-xl p-4 border border-[var(--danger)]/20">
             <p className="text-xs text-[var(--danger)]/70 font-medium mb-1">Failed (Draft)</p>
-            <p className="text-2xl font-bold text-[var(--danger)]">{statusData?.eventsFailed ?? 0}</p>
+            <p className="text-2xl font-bold text-[var(--danger)]">{statusData?.failed ?? 0}</p>
           </div>
           <div className="bg-white/5 rounded-xl p-4 col-span-2 md:col-span-1">
             <p className="text-xs text-white/50 font-medium mb-1">Duration</p>
             <p className="text-2xl font-bold text-white/80">
-              {statusData?.lastCycleDurationMs 
-                ? `${(statusData.lastCycleDurationMs / 1000).toFixed(1)}s` 
+              {statusData?.duration 
+                ? `${(statusData.duration / 1000).toFixed(1)}s` 
                 : "-"}
             </p>
           </div>
         </div>
 
-        {statusData?.lastError && (
+        {statusData?.error && (
           <div className="mt-6 p-4 bg-[var(--danger)]/10 border-l-2 border-[var(--danger)] rounded-r-xl">
             <p className="text-xs font-bold text-[var(--danger)] uppercase mb-1">Last Pipeline Error</p>
-            <p className="text-sm text-[var(--danger)]/90">{statusData.lastError}</p>
+            <p className="text-sm text-[var(--danger)]/90">{statusData.error}</p>
           </div>
         )}
       </div>
