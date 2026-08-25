@@ -29,6 +29,18 @@ async function handleRefresh(request: Request) {
     // Safely mark ingestion as completed (releases lock and updates timestamp)
     await markIngestionComplete().catch(err => console.error("[InternalRefreshAPI] Error releasing lock:", err));
 
+    try {
+      const { revalidateTag, revalidatePath } = require("next/cache");
+      revalidateTag("intelligence");
+      revalidateTag("homepage-live-events");
+      revalidatePath("/");
+      revalidatePath("/live");
+      revalidatePath("/intelligence");
+      revalidatePath("/gc-control-9x7k/intelligence");
+    } catch (e) {
+      console.warn("[InternalRefreshAPI] Revalidation failed:", e);
+    }
+
     return NextResponse.json({
       success: true,
       stats,

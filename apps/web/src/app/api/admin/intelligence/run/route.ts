@@ -62,7 +62,10 @@ export async function POST() {
         try {
           const { revalidateTag, revalidatePath } = require("next/cache");
           revalidateTag("intelligence");
-          revalidatePath("/intelligence"); // Assuming public path
+          revalidateTag("homepage-live-events");
+          revalidatePath("/");
+          revalidatePath("/live");
+          revalidatePath("/intelligence");
           revalidatePath("/gc-control-9x7k/intelligence");
         } catch (e) {
           console.warn("[IntelligenceAdminAPI] Revalidation failed:", e);
