@@ -42,6 +42,11 @@ export default function Footer() {
               <li><Link href="/breaking" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Breaking Intel</Link></li>
               <li><Link href="/blogs" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">All Reports</Link></li>
             </ul>
+            <div className="mt-4">
+              <a href="https://www.launchory.app/startups/global-chanakya?ref=badge" target="_blank" rel="noopener noreferrer">
+                <img src="https://www.launchory.app/api/badge/global-chanakya?theme=dark" alt="Featured on Launchory" width="240" height="54" />
+              </a>
+            </div>
           </div>
 
           {/* Column 3: Trust & Ethics */}
