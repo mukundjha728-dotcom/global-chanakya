@@ -16,6 +16,8 @@
     "@repo/config": "workspace:*",
     "@repo/constants": "workspace:*",
     "@repo/hooks": "workspace:*",
+    "web-push": "^4.0.0",
+    "@types/web-push": "^4.0.0",
     "@repo/security": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/ui": "workspace:*",
