@@ -36,7 +36,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
       <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--border)]/50 bg-[var(--surface)]/80 backdrop-blur-xl sticky top-0 z-40">
         <div className="flex items-center gap-4">
           <button 
-            onClick={() => router.push("/gc-control-9x7k/blogs")} 
+            onClick={() => router.push("/admin/blogs")} 
             className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all border border-[var(--border)]"
           >
             <ChevronLeft className="w-4 h-4" />
