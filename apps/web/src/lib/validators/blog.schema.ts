@@ -40,6 +40,20 @@ export const createBlogSchema = z.object({
   aiSummary: z.string().max(500, "AI Summary max 500 chars").optional(),
   citations: z.array(z.any()).optional(), // Flexible — validated on display
   contentType: z.enum(["standard", "platform-seo"]).optional().default("standard"),
+
+  // Scheduling & flags
+  publishAt: z.string().or(z.date()).optional(),
+  unpublishAt: z.string().or(z.date()).optional().or(z.literal("")),
+  isBreaking: z.boolean().optional().default(false),
+  breakingUntil: z.string().or(z.date()).optional().or(z.literal("")),
+  isFeatured: z.boolean().optional().default(false),
+  featuredUntil: z.string().or(z.date()).optional().or(z.literal("")),
+
+  // Entity relations (ObjectId strings)
+  countries: z.array(z.string()).optional(),
+  leaders: z.array(z.string()).optional(),
+  conflicts: z.array(z.string()).optional(),
+  organizations: z.array(z.string()).optional(),
 });
 
 // ─── Update Blog Schema ──────────────────────────────────────────────────────

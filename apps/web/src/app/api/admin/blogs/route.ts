@@ -59,7 +59,10 @@ export async function POST(req: NextRequest) {
     }
 
     const { title, slug, excerpt, content, category, tags, visibility, status,
-      isTrending, commentsEnabled, seo, featuredImage, contentType } = validation.data;
+      isTrending, commentsEnabled, seo, featuredImage, contentType,
+      ogImage, aiSummary, reportType, citations,
+      publishAt, unpublishAt, isBreaking, breakingUntil, isFeatured, featuredUntil,
+      countries, leaders, conflicts, organizations } = validation.data;
 
     // Get author ObjectId
     let authorObjectId: mongoose.Types.ObjectId;
@@ -79,12 +82,28 @@ export async function POST(req: NextRequest) {
           isTrending: isTrending ?? false,
           commentsEnabled: commentsEnabled ?? true,
           featuredImage: featuredImage ?? "",
+          ogImage: ogImage ?? "",
+          aiSummary: aiSummary ?? "",
+          reportType: reportType ?? "",
+          citations: citations ?? [],
+          isBreaking: isBreaking ?? false,
+          breakingUntil: breakingUntil || undefined,
+          isFeatured: isFeatured ?? false,
+          featuredUntil: featuredUntil || undefined,
+          unpublishAt: unpublishAt || undefined,
+          countries: countries ?? [],
+          leaders: leaders ?? [],
+          conflicts: conflicts ?? [],
+          organizations: organizations ?? [],
           seo: {
+            focusKeyword: seo?.focusKeyword || "",
             title: seo?.title || title,
             description: seo?.description || excerpt,
             keywords: seo?.keywords ?? [],
+            canonicalUrl: seo?.canonicalUrl || "",
+            robots: seo?.robots || "index,follow",
           },
-          publishAt: new Date(),
+          publishAt: publishAt ? new Date(publishAt as string) : new Date(),
         };
         const updated = await BlogService.updateBlog(existing._id.toString(), updateData);
         if (updated?.status === "published") {
@@ -111,13 +130,29 @@ export async function POST(req: NextRequest) {
       commentsEnabled: commentsEnabled ?? true,
       featuredImage: featuredImage ?? "",
       contentType: contentType ?? "standard",
+      ogImage: ogImage ?? "",
+      aiSummary: aiSummary ?? "",
+      reportType: reportType ?? "",
+      citations: citations ?? [],
+      isBreaking: isBreaking ?? false,
+      breakingUntil: breakingUntil ? new Date(breakingUntil as string) : undefined,
+      isFeatured: isFeatured ?? false,
+      featuredUntil: featuredUntil ? new Date(featuredUntil as string) : undefined,
+      unpublishAt: unpublishAt ? new Date(unpublishAt as string) : undefined,
+      countries: (countries ?? []).map((id: string) => new mongoose.Types.ObjectId(id)),
+      leaders: (leaders ?? []).map((id: string) => new mongoose.Types.ObjectId(id)),
+      conflicts: (conflicts ?? []).map((id: string) => new mongoose.Types.ObjectId(id)),
+      organizations: (organizations ?? []).map((id: string) => new mongoose.Types.ObjectId(id)),
       seo: {
+        focusKeyword: seo?.focusKeyword || "",
         title: seo?.title || title,
         description: seo?.description || excerpt,
         keywords: seo?.keywords ?? [],
+        canonicalUrl: seo?.canonicalUrl || "",
+        robots: seo?.robots || "index,follow",
       },
       author: authorObjectId,
-      publishAt: new Date(),
+      publishAt: publishAt ? new Date(publishAt as string) : new Date(),
       analytics: { views: 0, likes: 0, bookmarks: 0, readTime: 0, ctr: 0 },
     });
 
@@ -150,6 +185,7 @@ export async function PATCH(req: NextRequest) {
       "publishAt", "unpublishAt", "isBreaking", "breakingUntil",
       "isFeatured", "featuredUntil", "citations", "contentType",
       "entityRelations", "draftSnapshot", "previousVersions",
+      "countries", "leaders", "conflicts", "organizations",
     ];
 
     const updateData: Record<string, unknown> = {};

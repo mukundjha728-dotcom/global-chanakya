@@ -1,61 +1,154 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+// ─── Constants ────────────────────────────────────────────────────────────────
 const CATEGORIES = [
   "Geopolitics", "Defence", "Economy", "Diplomacy",
   "Indo-Pacific", "South Asia", "Europe", "Middle East",
   "China", "Russia", "USA", "Energy", "Technology", "Analysis",
 ];
 
+const REPORT_TYPES = ["Analysis", "Briefing", "Op-Ed", "Intelligence", "Report"];
+
+const VISIBILITY_OPTIONS = [
+  { value: "public", label: "🌐 Public" },
+  { value: "premium", label: "⭐ Premium (subscribers only)" },
+  { value: "private", label: "🔒 Private (admin only)" },
+];
+
+const STATUS_OPTIONS = [
+  { value: "draft", label: "📝 Draft" },
+  { value: "published", label: "✅ Published" },
+  { value: "archived", label: "📦 Archived" },
+  { value: "scheduled", label: "📅 Scheduled" },
+];
+
+const ROBOTS_OPTIONS = [
+  { value: "index,follow", label: "index, follow (default)" },
+  { value: "noindex,follow", label: "noindex, follow" },
+  { value: "index,nofollow", label: "index, nofollow" },
+  { value: "noindex,nofollow", label: "noindex, nofollow" },
+];
+
+// ─── Form Data Interface ──────────────────────────────────────────────────────
 interface FormData {
+  // Core
   title: string;
   slug: string;
   excerpt: string;
   content: string;
-  category: string;
-  tags: string;
-  visibility: "public" | "premium" | "private";
-  status: "draft" | "published" | "scheduled";
-  isTrending: boolean;
-  commentsEnabled: boolean;
+  featuredImage: string;
+  // SEO
+  focusKeyword: string;
   seoTitle: string;
   seoDescription: string;
   seoKeywords: string;
-  featuredImage: string;
+  canonicalUrl: string;
+  robots: string;
+  ogImage: string;
+  aiSummary: string;
+  // Settings
+  category: string;
+  reportType: string;
+  visibility: "public" | "premium" | "private";
+  status: "draft" | "published" | "archived" | "scheduled";
+  tags: string;
+  isTrending: boolean;
+  commentsEnabled: boolean;
+  isBreaking: boolean;
+  breakingUntil: string;
+  isFeatured: boolean;
+  featuredUntil: string;
+  publishAt: string;
+  unpublishAt: string;
+  // Linked entities (stored as comma-separated IDs in the form, arrays in payload)
+  countries: string;
+  leaders: string;
+  conflicts: string;
+  organizations: string;
+  // References (one per line)
+  references: string;
 }
 
+// ─── Entity cache for linked entity selectors ─────────────────────────────────
+interface EntityOption {
+  _id: string;
+  name: string;
+}
+
+// ─── Helper: format datetime-local value ──────────────────────────────────────
+function toDatetimeLocal(val: string | Date | undefined | null): string {
+  if (!val) return "";
+  const d = new Date(val);
+  if (isNaN(d.getTime())) return "";
+  const offset = d.getTimezoneOffset();
+  const local = new Date(d.getTime() - offset * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════════
 export default function WriteArticleClient({ authorId }: { authorId: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const editId = searchParams.get("edit");
 
+  // ─── State ────────────────────────────────────────────────────────────────
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [publishStep, setPublishStep] = useState(0); // 0=idle,1=saving,2=indexing,3=done
   const [activeTab, setActiveTab] = useState<"content" | "seo" | "settings">("content");
   const [editorMode, setEditorMode] = useState<"code" | "preview">("code");
+  const slugManuallyEdited = useRef(false);
+
+  // Entity caches
+  const [entityCountries, setEntityCountries] = useState<EntityOption[]>([]);
+  const [entityLeaders, setEntityLeaders] = useState<EntityOption[]>([]);
+  const [entityConflicts, setEntityConflicts] = useState<EntityOption[]>([]);
+  const [entityOrgs, setEntityOrgs] = useState<EntityOption[]>([]);
+
   const [form, setForm] = useState<FormData>({
     title: "",
     slug: "",
     excerpt: "",
     content: "",
-    category: "Geopolitics",
-    tags: "",
-    visibility: "public",
-    status: "draft",
-    isTrending: false,
-    commentsEnabled: true,
+    featuredImage: "",
+    // SEO
+    focusKeyword: "",
     seoTitle: "",
     seoDescription: "",
     seoKeywords: "",
-    featuredImage: "",
+    canonicalUrl: "",
+    robots: "index,follow",
+    ogImage: "",
+    aiSummary: "",
+    // Settings
+    category: "Geopolitics",
+    reportType: "",
+    visibility: "public",
+    status: "draft",
+    tags: "",
+    isTrending: false,
+    commentsEnabled: true,
+    isBreaking: false,
+    breakingUntil: "",
+    isFeatured: false,
+    featuredUntil: "",
+    publishAt: "",
+    unpublishAt: "",
+    countries: "",
+    leaders: "",
+    conflicts: "",
+    organizations: "",
+    references: "",
   });
 
-  // Auto-generate slug from title
+  // ─── Auto-slug from title ─────────────────────────────────────────────────
   useEffect(() => {
-    if (!editId) {
+    if (!slugManuallyEdited.current) {
       const slug = form.title
         .toLowerCase()
         .replace(/[^a-z0-9\s-]/g, "")
@@ -64,37 +157,76 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
         .trim();
       setForm((prev) => ({ ...prev, slug }));
     }
-  }, [form.title, editId]);
+  }, [form.title]);
 
-  // Load blog for editing
+  // ─── Fetch entity lists for selectors ─────────────────────────────────────
+  useEffect(() => {
+    async function fetchEntities() {
+      try {
+        const [countriesRes, leadersRes, conflictsRes] = await Promise.allSettled([
+          fetch("/api/admin/intelligence/countries").then(r => r.ok ? r.json() : []),
+          fetch("/api/admin/intelligence/leaders").then(r => r.ok ? r.json() : []),
+          fetch("/api/admin/intelligence/conflicts").then(r => r.ok ? r.json() : []),
+        ]);
+        if (countriesRes.status === "fulfilled") setEntityCountries(countriesRes.value);
+        if (leadersRes.status === "fulfilled") setEntityLeaders(leadersRes.value);
+        if (conflictsRes.status === "fulfilled") setEntityConflicts(conflictsRes.value);
+      } catch { /* silent — entities are optional */ }
+    }
+    fetchEntities();
+  }, []);
+
+  // ─── Load existing article for editing ────────────────────────────────────
   useEffect(() => {
     if (editId) {
       fetch(`/api/admin/blogs?id=${editId}`)
         .then((r) => r.json())
         .then((blog) => {
           if (blog) {
+            slugManuallyEdited.current = true; // Don't overwrite loaded slug
             setForm({
               title: blog.title ?? "",
               slug: blog.slug ?? "",
               excerpt: blog.excerpt ?? "",
               content: blog.content ?? "",
-              category: blog.category ?? "Geopolitics",
-              tags: (blog.tags ?? []).join(", "),
-              visibility: blog.visibility ?? "public",
-              status: blog.status ?? "draft",
-              isTrending: blog.isTrending ?? false,
-              commentsEnabled: blog.commentsEnabled ?? true,
+              featuredImage: blog.featuredImage ?? "",
+              // SEO
+              focusKeyword: blog.seo?.focusKeyword ?? "",
               seoTitle: blog.seo?.title ?? "",
               seoDescription: blog.seo?.description ?? "",
               seoKeywords: (blog.seo?.keywords ?? []).join(", "),
-              featuredImage: blog.featuredImage ?? "",
+              canonicalUrl: blog.seo?.canonicalUrl ?? "",
+              robots: blog.seo?.robots ?? "index,follow",
+              ogImage: blog.ogImage ?? "",
+              aiSummary: blog.aiSummary ?? "",
+              // Settings
+              category: blog.category ?? "Geopolitics",
+              reportType: blog.reportType ?? "",
+              visibility: blog.visibility ?? "public",
+              status: blog.status ?? "draft",
+              tags: (blog.tags ?? []).join(", "),
+              isTrending: blog.isTrending ?? false,
+              commentsEnabled: blog.commentsEnabled ?? true,
+              isBreaking: blog.isBreaking ?? false,
+              breakingUntil: toDatetimeLocal(blog.breakingUntil),
+              isFeatured: blog.isFeatured ?? false,
+              featuredUntil: toDatetimeLocal(blog.featuredUntil),
+              publishAt: toDatetimeLocal(blog.publishAt),
+              unpublishAt: toDatetimeLocal(blog.unpublishAt),
+              // Entity relations — stored as ObjectId strings
+              countries: (blog.countries ?? []).map((e: any) => typeof e === "object" ? e._id || e : e).join(", "),
+              leaders: (blog.leaders ?? []).map((e: any) => typeof e === "object" ? e._id || e : e).join(", "),
+              conflicts: (blog.conflicts ?? []).map((e: any) => typeof e === "object" ? e._id || e : e).join(", "),
+              organizations: (blog.organizations ?? []).map((e: any) => typeof e === "object" ? e._id || e : e).join(", "),
+              // References from citations
+              references: (blog.citations ?? []).map((c: any) => c.url || c.source || "").filter(Boolean).join("\n"),
             });
           }
         });
     }
   }, [editId]);
 
-  // Keyboard Shortcuts
+  // ─── Keyboard Shortcuts ───────────────────────────────────────────────────
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Ctrl+S or Cmd+S -> Save Draft
@@ -112,10 +244,60 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  // ─── Field update helper ──────────────────────────────────────────────────
   function update(field: keyof FormData, value: string | boolean) {
+    if (field === "slug") slugManuallyEdited.current = true;
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  // ─── Build API payload ────────────────────────────────────────────────────
+  function buildPayload(publishNow: boolean) {
+    const refsArray = form.references
+      .split("\n")
+      .map(r => r.trim())
+      .filter(Boolean)
+      .map(url => ({ type: "Primary" as const, source: url, url }));
+
+    return {
+      id: editId ?? undefined,
+      authorId,
+      title: form.title,
+      slug: form.slug,
+      excerpt: form.excerpt,
+      content: form.content,
+      category: form.category,
+      featuredImage: form.featuredImage || "",
+      ogImage: form.ogImage || "",
+      aiSummary: form.aiSummary || "",
+      reportType: form.reportType || undefined,
+      tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+      visibility: form.visibility,
+      status: publishNow ? "published" : form.status,
+      isTrending: form.isTrending,
+      commentsEnabled: form.commentsEnabled,
+      isBreaking: form.isBreaking,
+      breakingUntil: form.breakingUntil || undefined,
+      isFeatured: form.isFeatured,
+      featuredUntil: form.featuredUntil || undefined,
+      publishAt: form.publishAt || undefined,
+      unpublishAt: form.unpublishAt || undefined,
+      countries: form.countries.split(",").map(s => s.trim()).filter(Boolean),
+      leaders: form.leaders.split(",").map(s => s.trim()).filter(Boolean),
+      conflicts: form.conflicts.split(",").map(s => s.trim()).filter(Boolean),
+      organizations: form.organizations.split(",").map(s => s.trim()).filter(Boolean),
+      citations: refsArray,
+      seo: {
+        focusKeyword: form.focusKeyword || "",
+        title: form.seoTitle || form.title,
+        description: form.seoDescription || form.excerpt,
+        keywords: form.seoKeywords.split(",").map((k) => k.trim()).filter(Boolean),
+        canonicalUrl: form.canonicalUrl || "",
+        robots: form.robots || "index,follow",
+      },
+    };
+  }
+
+  // ─── Save / Publish ───────────────────────────────────────────────────────
   async function handleSave(publishNow?: boolean) {
     if (!form.title || !form.content || !form.excerpt) {
       alert("Title, excerpt aur content required hai!");
@@ -134,18 +316,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
     const hardTimeout = setTimeout(() => controller.abort(), 45000);
 
     try {
-      const payload = {
-        ...form,
-        id: editId ?? undefined,
-        authorId,
-        tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
-        seo: {
-          title: form.seoTitle || form.title,
-          description: form.seoDescription || form.excerpt,
-          keywords: form.seoKeywords.split(",").map((k) => k.trim()).filter(Boolean),
-        },
-        status: publishNow ? "published" : form.status,
-      };
+      const payload = buildPayload(!!publishNow);
 
       // Move to step 2 after 1.5s (visual feedback)
       let stepTimer: ReturnType<typeof setTimeout> | null = null;
@@ -204,12 +375,22 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
     }
   }
 
+  // ─── Style constants (preserved from historical editor) ───────────────────
   const inputClass = "w-full px-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 focus:bg-white/8 transition-all";
   const labelClass = "block text-xs text-gray-400 font-medium mb-1.5 uppercase tracking-wider";
+  const selectBgClass = "bg-[#0d0d17]";
 
+  // ─── Word count helpers ───────────────────────────────────────────────────
+  const plainText = form.content.replace(/<[^>]*>/g, " ");
+  const wordCount = plainText.split(/\s+/).filter(Boolean).length;
+  const readTime = Math.max(1, Math.ceil(wordCount / 200));
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // RENDER
+  // ═══════════════════════════════════════════════════════════════════════════
   return (
     <div className="flex flex-col h-full relative">
-      {/* Publishing Progress Overlay */}
+      {/* ═══════ Publishing Progress Overlay ═══════ */}
       {publishing && (
         <div className="absolute inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-[#0d0d17] border border-white/10 rounded-3xl p-10 max-w-sm w-full mx-6 text-center shadow-2xl">
@@ -255,7 +436,8 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
           </div>
         </div>
       )}
-      {/* Top Bar */}
+
+      {/* ═══════ Top Bar ═══════ */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#0d0d17] sticky top-0 z-10">
         <div className="flex items-center gap-3">
           <button
@@ -294,9 +476,9 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Main Editor */}
+        {/* ═══════ Main Editor ═══════ */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Tabs */}
+          {/* ─── Tabs ─── */}
           <div className="flex gap-1 mb-6 bg-white/5 rounded-lg p-1 w-fit">
             {(["content", "seo", "settings"] as const).map((tab) => (
               <button
@@ -308,14 +490,17 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                     : "text-gray-400 hover:text-white"
                 }`}
               >
-                {tab === "content" ? "📝 Content" : tab === "seo" ? "🔍 SEO" : "⚙️ Settings"}
+                {tab === "content" ? "📝 Analysis Content" : tab === "seo" ? "🔍 Search & Metadata" : "⚙️ Report Settings"}
               </button>
             ))}
           </div>
 
-          {/* Content Tab */}
+          {/* ═══════════════════════════════════════════════════════════════════
+              TAB 1 — ANALYSIS CONTENT
+              ═══════════════════════════════════════════════════════════════════ */}
           {activeTab === "content" && (
             <div className="space-y-5">
+              {/* Title */}
               <div>
                 <label className={labelClass}>Article Title *</label>
                 <input
@@ -327,6 +512,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 />
               </div>
 
+              {/* Slug */}
               <div>
                 <label className={labelClass}>URL Slug</label>
                 <div className="flex items-center gap-2">
@@ -340,6 +526,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 </div>
               </div>
 
+              {/* Excerpt */}
               <div>
                 <label className={labelClass}>Excerpt (Short Summary) *</label>
                 <textarea
@@ -352,6 +539,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 <p className="text-gray-600 text-xs mt-1">{form.excerpt.length}/300 characters</p>
               </div>
 
+              {/* Featured Image */}
               <div>
                 <label className={labelClass}>Featured Image URL</label>
                 <input
@@ -367,6 +555,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 )}
               </div>
 
+              {/* Article Content — HTML/CSS/JS Editor */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className={labelClass}>Article Content *</label>
@@ -419,7 +608,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                     />
                     <div className="flex items-center gap-4 mt-1">
                       <p className="text-gray-600 text-xs">
-                        {form.content.length.toLocaleString()} chars · ~{Math.max(1, Math.ceil(form.content.replace(/<[^>]*>/g," ").split(/\s+/).length / 200))} min read
+                        {form.content.length.toLocaleString()} chars · ~{readTime} min read
                       </p>
                       <p className="text-gray-700 text-xs">Tab = 2 spaces · HTML + CSS + JS all supported</p>
                     </div>
@@ -444,7 +633,9 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
             </div>
           )}
 
-          {/* SEO Tab */}
+          {/* ═══════════════════════════════════════════════════════════════════
+              TAB 2 — SEARCH & METADATA
+              ═══════════════════════════════════════════════════════════════════ */}
           {activeTab === "seo" && (
             <div className="space-y-5">
               <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
@@ -456,8 +647,21 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 </ul>
               </div>
 
+              {/* Focus Keyword */}
               <div>
-                <label className={labelClass}>SEO Title</label>
+                <label className={labelClass}>Focus Keyword</label>
+                <input
+                  type="text"
+                  placeholder="Primary keyword for this article"
+                  value={form.focusKeyword}
+                  onChange={(e) => update("focusKeyword", e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+
+              {/* Meta Title */}
+              <div>
+                <label className={labelClass}>Meta Title</label>
                 <input
                   type="text"
                   placeholder="Title jo Google mein dikhega (blank = article title)"
@@ -465,10 +669,12 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                   onChange={(e) => update("seoTitle", e.target.value)}
                   className={inputClass}
                 />
-                <div className="mt-1 flex justify-between">
-                  <p className="text-gray-600 text-xs">{(form.seoTitle || form.title).length}/60</p>
+                <div className="mt-1 flex justify-between items-center">
+                  <p className={`text-xs ${(form.seoTitle || form.title).length > 60 ? "text-red-400" : "text-gray-600"}`}>
+                    {(form.seoTitle || form.title).length} / 60
+                  </p>
                   <div
-                    className={`h-1 rounded-full flex-1 ml-3 mt-1 ${
+                    className={`h-1 rounded-full flex-1 ml-3 ${
                       (form.seoTitle || form.title).length <= 60
                         ? "bg-green-500"
                         : "bg-red-500"
@@ -478,6 +684,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 </div>
               </div>
 
+              {/* Meta Description */}
               <div>
                 <label className={labelClass}>Meta Description</label>
                 <textarea
@@ -487,9 +694,12 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                   onChange={(e) => update("seoDescription", e.target.value)}
                   className={inputClass}
                 />
-                <p className="text-gray-600 text-xs mt-1">{form.seoDescription.length}/160</p>
+                <p className={`text-xs mt-1 ${form.seoDescription.length > 160 ? "text-red-400" : "text-gray-600"}`}>
+                  {form.seoDescription.length} / 160
+                </p>
               </div>
 
+              {/* SEO Keywords */}
               <div>
                 <label className={labelClass}>SEO Keywords (comma separated)</label>
                 <input
@@ -501,6 +711,61 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 />
               </div>
 
+              {/* Canonical URL */}
+              <div>
+                <label className={labelClass}>Canonical URL</label>
+                <input
+                  type="text"
+                  placeholder="https://www.globalchanakya.in/blogs/your-article-slug"
+                  value={form.canonicalUrl}
+                  onChange={(e) => update("canonicalUrl", e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+
+              {/* Robots Directive */}
+              <div>
+                <label className={labelClass}>Robots Directive</label>
+                <select
+                  value={form.robots}
+                  onChange={(e) => update("robots", e.target.value)}
+                  className={inputClass}
+                >
+                  {ROBOTS_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value} className={selectBgClass}>{opt.label}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* OG Image URL */}
+              <div>
+                <label className={labelClass}>OG Image URL</label>
+                <input
+                  type="text"
+                  placeholder="Social sharing image URL (defaults to featured image)"
+                  value={form.ogImage}
+                  onChange={(e) => update("ogImage", e.target.value)}
+                  className={inputClass}
+                />
+                {form.ogImage && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={form.ogImage} alt="OG preview" className="mt-2 rounded-lg h-24 object-cover border border-white/10" />
+                )}
+              </div>
+
+              {/* AI Summary */}
+              <div>
+                <label className={labelClass}>AI Summary</label>
+                <textarea
+                  rows={3}
+                  placeholder="AI-generated summary of the article (max 500 chars)"
+                  value={form.aiSummary}
+                  onChange={(e) => update("aiSummary", e.target.value)}
+                  className={inputClass}
+                />
+                <p className="text-gray-600 text-xs mt-1">{form.aiSummary.length}/500</p>
+              </div>
+
               {/* Google Preview */}
               <div>
                 <label className={labelClass}>Google Preview</label>
@@ -509,7 +774,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                     {form.seoTitle || form.title || "Article Title"}
                   </p>
                   <p className="text-green-700 text-xs mt-0.5">
-                    global-chanakya-web.vercel.app/blogs/{form.slug || "article-slug"}
+                    globalchanakya.in/blogs/{form.slug || "article-slug"}
                   </p>
                   <p className="text-gray-600 text-xs mt-1 line-clamp-2">
                     {form.seoDescription || form.excerpt || "Article description…"}
@@ -519,9 +784,12 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
             </div>
           )}
 
-          {/* Settings Tab */}
+          {/* ═══════════════════════════════════════════════════════════════════
+              TAB 3 — REPORT SETTINGS
+              ═══════════════════════════════════════════════════════════════════ */}
           {activeTab === "settings" && (
             <div className="space-y-5">
+              {/* Category & Report Type */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Category *</label>
@@ -531,25 +799,56 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                     className={inputClass}
                   >
                     {CATEGORIES.map((c) => (
-                      <option key={c} value={c} className="bg-[#0d0d17]">{c}</option>
+                      <option key={c} value={c} className={selectBgClass}>{c}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className={labelClass}>Visibility</label>
+                  <label className={labelClass}>Report Type</label>
                   <select
-                    value={form.visibility}
-                    onChange={(e) => update("visibility", e.target.value as "public" | "premium" | "private")}
+                    value={form.reportType}
+                    onChange={(e) => update("reportType", e.target.value)}
                     className={inputClass}
                   >
-                    <option value="public" className="bg-[#0d0d17]">🌐 Public (sab dekh sakte)</option>
-                    <option value="premium" className="bg-[#0d0d17]">⭐ Premium (subscribers only)</option>
-                    <option value="private" className="bg-[#0d0d17]">🔒 Private (sirf admin)</option>
+                    <option value="" className={selectBgClass}>— Select —</option>
+                    {REPORT_TYPES.map((rt) => (
+                      <option key={rt} value={rt} className={selectBgClass}>{rt}</option>
+                    ))}
                   </select>
                 </div>
               </div>
 
+              {/* Visibility & Status */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Visibility</label>
+                  <select
+                    value={form.visibility}
+                    onChange={(e) => update("visibility", e.target.value as FormData["visibility"])}
+                    className={inputClass}
+                  >
+                    {VISIBILITY_OPTIONS.map((v) => (
+                      <option key={v.value} value={v.value} className={selectBgClass}>{v.label}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className={labelClass}>Status</label>
+                  <select
+                    value={form.status}
+                    onChange={(e) => update("status", e.target.value as FormData["status"])}
+                    className={inputClass}
+                  >
+                    {STATUS_OPTIONS.map((s) => (
+                      <option key={s.value} value={s.value} className={selectBgClass}>{s.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Tags */}
               <div>
                 <label className={labelClass}>Tags (comma separated)</label>
                 <input
@@ -570,22 +869,66 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 )}
               </div>
 
+              {/* Country Assignment */}
+              <div>
+                <label className={labelClass}>Country Assignment</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (!e.target.value) return;
+                    const current = form.countries.split(",").map(s => s.trim()).filter(Boolean);
+                    if (!current.includes(e.target.value)) {
+                      update("countries", [...current, e.target.value].join(", "));
+                    }
+                  }}
+                  className={inputClass}
+                >
+                  <option value="" className={selectBgClass}>— Add Country —</option>
+                  {entityCountries.map((c) => (
+                    <option key={c._id} value={c._id} className={selectBgClass}>{c.name}</option>
+                  ))}
+                </select>
+                {form.countries && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {form.countries.split(",").map(s => s.trim()).filter(Boolean).map((id) => {
+                      const name = entityCountries.find(c => c._id === id)?.name || id;
+                      return (
+                        <span key={id} className="px-2 py-0.5 bg-blue-500/10 text-blue-300 text-xs rounded-full border border-blue-500/20 flex items-center gap-1">
+                          {name}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = form.countries.split(",").map(s => s.trim()).filter(s => s !== id).join(", ");
+                              update("countries", updated);
+                            }}
+                            className="text-blue-400 hover:text-white"
+                          >×</button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Toggle Options */}
               <div className="space-y-3">
                 <label className={labelClass}>Article Options</label>
                 {[
-                  { key: "isTrending", label: "🔥 Trending Article (homepage pe feature hoga)" },
-                  { key: "commentsEnabled", label: "💬 Comments Enable Karein" },
+                  { key: "isTrending" as keyof FormData, label: "🔥 Trending Article (homepage pe feature hoga)" },
+                  { key: "commentsEnabled" as keyof FormData, label: "💬 Comments Enable Karein" },
+                  { key: "isBreaking" as keyof FormData, label: "🚨 Breaking News" },
+                  { key: "isFeatured" as keyof FormData, label: "⭐ Featured Article" },
                 ].map(({ key, label }) => (
                   <label key={key} className="flex items-center gap-3 cursor-pointer group">
                     <div
-                      onClick={() => update(key as keyof FormData, !form[key as keyof FormData])}
+                      onClick={() => update(key, !form[key])}
                       className={`w-10 h-5 rounded-full transition-all relative ${
-                        form[key as keyof FormData] ? "bg-amber-500" : "bg-white/10"
+                        form[key] ? "bg-amber-500" : "bg-white/10"
                       }`}
                     >
                       <div
                         className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all shadow ${
-                          form[key as keyof FormData] ? "translate-x-5" : ""
+                          form[key] ? "translate-x-5" : ""
                         }`}
                       />
                     </div>
@@ -595,11 +938,148 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                   </label>
                 ))}
               </div>
+
+              {/* Breaking Until (conditional) */}
+              {form.isBreaking && (
+                <div>
+                  <label className={labelClass}>Breaking Until</label>
+                  <input
+                    type="datetime-local"
+                    value={form.breakingUntil}
+                    onChange={(e) => update("breakingUntil", e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              )}
+
+              {/* Featured Until (conditional) */}
+              {form.isFeatured && (
+                <div>
+                  <label className={labelClass}>Featured Until</label>
+                  <input
+                    type="datetime-local"
+                    value={form.featuredUntil}
+                    onChange={(e) => update("featuredUntil", e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              )}
+
+              {/* Publish & Unpublish Dates */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Publish Date</label>
+                  <input
+                    type="datetime-local"
+                    value={form.publishAt}
+                    onChange={(e) => update("publishAt", e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Unpublish Date</label>
+                  <input
+                    type="datetime-local"
+                    value={form.unpublishAt}
+                    onChange={(e) => update("unpublishAt", e.target.value)}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+
+              {/* Linked Entities — Leaders */}
+              <div>
+                <label className={labelClass}>Linked Leaders</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (!e.target.value) return;
+                    const current = form.leaders.split(",").map(s => s.trim()).filter(Boolean);
+                    if (!current.includes(e.target.value)) {
+                      update("leaders", [...current, e.target.value].join(", "));
+                    }
+                  }}
+                  className={inputClass}
+                >
+                  <option value="" className={selectBgClass}>— Add Leader —</option>
+                  {entityLeaders.map((l) => (
+                    <option key={l._id} value={l._id} className={selectBgClass}>{l.name}</option>
+                  ))}
+                </select>
+                {form.leaders && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {form.leaders.split(",").map(s => s.trim()).filter(Boolean).map((id) => {
+                      const name = entityLeaders.find(l => l._id === id)?.name || id;
+                      return (
+                        <span key={id} className="px-2 py-0.5 bg-purple-500/10 text-purple-300 text-xs rounded-full border border-purple-500/20 flex items-center gap-1">
+                          {name}
+                          <button type="button" onClick={() => {
+                            const updated = form.leaders.split(",").map(s => s.trim()).filter(s => s !== id).join(", ");
+                            update("leaders", updated);
+                          }} className="text-purple-400 hover:text-white">×</button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Linked Entities — Conflicts */}
+              <div>
+                <label className={labelClass}>Linked Conflicts</label>
+                <select
+                  value=""
+                  onChange={(e) => {
+                    if (!e.target.value) return;
+                    const current = form.conflicts.split(",").map(s => s.trim()).filter(Boolean);
+                    if (!current.includes(e.target.value)) {
+                      update("conflicts", [...current, e.target.value].join(", "));
+                    }
+                  }}
+                  className={inputClass}
+                >
+                  <option value="" className={selectBgClass}>— Add Conflict —</option>
+                  {entityConflicts.map((c) => (
+                    <option key={c._id} value={c._id} className={selectBgClass}>{c.name}</option>
+                  ))}
+                </select>
+                {form.conflicts && (
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {form.conflicts.split(",").map(s => s.trim()).filter(Boolean).map((id) => {
+                      const name = entityConflicts.find(c => c._id === id)?.name || id;
+                      return (
+                        <span key={id} className="px-2 py-0.5 bg-red-500/10 text-red-300 text-xs rounded-full border border-red-500/20 flex items-center gap-1">
+                          {name}
+                          <button type="button" onClick={() => {
+                            const updated = form.conflicts.split(",").map(s => s.trim()).filter(s => s !== id).join(", ");
+                            update("conflicts", updated);
+                          }} className="text-red-400 hover:text-white">×</button>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* References */}
+              <div>
+                <label className={labelClass}>References (one per line)</label>
+                <textarea
+                  rows={5}
+                  placeholder={"https://source1.com/article\nhttps://source2.org/report\nhttps://think-tank.org/analysis"}
+                  value={form.references}
+                  onChange={(e) => update("references", e.target.value)}
+                  className={`${inputClass} font-mono text-xs`}
+                />
+                <p className="text-gray-600 text-xs mt-1">
+                  {form.references.split("\n").filter(r => r.trim()).length} reference(s)
+                </p>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Right Panel - Quick Stats */}
+        {/* ═══════ Right Panel - Quick Stats ═══════ */}
         <div className="w-56 border-l border-white/10 p-4 overflow-y-auto bg-[#0d0d17] hidden lg:block">
           <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-3">Article Info</p>
           <div className="space-y-3 text-xs">
@@ -615,28 +1095,40 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
             </div>
             <div>
               <p className="text-gray-500">Word Count</p>
-              <p className="text-white font-medium">{form.content.split(/\s+/).filter(Boolean).length}</p>
+              <p className="text-white font-medium">{wordCount}</p>
             </div>
             <div>
               <p className="text-gray-500">Read Time</p>
-              <p className="text-white font-medium">~{Math.ceil(form.content.split(/\s+/).filter(Boolean).length / 200)} min</p>
+              <p className="text-white font-medium">~{readTime} min</p>
             </div>
             <div>
               <p className="text-gray-500">Excerpt</p>
               <p className="text-white font-medium">{form.excerpt.length}/300</p>
             </div>
+            {form.focusKeyword && (
+              <div>
+                <p className="text-gray-500">Focus Keyword</p>
+                <p className="text-amber-300 font-medium">{form.focusKeyword}</p>
+              </div>
+            )}
+            {form.category && (
+              <div>
+                <p className="text-gray-500">Category</p>
+                <p className="text-white font-medium">{form.category}</p>
+              </div>
+            )}
           </div>
 
           <div className="mt-6 pt-4 border-t border-white/10">
             <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-2">Shortcuts</p>
             <div className="space-y-1 text-xs text-gray-500">
-              <p 
+              <p
                 className="cursor-pointer hover:text-white transition-colors"
                 onClick={() => handleSave(false)}
               >
                 Draft → <span className="text-white">Ctrl+S</span>
               </p>
-              <p 
+              <p
                 className="cursor-pointer hover:text-amber-400 transition-colors"
                 onClick={() => handleSave(true)}
               >
