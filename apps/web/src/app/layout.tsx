@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Lora } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
@@ -23,7 +23,15 @@ const lora = Lora({
 
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION as SITE_DESC } from "@/constants";
 
+export const viewport: Viewport = {
+  themeColor: "#0B1020",
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
+  manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Global Chanakya", statusBarStyle: "default" },
   metadataBase: new URL(SITE_URL),
   title: {
     default: `Global Chanakya: Geopolitical Intelligence & Strategic Analysis`,
@@ -195,3 +203,5 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     </html>
   );
 }
+
+

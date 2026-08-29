@@ -8,6 +8,7 @@ import { useState, useEffect } from "react";
 import SearchModal from "../shared/SearchModal";
 import { logoutAction } from "@/app/actions";
 import LiveUpdatesButton from "../notifications/LiveUpdatesButton";
+import { PWAInstallButton } from "../pwa/PWAInstallButton";
 
 interface NavbarClientProps {
   session: {
@@ -84,6 +85,7 @@ export default function NavbarClient({ session }: NavbarClientProps) {
         <div className="hidden lg:flex items-center gap-5">
           {/* Status Pill Removed */}
 
+          <PWAInstallButton />
           <LiveUpdatesButton />
 
           <button 
