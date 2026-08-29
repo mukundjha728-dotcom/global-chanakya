@@ -165,7 +165,7 @@ import CookieConsent from "@/components/CookieConsent";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="overflow-x-hidden">
       <head>
         <meta name="google-site-verification" content="VrGd2s0LCdRNrUkVXP2WS7oMOvKxAUD2qZE1Nsepl3A" />
         <meta name="google-adsense-account" content="ca-pub-3046817657353243" />
@@ -186,7 +186,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           strategy="beforeInteractive"
         />
       </head>
-      <body className={`${inter.variable} ${lora.variable} font-sans antialiased leading-[1.8] w-full max-w-[100vw] overflow-x-hidden`}>
+      <body className={`${inter.variable} ${lora.variable} font-sans antialiased leading-[1.8] w-full overflow-x-hidden`}>
         <CookieConsent />
         <CSPostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
