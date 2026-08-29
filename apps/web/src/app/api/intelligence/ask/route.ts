@@ -21,17 +21,14 @@ const requestSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // 1. Authentication
-    let userId = "anonymous";
-    if (process.env.NODE_ENV !== "development") {
-      const session = await auth();
-      if (!session) {
-        return NextResponse.json(
-          { error: { code: "UNAUTHORIZED", message: "You must be logged in to use Ask Chanakya." } },
-          { status: 401 }
-        );
-      }
-      userId = session.user?.id || "anonymous";
+    const session = await auth(req);
+    if (!session) {
+      return NextResponse.json(
+        { error: { code: "UNAUTHORIZED", message: "You must be logged in to use Ask Chanakya." } },
+        { status: 401 }
+      );
     }
+    const userId = session.user?.id || "anonymous";
 
     // 2. Rate Limiting (Application Level)
     const ip = req.headers.get("x-forwarded-for") || "unknown-ip";
