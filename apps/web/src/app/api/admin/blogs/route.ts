@@ -5,6 +5,7 @@ import { BlogService } from "@/modules/blog/services/blog.service";
 import mongoose from "mongoose";
 import { createBlogSchema } from "@/lib/validators/blog.schema";
 import { ragIndexerService } from "@/modules/intelligence/services/ragIndexer.service";
+import { PushService } from "@/lib/notifications/push.service";
 
 // Give Vercel 30s before cutting off the function
 export const maxDuration = 30;
@@ -108,6 +109,7 @@ export async function POST(req: NextRequest) {
         const updated = await BlogService.updateBlog(existing._id.toString(), updateData);
         if (updated?.status === "published") {
           ragIndexerService.indexBlog(updated._id.toString()).catch(e => console.error("RAG Indexing Failed:", e));
+          await PushService.notifyBlog(updated).catch(e => console.error("[PushService] Failed:", e));
         } else {
           ragIndexerService.unindexBlog(existing._id.toString()).catch(e => console.error("RAG Unindexing Failed:", e));
         }
@@ -158,6 +160,7 @@ export async function POST(req: NextRequest) {
 
     if (blog.status === "published") {
       ragIndexerService.indexBlog(blog._id.toString()).catch(e => console.error("RAG Indexing Failed:", e));
+      await PushService.notifyBlog(blog).catch(e => console.error("[PushService] Failed:", e));
     }
 
     return NextResponse.json({ success: true, id: blog._id.toString(), slug: blog.slug }, { status: 201 });
@@ -212,11 +215,17 @@ export async function PATCH(req: NextRequest) {
       updateData.seo = seo;
     }
 
+    const existing = await BlogService.getBlogById(id);
+    const wasDraft = existing?.status === "draft";
+
     const updated = await BlogService.updateBlog(id, updateData);
     if (!updated) return NextResponse.json({ error: "Blog not found" }, { status: 404 });
 
     if (updated.status === "published") {
       ragIndexerService.indexBlog(id).catch(e => console.error("RAG Indexing Failed:", e));
+      if (wasDraft) {
+        await PushService.notifyBlog(updated).catch(e => console.error("[PushService] Failed:", e));
+      }
     } else {
       ragIndexerService.unindexBlog(id).catch(e => console.error("RAG Unindexing Failed:", e));
     }

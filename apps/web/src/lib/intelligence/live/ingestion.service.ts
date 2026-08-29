@@ -10,6 +10,7 @@ import { liveEventEnrichmentJsonSchema, liveEventEnrichmentSchema } from "../val
 import { Country } from "../../models/Country";
 import { Leader } from "../../models/Leader";
 import { Conflict } from "../../models/Conflict";
+import { PushService } from "@/lib/notifications/push.service";
 
 const DEFAULT_EXECUTION_BUDGET_MS = Number(process.env.INGESTION_BUDGET_MS) || 50000;
 
@@ -174,6 +175,7 @@ export class LiveIngestionService {
              stats.published++;
              console.log(`[INTELLIGENCE_DIAGNOSTIC] EVENT_PUBLISHED candidate=${item.slug}`);
              console.log(`[LiveIngestionService] ✅ Published: "${item.title.substring(0, 60)}..."`);
+             await PushService.notifyIntelligence(eventDoc).catch(e => console.error("[PushService] Failed:", e));
           } else if (enrichmentStatus === "PENDING") {
              stats.pending++;
              console.warn(`[LiveIngestionService] ⏸️ Pending: "${item.title.substring(0, 60)}..."`);
@@ -197,6 +199,7 @@ export class LiveIngestionService {
              await item.save();
              stats.published++;
              console.log(`[LiveIngestionService] ✅ Retry Published: "${item.slug}"`);
+             await PushService.notifyIntelligence(item).catch(e => console.error("[PushService] Failed:", e));
           } else {
              if ((Date.now() - startedAt) > budgetMs - 1500) {
                 item.enrichmentStatus = "PENDING";

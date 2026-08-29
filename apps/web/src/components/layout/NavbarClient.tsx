@@ -7,6 +7,7 @@ import { LogOut, Menu, X, LayoutDashboard, Search, User } from "lucide-react";
 import { useState, useEffect } from "react";
 import SearchModal from "../shared/SearchModal";
 import { logoutAction } from "@/app/actions";
+import LiveUpdatesButton from "../notifications/LiveUpdatesButton";
 
 interface NavbarClientProps {
   session: {
@@ -40,10 +41,10 @@ export default function NavbarClient({ session }: NavbarClientProps) {
 
   return (
     <nav className="sticky top-0 z-50 w-full h-20 backdrop-blur-xl bg-[var(--bg)]/90 border-b border-[var(--border)] flex items-center transition-all duration-300">
-      <div className="w-full max-w-7xl mx-auto px-8 flex items-center justify-between">
+      <div className="w-full max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between">
         
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center gap-2 md:gap-4 min-w-fit md:min-w-[240px] shrink-0 group">
+        <Link href="/" className="flex items-center gap-1.5 md:gap-4 min-w-fit md:min-w-[240px] shrink-0 group">
           <Image
             src="/icon.svg"
             alt="Global Chanakya"
@@ -52,7 +53,7 @@ export default function NavbarClient({ session }: NavbarClientProps) {
             className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl group-hover:scale-105 transition-transform duration-300"
           />
           <div className="flex flex-col leading-none gap-0.5 md:gap-1">
-            <span className="text-[18px] md:text-[28px] font-bold tracking-[-0.03em] text-white">
+            <span className="text-[16px] md:text-[28px] font-bold tracking-[-0.03em] text-white">
               Global Chanakya
             </span>
             <span className="text-[8px] md:text-[11px] font-bold text-[var(--gold)] tracking-[0.22em] uppercase">
@@ -82,6 +83,8 @@ export default function NavbarClient({ session }: NavbarClientProps) {
         {/* Right: Search, Status, Auth */}
         <div className="hidden lg:flex items-center gap-5">
           {/* Status Pill Removed */}
+
+          <LiveUpdatesButton />
 
           <button 
             onClick={() => setIsSearchOpen(true)}
@@ -185,6 +188,9 @@ export default function NavbarClient({ session }: NavbarClientProps) {
       {mobileOpen && (
         <div className="absolute top-20 left-0 w-full lg:hidden border-b border-[var(--border)] bg-[var(--bg)]/95 backdrop-blur-xl">
           <div className="px-6 py-6 space-y-2">
+            <div className="pb-4">
+              <LiveUpdatesButton />
+            </div>
             {navLinks.map((link) => (
               <Link
                 key={link.href}

@@ -1,7 +1,15 @@
 import webpush from 'web-push';
 import { PushSubscription } from '@/lib/models/PushSubscription';
 import { NotificationEvent } from '@/lib/models/NotificationEvent';
-import type { NotificationPayload } from '@/types/notification';
+export interface NotificationPayload {
+  title: string;
+  body: string;
+  url?: string;
+  icon?: string;
+  tag?: string;
+  type?: string;
+  eventId?: string;
+}
 
 // Load VAPID details from environment
 const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
