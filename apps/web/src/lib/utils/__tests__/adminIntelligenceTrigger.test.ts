@@ -101,7 +101,7 @@ describe("Admin Intelligence Run Trigger", () => {
 
 
 
-    const res = await POST();
+    const res = await POST({} as any);
     const data = await res.json();
 
     expect(data.success).toBe(true);

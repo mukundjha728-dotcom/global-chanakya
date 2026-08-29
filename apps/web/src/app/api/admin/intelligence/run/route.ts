@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { redis } from "@/lib/redis";
 import { liveIngestionService } from "@/lib/intelligence/live/ingestion.service";
@@ -12,12 +12,12 @@ const WORKER_ID = `admin-manual-${Date.now()}`;
 
 export const maxDuration = 300; // Prevent Vercel from timing out this API route prematurely
 
-export async function POST() {
+export const POST = auth(async function POST(req) {
   console.log("[INTELLIGENCE_TRIGGER] REQUEST_RECEIVED");
   let lockAcquired = false;
   try {
-    const session = await auth();
-    if (!session || session.user.role !== "admin") {
+    const session = req.auth;
+    if (!session || session.user?.role !== "admin") {
       console.warn("[INTELLIGENCE_TRIGGER] UNAUTHORIZED");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -63,10 +63,8 @@ export async function POST() {
     try {
       await dbConnect();
       console.log("[INTELLIGENCE_TRIGGER] INGESTION_STARTED");
-      // Use strict Vercel Hobby execution budget (7s) to guarantee completion before timeout
-      cycleStats = await liveIngestionService.pollAllProviders({
-        maxDurationMs: 8000
-      });
+      // Use default execution budget to allow complete processing
+      cycleStats = await liveIngestionService.pollAllProviders();
       
       console.log("[INTELLIGENCE_TRIGGER] INGESTION_COMPLETED");
       
@@ -151,5 +149,5 @@ export async function POST() {
       { status: 500 }
     );
   }
-}
+});
 

@@ -18,13 +18,14 @@ const requestSchema = z.object({
   mode: z.enum(["INTERNAL", "LIVE", "HYBRID"]).optional().default("HYBRID"),
 });
 
-export async function POST(req: NextRequest) {
+export const POST = auth(async function POST(req) {
   try {
-    // 1. Authentication
-    const session = await auth(req);
-    if (!session) {
+    const session = req.auth;
+    
+    // Check authentication
+    if (!session || !session.user) {
       return NextResponse.json(
-        { error: { code: "UNAUTHORIZED", message: "You must be logged in to use Ask Chanakya." } },
+        { error: "Unauthorized. Please log in to use Ask Chanakya." },
         { status: 401 }
       );
     }
@@ -108,4 +109,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
+});
