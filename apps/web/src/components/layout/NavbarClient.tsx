@@ -44,7 +44,7 @@ export default function NavbarClient({ session }: NavbarClientProps) {
       <div className="w-full max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between">
         
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center gap-1.5 md:gap-4 min-w-fit md:min-w-[240px] shrink-0 group">
+        <Link href="/" className="flex items-center gap-1.5 md:gap-4 md:min-w-[240px] group">
           <Image
             src="/icon.svg"
             alt="Global Chanakya"
