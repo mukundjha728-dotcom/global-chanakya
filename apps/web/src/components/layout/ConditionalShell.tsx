@@ -1,6 +1,8 @@
 "use client";
 import { usePathname } from "next/navigation";
 
+import { PWAInstallPrompt } from "@/components/pwa/PWAInstallPrompt";
+
 export function ConditionalShell({
   navbar,
   footer,
@@ -11,11 +13,12 @@ export function ConditionalShell({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAdmin = pathname.startsWith("/gc-control-9x7k");
+  const isAdmin = pathname.startsWith("/gc-control-9x7k") || pathname.startsWith("/admin");
 
   return (
     <>
       {!isAdmin && navbar}
+      {!isAdmin && <PWAInstallPrompt />}
       <div className={isAdmin ? "" : "min-h-screen"}>{children}</div>
       {!isAdmin && footer}
     </>
