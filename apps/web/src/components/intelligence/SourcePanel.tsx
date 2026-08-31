@@ -25,10 +25,16 @@ export function SourcePanel({
             {sources.map((source, i) => (
               <li key={i} className="flex flex-col gap-1 p-3 rounded-lg bg-[var(--surface)]/50 border border-[var(--border)]">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white flex items-center gap-2">
-                    {source.name}
-                    {source.url && <ExternalLink className="w-3 h-3 text-[var(--muted)]" />}
-                  </span>
+                  {source.url ? (
+                    <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-white flex items-center gap-2 hover:text-[var(--cyan)] transition-colors">
+                      {source.name}
+                      <ExternalLink className="w-3 h-3 text-[var(--muted)]" />
+                    </a>
+                  ) : (
+                    <span className="text-xs font-bold text-white flex items-center gap-2">
+                      {source.name}
+                    </span>
+                  )}
                   <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--cyan)] bg-[var(--cyan)]/10 px-1.5 py-0.5 rounded">
                     {source.type}
                   </span>
