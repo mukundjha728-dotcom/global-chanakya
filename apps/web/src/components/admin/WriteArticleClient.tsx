@@ -476,30 +476,20 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        {/* ═══════ Main Editor ═══════ */}
-        <div className="flex-1 overflow-y-auto p-6">
-          {/* ─── Tabs ─── */}
-          <div className="flex gap-1 mb-6 bg-white/5 rounded-lg p-1 w-fit">
-            {(["content", "seo", "settings"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-1.5 rounded-md text-xs font-medium capitalize transition-all ${
-                  activeTab === tab
-                    ? "bg-amber-500 text-black"
-                    : "text-gray-400 hover:text-white"
-                }`}
-              >
-                {tab === "content" ? "📝 Analysis Content" : tab === "seo" ? "🔍 Search & Metadata" : "⚙️ Report Settings"}
-              </button>
-            ))}
-          </div>
-
+        {/* ═══════ Main Editor (Vertical Cards) ═══════ */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-scrollbar">
+          
           {/* ═══════════════════════════════════════════════════════════════════
-              TAB 1 — ANALYSIS CONTENT
+              CARD 1 — ARTICLE IDENTITY
               ═══════════════════════════════════════════════════════════════════ */}
-          {activeTab === "content" && (
-            <div className="space-y-5">
+          <div className="bg-[#0d0d17] border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+            <div className="px-6 py-4 border-b border-white/10 bg-white/5">
+              <h2 className="text-white text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[var(--gold)]"></span>
+                Article Identity
+              </h2>
+            </div>
+            <div className="p-6 space-y-5">
               {/* Title */}
               <div>
                 <label className={labelClass}>Article Title *</label>
@@ -551,532 +541,474 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 />
                 {form.featuredImage && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={form.featuredImage} alt="preview" className="mt-2 rounded-lg h-32 object-cover border border-white/10" />
+                  <img src={form.featuredImage} alt="preview" className="mt-3 rounded-xl h-40 w-auto object-cover border border-white/10 shadow-lg" />
                 )}
               </div>
+            </div>
+          </div>
 
-              {/* Article Content — HTML/CSS/JS Editor */}
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className={labelClass}>Article Content *</label>
-                  <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
-                    <button
-                      type="button"
-                      onClick={() => setEditorMode("code")}
-                      className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-                        editorMode === "code" ? "bg-amber-500 text-black" : "text-gray-400 hover:text-white"
-                      }`}
-                    >
-                      &lt;/&gt; Code
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setEditorMode("preview")}
-                      className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
-                        editorMode === "preview" ? "bg-amber-500 text-black" : "text-gray-400 hover:text-white"
-                      }`}
-                    >
-                      👁 Preview
-                    </button>
+          {/* ═══════════════════════════════════════════════════════════════════
+              CARD 2 — ARTICLE CONTENT
+              ═══════════════════════════════════════════════════════════════════ */}
+          <div className="bg-[#0d0d17] border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+            <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
+              <h2 className="text-white text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-[var(--cyan)]"></span>
+                Article Content
+              </h2>
+              <div className="flex gap-1 bg-white/5 rounded-lg p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setEditorMode("code")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${
+                    editorMode === "code" ? "bg-[var(--cyan)] text-black" : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  &lt;/&gt; Code
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditorMode("preview")}
+                  className={`px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wider transition-all ${
+                    editorMode === "preview" ? "bg-[var(--cyan)] text-black" : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  👁 Preview
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              {editorMode === "code" ? (
+                <>
+                  <textarea
+                    rows={28}
+                    spellCheck={false}
+                    placeholder={`Write full HTML with embedded CSS & JS:\n\n<style>\n  h2 { color: #f59e0b; }\n</style>\n\n<h2>Section Title</h2>\n<p>Your paragraph here...</p>\n\n<script>\n  console.log('Hello!');\n<\/script>`}
+                    value={form.content}
+                    onChange={(e) => update("content", e.target.value)}
+                    className={`${inputClass} font-mono text-sm leading-relaxed resize-y bg-[#0a0a12]`}
+                    style={{ minHeight: "520px", tabSize: 2 }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Tab") {
+                        e.preventDefault();
+                        const start = e.currentTarget.selectionStart;
+                        const end = e.currentTarget.selectionEnd;
+                        const val = e.currentTarget.value;
+                        const newVal = val.substring(0, start) + "  " + val.substring(end);
+                        update("content", newVal);
+                        requestAnimationFrame(() => {
+                          e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2;
+                        });
+                      }
+                    }}
+                  />
+                  <div className="flex items-center gap-4 mt-2 px-1">
+                    <p className="text-gray-500 text-xs font-medium">
+                      <span className="text-white">{form.content.length.toLocaleString()}</span> chars · <span className="text-white">~{readTime} min</span> read
+                    </p>
+                    <p className="text-gray-600 text-xs">Tab = 2 spaces · HTML + CSS + JS supported</p>
+                  </div>
+                </>
+              ) : (
+                <div className="rounded-xl overflow-hidden border border-white/10 shadow-inner" style={{ height: "560px" }}>
+                  {form.content ? (
+                    <iframe
+                      srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{background:#fff;color:#111;font-family:Georgia,serif;font-size:17px;line-height:1.8;padding:24px 32px;max-width:800px;margin:0 auto;}h1,h2,h3,h4{font-family:-apple-system,sans-serif;font-weight:700;margin-top:1.5em;}a{color:#ef4444;}blockquote{border-left:4px solid #ef4444;margin:1.5em 0;padding:12px 20px;background:#fff5f5;border-radius:0 8px 8px 0;font-style:italic;color:#555;}ul,ol{padding-left:1.5em;}img{max-width:100%;border-radius:8px;}</style></head><body>${form.content}</body></html>`}
+                      className="w-full h-full bg-white"
+                      title="Article Preview"
+                      sandbox="allow-scripts"
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center bg-white/5 text-gray-500 text-sm font-medium">
+                      Write content in Code tab to see preview here
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ═══════════════════════════════════════════════════════════════════
+              CARD 3 — SEARCH & METADATA
+              ═══════════════════════════════════════════════════════════════════ */}
+          <div className="bg-[#0d0d17] border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+            <div className="px-6 py-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
+              <h2 className="text-white text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                Search & Metadata
+              </h2>
+            </div>
+            
+            <div className="p-6 space-y-5">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="space-y-5">
+                  {/* Focus Keyword */}
+                  <div>
+                    <label className={labelClass}>Focus Keyword</label>
+                    <input
+                      type="text"
+                      placeholder="Primary keyword for this article"
+                      value={form.focusKeyword}
+                      onChange={(e) => update("focusKeyword", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  {/* Meta Title */}
+                  <div>
+                    <div className="flex justify-between items-end mb-1.5">
+                      <label className="block text-xs text-gray-400 font-medium uppercase tracking-wider">Meta / SEO Title</label>
+                      <span className={`text-[10px] font-bold ${form.seoTitle.length > 60 ? "text-red-400" : "text-gray-500"}`}>{form.seoTitle.length}/60</span>
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Title jo Google mein dikhega (blank = article title)"
+                      value={form.seoTitle}
+                      onChange={(e) => update("seoTitle", e.target.value)}
+                      className={inputClass}
+                    />
+                    <div className="mt-1.5 w-full bg-white/5 rounded-full h-1 overflow-hidden">
+                      <div
+                        className={`h-full transition-all ${form.seoTitle.length > 60 ? "bg-red-500" : form.seoTitle.length > 0 ? "bg-green-500" : "bg-transparent"}`}
+                        style={{ width: `${Math.min((form.seoTitle.length / 60) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Meta Description */}
+                  <div>
+                    <div className="flex justify-between items-end mb-1.5">
+                      <label className="block text-xs text-gray-400 font-medium uppercase tracking-wider">Meta Description</label>
+                      <span className={`text-[10px] font-bold ${form.seoDescription.length > 160 ? "text-red-400" : "text-gray-500"}`}>{form.seoDescription.length}/160</span>
+                    </div>
+                    <textarea
+                      rows={3}
+                      placeholder="Google search result mein dikhne wala description…"
+                      value={form.seoDescription}
+                      onChange={(e) => update("seoDescription", e.target.value)}
+                      className={inputClass}
+                    />
+                    <div className="mt-1.5 w-full bg-white/5 rounded-full h-1 overflow-hidden">
+                      <div
+                        className={`h-full transition-all ${form.seoDescription.length > 160 ? "bg-red-500" : form.seoDescription.length > 0 ? "bg-green-500" : "bg-transparent"}`}
+                        style={{ width: `${Math.min((form.seoDescription.length / 160) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* SEO Keywords */}
+                  <div>
+                    <label className={labelClass}>SEO Keywords (comma separated)</label>
+                    <input
+                      type="text"
+                      placeholder="india china, geopolitics, defence"
+                      value={form.seoKeywords}
+                      onChange={(e) => update("seoKeywords", e.target.value)}
+                      className={inputClass}
+                    />
                   </div>
                 </div>
 
-                {editorMode === "code" ? (
-                  <>
-                    <textarea
-                      rows={28}
-                      spellCheck={false}
-                      placeholder={`Write full HTML with embedded CSS & JS:\n\n<style>\n  h2 { color: #f59e0b; }\n</style>\n\n<h2>Section Title</h2>\n<p>Your paragraph here...</p>\n\n<script>\n  console.log('Hello!');\n<\/script>`}
-                      value={form.content}
-                      onChange={(e) => update("content", e.target.value)}
-                      className={`${inputClass} font-mono text-sm leading-relaxed resize-y`}
-                      style={{ minHeight: "520px", tabSize: 2 }}
-                      onKeyDown={(e) => {
-                        // Tab key inserts 2 spaces instead of changing focus
-                        if (e.key === "Tab") {
-                          e.preventDefault();
-                          const start = e.currentTarget.selectionStart;
-                          const end = e.currentTarget.selectionEnd;
-                          const val = e.currentTarget.value;
-                          const newVal = val.substring(0, start) + "  " + val.substring(end);
-                          update("content", newVal);
-                          requestAnimationFrame(() => {
-                            e.currentTarget.selectionStart = e.currentTarget.selectionEnd = start + 2;
-                          });
-                        }
-                      }}
+                <div className="space-y-5">
+                  {/* Canonical URL */}
+                  <div>
+                    <label className={labelClass}>Canonical URL</label>
+                    <input
+                      type="text"
+                      placeholder="https://www.globalchanakya.in/blogs/your-article-slug"
+                      value={form.canonicalUrl}
+                      onChange={(e) => update("canonicalUrl", e.target.value)}
+                      className={inputClass}
                     />
-                    <div className="flex items-center gap-4 mt-1">
-                      <p className="text-gray-600 text-xs">
-                        {form.content.length.toLocaleString()} chars · ~{readTime} min read
-                      </p>
-                      <p className="text-gray-700 text-xs">Tab = 2 spaces · HTML + CSS + JS all supported</p>
-                    </div>
-                  </>
-                ) : (
-                  <div className="rounded-xl overflow-hidden border border-white/10" style={{ height: "560px" }}>
-                    {form.content ? (
-                      <iframe
-                        srcDoc={`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{background:#fff;color:#111;font-family:Georgia,serif;font-size:17px;line-height:1.8;padding:24px 32px;max-width:800px;margin:0 auto;}h1,h2,h3,h4{font-family:-apple-system,sans-serif;font-weight:700;margin-top:1.5em;}a{color:#ef4444;}blockquote{border-left:4px solid #ef4444;margin:1.5em 0;padding:12px 20px;background:#fff5f5;border-radius:0 8px 8px 0;font-style:italic;color:#555;}ul,ol{padding-left:1.5em;}img{max-width:100%;border-radius:8px;}</style></head><body>${form.content}</body></html>`}
-                        className="w-full h-full bg-white"
-                        title="Article Preview"
-                        sandbox="allow-scripts"
-                      />
-                    ) : (
-                      <div className="h-full flex items-center justify-center bg-white/5 text-gray-600 text-sm">
-                        Code tab mein content likhne ke baad preview yahan dikhega
+                  </div>
+
+                  {/* Robots Directive */}
+                  <div>
+                    <label className={labelClass}>Robots Directive</label>
+                    <select
+                      value={form.robots}
+                      onChange={(e) => update("robots", e.target.value)}
+                      className={inputClass}
+                    >
+                      {ROBOTS_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value} className={selectBgClass}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* OG Image URL */}
+                  <div>
+                    <label className={labelClass}>OG Image URL</label>
+                    <input
+                      type="text"
+                      placeholder="Social sharing image URL (defaults to featured image)"
+                      value={form.ogImage}
+                      onChange={(e) => update("ogImage", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+
+                  {/* AI Summary */}
+                  <div>
+                    <label className={labelClass}>AI Summary</label>
+                    <textarea
+                      rows={2}
+                      placeholder="AI-generated summary of the article"
+                      value={form.aiSummary}
+                      onChange={(e) => update("aiSummary", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ═══════════════════════════════════════════════════════════════════
+              CARD 4 — EDITOR STATUS
+              ═══════════════════════════════════════════════════════════════════ */}
+          <div className="bg-[#0d0d17] border border-white/10 rounded-2xl overflow-hidden shadow-lg">
+            <div className="px-6 py-4 border-b border-white/10 bg-white/5">
+              <h2 className="text-white text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Editor Status
+              </h2>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {/* Status, Visibility, Category */}
+                <div className="space-y-5">
+                  <div>
+                    <label className={labelClass}>Status</label>
+                    <select
+                      value={form.status}
+                      onChange={(e) => update("status", e.target.value as FormData["status"])}
+                      className={inputClass}
+                    >
+                      {STATUS_OPTIONS.map((s) => (
+                        <option key={s.value} value={s.value} className={selectBgClass}>{s.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Visibility</label>
+                    <select
+                      value={form.visibility}
+                      onChange={(e) => update("visibility", e.target.value as FormData["visibility"])}
+                      className={inputClass}
+                    >
+                      {VISIBILITY_OPTIONS.map((v) => (
+                        <option key={v.value} value={v.value} className={selectBgClass}>{v.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Category *</label>
+                    <select
+                      value={form.category}
+                      onChange={(e) => update("category", e.target.value)}
+                      className={inputClass}
+                    >
+                      {CATEGORIES.map((c) => (
+                        <option key={c} value={c} className={selectBgClass}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className={labelClass}>Report Type</label>
+                    <select
+                      value={form.reportType}
+                      onChange={(e) => update("reportType", e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="" className={selectBgClass}>— Select —</option>
+                      {REPORT_TYPES.map((rt) => (
+                        <option key={rt} value={rt} className={selectBgClass}>{rt}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Scheduling & Tags */}
+                <div className="space-y-5">
+                  <div>
+                    <label className={labelClass}>Publish Date</label>
+                    <input
+                      type="datetime-local"
+                      value={form.publishAt}
+                      onChange={(e) => update("publishAt", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Unpublish Date</label>
+                    <input
+                      type="datetime-local"
+                      value={form.unpublishAt}
+                      onChange={(e) => update("unpublishAt", e.target.value)}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Tags (comma separated)</label>
+                    <input
+                      type="text"
+                      placeholder="india, china, defence"
+                      value={form.tags}
+                      onChange={(e) => update("tags", e.target.value)}
+                      className={inputClass}
+                    />
+                    {form.tags && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {form.tags.split(",").map((t) => t.trim()).filter(Boolean).map((tag) => (
+                          <span key={tag} className="px-2 py-0.5 bg-amber-500/10 text-amber-300 text-[10px] font-bold tracking-wider rounded-md border border-amber-500/20">
+                            #{tag}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════════════════
-              TAB 2 — SEARCH & METADATA
-              ═══════════════════════════════════════════════════════════════════ */}
-          {activeTab === "seo" && (
-            <div className="space-y-5">
-              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                <p className="text-blue-300 text-xs font-semibold mb-1">🔍 SEO Tips</p>
-                <ul className="text-gray-400 text-xs space-y-1">
-                  <li>• SEO title: 50-60 characters ideal</li>
-                  <li>• Meta description: 150-160 characters</li>
-                  <li>• Focus keyword pehle title mein ho</li>
-                </ul>
-              </div>
-
-              {/* Focus Keyword */}
-              <div>
-                <label className={labelClass}>Focus Keyword</label>
-                <input
-                  type="text"
-                  placeholder="Primary keyword for this article"
-                  value={form.focusKeyword}
-                  onChange={(e) => update("focusKeyword", e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-
-              {/* Meta Title */}
-              <div>
-                <label className={labelClass}>Meta Title</label>
-                <input
-                  type="text"
-                  placeholder="Title jo Google mein dikhega (blank = article title)"
-                  value={form.seoTitle}
-                  onChange={(e) => update("seoTitle", e.target.value)}
-                  className={inputClass}
-                />
-                <div className="mt-1 flex justify-between items-center">
-                  <p className={`text-xs ${(form.seoTitle || form.title).length > 60 ? "text-red-400" : "text-gray-600"}`}>
-                    {(form.seoTitle || form.title).length} / 60
-                  </p>
-                  <div
-                    className={`h-1 rounded-full flex-1 ml-3 ${
-                      (form.seoTitle || form.title).length <= 60
-                        ? "bg-green-500"
-                        : "bg-red-500"
-                    }`}
-                    style={{ maxWidth: `${Math.min(((form.seoTitle || form.title).length / 60) * 100, 100)}%` }}
-                  />
-                </div>
-              </div>
-
-              {/* Meta Description */}
-              <div>
-                <label className={labelClass}>Meta Description</label>
-                <textarea
-                  rows={3}
-                  placeholder="Google search result mein dikhne wala description…"
-                  value={form.seoDescription}
-                  onChange={(e) => update("seoDescription", e.target.value)}
-                  className={inputClass}
-                />
-                <p className={`text-xs mt-1 ${form.seoDescription.length > 160 ? "text-red-400" : "text-gray-600"}`}>
-                  {form.seoDescription.length} / 160
-                </p>
-              </div>
-
-              {/* SEO Keywords */}
-              <div>
-                <label className={labelClass}>SEO Keywords (comma separated)</label>
-                <input
-                  type="text"
-                  placeholder="india china, border tensions, geopolitics, defence"
-                  value={form.seoKeywords}
-                  onChange={(e) => update("seoKeywords", e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-
-              {/* Canonical URL */}
-              <div>
-                <label className={labelClass}>Canonical URL</label>
-                <input
-                  type="text"
-                  placeholder="https://www.globalchanakya.in/blogs/your-article-slug"
-                  value={form.canonicalUrl}
-                  onChange={(e) => update("canonicalUrl", e.target.value)}
-                  className={inputClass}
-                />
-              </div>
-
-              {/* Robots Directive */}
-              <div>
-                <label className={labelClass}>Robots Directive</label>
-                <select
-                  value={form.robots}
-                  onChange={(e) => update("robots", e.target.value)}
-                  className={inputClass}
-                >
-                  {ROBOTS_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value} className={selectBgClass}>{opt.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* OG Image URL */}
-              <div>
-                <label className={labelClass}>OG Image URL</label>
-                <input
-                  type="text"
-                  placeholder="Social sharing image URL (defaults to featured image)"
-                  value={form.ogImage}
-                  onChange={(e) => update("ogImage", e.target.value)}
-                  className={inputClass}
-                />
-                {form.ogImage && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={form.ogImage} alt="OG preview" className="mt-2 rounded-lg h-24 object-cover border border-white/10" />
-                )}
-              </div>
-
-              {/* AI Summary */}
-              <div>
-                <label className={labelClass}>AI Summary</label>
-                <textarea
-                  rows={3}
-                  placeholder="AI-generated summary of the article (max 500 chars)"
-                  value={form.aiSummary}
-                  onChange={(e) => update("aiSummary", e.target.value)}
-                  className={inputClass}
-                />
-                <p className="text-gray-600 text-xs mt-1">{form.aiSummary.length}/500</p>
-              </div>
-
-              {/* Google Preview */}
-              <div>
-                <label className={labelClass}>Google Preview</label>
-                <div className="p-4 bg-white rounded-lg">
-                  <p className="text-blue-700 text-sm font-medium truncate">
-                    {form.seoTitle || form.title || "Article Title"}
-                  </p>
-                  <p className="text-green-700 text-xs mt-0.5">
-                    globalchanakya.in/blogs/{form.slug || "article-slug"}
-                  </p>
-                  <p className="text-gray-600 text-xs mt-1 line-clamp-2">
-                    {form.seoDescription || form.excerpt || "Article description…"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ═══════════════════════════════════════════════════════════════════
-              TAB 3 — REPORT SETTINGS
-              ═══════════════════════════════════════════════════════════════════ */}
-          {activeTab === "settings" && (
-            <div className="space-y-5">
-              {/* Category & Report Type */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Category *</label>
-                  <select
-                    value={form.category}
-                    onChange={(e) => update("category", e.target.value)}
-                    className={inputClass}
-                  >
-                    {CATEGORIES.map((c) => (
-                      <option key={c} value={c} className={selectBgClass}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Report Type</label>
-                  <select
-                    value={form.reportType}
-                    onChange={(e) => update("reportType", e.target.value)}
-                    className={inputClass}
-                  >
-                    <option value="" className={selectBgClass}>— Select —</option>
-                    {REPORT_TYPES.map((rt) => (
-                      <option key={rt} value={rt} className={selectBgClass}>{rt}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Visibility & Status */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Visibility</label>
-                  <select
-                    value={form.visibility}
-                    onChange={(e) => update("visibility", e.target.value as FormData["visibility"])}
-                    className={inputClass}
-                  >
-                    {VISIBILITY_OPTIONS.map((v) => (
-                      <option key={v.value} value={v.value} className={selectBgClass}>{v.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className={labelClass}>Status</label>
-                  <select
-                    value={form.status}
-                    onChange={(e) => update("status", e.target.value as FormData["status"])}
-                    className={inputClass}
-                  >
-                    {STATUS_OPTIONS.map((s) => (
-                      <option key={s.value} value={s.value} className={selectBgClass}>{s.label}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div>
-                <label className={labelClass}>Tags (comma separated)</label>
-                <input
-                  type="text"
-                  placeholder="india, china, border, defence, strategic"
-                  value={form.tags}
-                  onChange={(e) => update("tags", e.target.value)}
-                  className={inputClass}
-                />
-                {form.tags && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {form.tags.split(",").map((t) => t.trim()).filter(Boolean).map((tag) => (
-                      <span key={tag} className="px-2 py-0.5 bg-amber-500/10 text-amber-300 text-xs rounded-full border border-amber-500/20">
-                        #{tag}
-                      </span>
-                    ))}
+                  <div>
+                    <label className={labelClass}>References (one per line)</label>
+                    <textarea
+                      rows={2}
+                      placeholder="https://source1.com/article"
+                      value={form.references}
+                      onChange={(e) => update("references", e.target.value)}
+                      className={`${inputClass} font-mono text-xs`}
+                    />
                   </div>
-                )}
-              </div>
+                </div>
 
-              {/* Country Assignment */}
-              <div>
-                <label className={labelClass}>Country Assignment</label>
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (!e.target.value) return;
-                    const current = form.countries.split(",").map(s => s.trim()).filter(Boolean);
-                    if (!current.includes(e.target.value)) {
-                      update("countries", [...current, e.target.value].join(", "));
-                    }
-                  }}
-                  className={inputClass}
-                >
-                  <option value="" className={selectBgClass}>— Add Country —</option>
-                  {entityCountries.map((c) => (
-                    <option key={c._id} value={c._id} className={selectBgClass}>{c.name}</option>
-                  ))}
-                </select>
-                {form.countries && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {form.countries.split(",").map(s => s.trim()).filter(Boolean).map((id) => {
-                      const name = entityCountries.find(c => c._id === id)?.name || id;
-                      return (
-                        <span key={id} className="px-2 py-0.5 bg-blue-500/10 text-blue-300 text-xs rounded-full border border-blue-500/20 flex items-center gap-1">
-                          {name}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const updated = form.countries.split(",").map(s => s.trim()).filter(s => s !== id).join(", ");
-                              update("countries", updated);
-                            }}
-                            className="text-blue-400 hover:text-white"
-                          >×</button>
+                {/* Options & Entities */}
+                <div className="space-y-5">
+                  {/* Toggles */}
+                  <div className="space-y-3 bg-white/5 p-4 rounded-xl border border-white/5">
+                    {[
+                      { key: "isTrending" as keyof FormData, label: "🔥 Trending Article" },
+                      { key: "commentsEnabled" as keyof FormData, label: "💬 Enable Comments" },
+                      { key: "isBreaking" as keyof FormData, label: "🚨 Breaking News" },
+                      { key: "isFeatured" as keyof FormData, label: "⭐ Featured Article" },
+                    ].map(({ key, label }) => (
+                      <label key={key} className="flex items-center gap-3 cursor-pointer group">
+                        <div
+                          onClick={() => update(key, !form[key])}
+                          className={`w-9 h-5 rounded-full transition-all relative ${
+                            form[key] ? "bg-[var(--cyan)]" : "bg-white/10"
+                          }`}
+                        >
+                          <div
+                            className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all shadow ${
+                              form[key] ? "translate-x-4" : ""
+                            }`}
+                          />
+                        </div>
+                        <span className="text-gray-300 text-xs font-medium group-hover:text-white transition-colors">
+                          {label}
                         </span>
-                      );
-                    })}
+                      </label>
+                    ))}
                   </div>
-                )}
-              </div>
 
-              {/* Toggle Options */}
-              <div className="space-y-3">
-                <label className={labelClass}>Article Options</label>
-                {[
-                  { key: "isTrending" as keyof FormData, label: "🔥 Trending Article (homepage pe feature hoga)" },
-                  { key: "commentsEnabled" as keyof FormData, label: "💬 Comments Enable Karein" },
-                  { key: "isBreaking" as keyof FormData, label: "🚨 Breaking News" },
-                  { key: "isFeatured" as keyof FormData, label: "⭐ Featured Article" },
-                ].map(({ key, label }) => (
-                  <label key={key} className="flex items-center gap-3 cursor-pointer group">
-                    <div
-                      onClick={() => update(key, !form[key])}
-                      className={`w-10 h-5 rounded-full transition-all relative ${
-                        form[key] ? "bg-amber-500" : "bg-white/10"
-                      }`}
-                    >
-                      <div
-                        className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-all shadow ${
-                          form[key] ? "translate-x-5" : ""
-                        }`}
-                      />
+                  {form.isBreaking && (
+                    <div>
+                      <label className={labelClass}>Breaking Until</label>
+                      <input type="datetime-local" value={form.breakingUntil} onChange={(e) => update("breakingUntil", e.target.value)} className={inputClass} />
                     </div>
-                    <span className="text-gray-300 text-sm group-hover:text-white transition-colors">
-                      {label}
-                    </span>
-                  </label>
-                ))}
-              </div>
+                  )}
+                  {form.isFeatured && (
+                    <div>
+                      <label className={labelClass}>Featured Until</label>
+                      <input type="datetime-local" value={form.featuredUntil} onChange={(e) => update("featuredUntil", e.target.value)} className={inputClass} />
+                    </div>
+                  )}
 
-              {/* Breaking Until (conditional) */}
-              {form.isBreaking && (
-                <div>
-                  <label className={labelClass}>Breaking Until</label>
-                  <input
-                    type="datetime-local"
-                    value={form.breakingUntil}
-                    onChange={(e) => update("breakingUntil", e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-              )}
-
-              {/* Featured Until (conditional) */}
-              {form.isFeatured && (
-                <div>
-                  <label className={labelClass}>Featured Until</label>
-                  <input
-                    type="datetime-local"
-                    value={form.featuredUntil}
-                    onChange={(e) => update("featuredUntil", e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-              )}
-
-              {/* Publish & Unpublish Dates */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Publish Date</label>
-                  <input
-                    type="datetime-local"
-                    value={form.publishAt}
-                    onChange={(e) => update("publishAt", e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Unpublish Date</label>
-                  <input
-                    type="datetime-local"
-                    value={form.unpublishAt}
-                    onChange={(e) => update("unpublishAt", e.target.value)}
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-
-              {/* Linked Entities — Leaders */}
-              <div>
-                <label className={labelClass}>Linked Leaders</label>
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (!e.target.value) return;
-                    const current = form.leaders.split(",").map(s => s.trim()).filter(Boolean);
-                    if (!current.includes(e.target.value)) {
-                      update("leaders", [...current, e.target.value].join(", "));
-                    }
-                  }}
-                  className={inputClass}
-                >
-                  <option value="" className={selectBgClass}>— Add Leader —</option>
-                  {entityLeaders.map((l) => (
-                    <option key={l._id} value={l._id} className={selectBgClass}>{l.name}</option>
-                  ))}
-                </select>
-                {form.leaders && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {form.leaders.split(",").map(s => s.trim()).filter(Boolean).map((id) => {
-                      const name = entityLeaders.find(l => l._id === id)?.name || id;
-                      return (
-                        <span key={id} className="px-2 py-0.5 bg-purple-500/10 text-purple-300 text-xs rounded-full border border-purple-500/20 flex items-center gap-1">
-                          {name}
-                          <button type="button" onClick={() => {
-                            const updated = form.leaders.split(",").map(s => s.trim()).filter(s => s !== id).join(", ");
-                            update("leaders", updated);
-                          }} className="text-purple-400 hover:text-white">×</button>
-                        </span>
-                      );
-                    })}
+                  {/* Linked Country */}
+                  <div>
+                    <label className={labelClass}>Linked Country</label>
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        if (!e.target.value) return;
+                        const current = form.countries.split(",").map(s => s.trim()).filter(Boolean);
+                        if (!current.includes(e.target.value)) update("countries", [...current, e.target.value].join(", "));
+                      }}
+                      className={inputClass}
+                    >
+                      <option value="" className={selectBgClass}>— Add Country —</option>
+                      {entityCountries.map((c) => <option key={c._id} value={c._id} className={selectBgClass}>{c.name}</option>)}
+                    </select>
+                    {form.countries && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {form.countries.split(",").map(s => s.trim()).filter(Boolean).map((id) => (
+                          <span key={id} className="px-2 py-0.5 bg-blue-500/10 text-blue-300 text-[10px] rounded-md border border-blue-500/20 flex items-center gap-1">
+                            {entityCountries.find(c => c._id === id)?.name || id}
+                            <button type="button" onClick={() => update("countries", form.countries.split(",").map(s => s.trim()).filter(s => s !== id).join(", "))} className="hover:text-white">×</button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* Linked Entities — Conflicts */}
-              <div>
-                <label className={labelClass}>Linked Conflicts</label>
-                <select
-                  value=""
-                  onChange={(e) => {
-                    if (!e.target.value) return;
-                    const current = form.conflicts.split(",").map(s => s.trim()).filter(Boolean);
-                    if (!current.includes(e.target.value)) {
-                      update("conflicts", [...current, e.target.value].join(", "));
-                    }
-                  }}
-                  className={inputClass}
-                >
-                  <option value="" className={selectBgClass}>— Add Conflict —</option>
-                  {entityConflicts.map((c) => (
-                    <option key={c._id} value={c._id} className={selectBgClass}>{c.name}</option>
-                  ))}
-                </select>
-                {form.conflicts && (
-                  <div className="flex flex-wrap gap-1.5 mt-2">
-                    {form.conflicts.split(",").map(s => s.trim()).filter(Boolean).map((id) => {
-                      const name = entityConflicts.find(c => c._id === id)?.name || id;
-                      return (
-                        <span key={id} className="px-2 py-0.5 bg-red-500/10 text-red-300 text-xs rounded-full border border-red-500/20 flex items-center gap-1">
-                          {name}
-                          <button type="button" onClick={() => {
-                            const updated = form.conflicts.split(",").map(s => s.trim()).filter(s => s !== id).join(", ");
-                            update("conflicts", updated);
-                          }} className="text-red-400 hover:text-white">×</button>
-                        </span>
-                      );
-                    })}
+                  {/* Linked Leader */}
+                  <div>
+                    <label className={labelClass}>Linked Leader</label>
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        if (!e.target.value) return;
+                        const current = form.leaders.split(",").map(s => s.trim()).filter(Boolean);
+                        if (!current.includes(e.target.value)) update("leaders", [...current, e.target.value].join(", "));
+                      }}
+                      className={inputClass}
+                    >
+                      <option value="" className={selectBgClass}>— Add Leader —</option>
+                      {entityLeaders.map((l) => <option key={l._id} value={l._id} className={selectBgClass}>{l.name}</option>)}
+                    </select>
+                    {form.leaders && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {form.leaders.split(",").map(s => s.trim()).filter(Boolean).map((id) => (
+                          <span key={id} className="px-2 py-0.5 bg-purple-500/10 text-purple-300 text-[10px] rounded-md border border-purple-500/20 flex items-center gap-1">
+                            {entityLeaders.find(l => l._id === id)?.name || id}
+                            <button type="button" onClick={() => update("leaders", form.leaders.split(",").map(s => s.trim()).filter(s => s !== id).join(", "))} className="hover:text-white">×</button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              {/* References */}
-              <div>
-                <label className={labelClass}>References (one per line)</label>
-                <textarea
-                  rows={5}
-                  placeholder={"https://source1.com/article\nhttps://source2.org/report\nhttps://think-tank.org/analysis"}
-                  value={form.references}
-                  onChange={(e) => update("references", e.target.value)}
-                  className={`${inputClass} font-mono text-xs`}
-                />
-                <p className="text-gray-600 text-xs mt-1">
-                  {form.references.split("\n").filter(r => r.trim()).length} reference(s)
-                </p>
+                  {/* Linked Conflict */}
+                  <div>
+                    <label className={labelClass}>Linked Conflict</label>
+                    <select
+                      value=""
+                      onChange={(e) => {
+                        if (!e.target.value) return;
+                        const current = form.conflicts.split(",").map(s => s.trim()).filter(Boolean);
+                        if (!current.includes(e.target.value)) update("conflicts", [...current, e.target.value].join(", "));
+                      }}
+                      className={inputClass}
+                    >
+                      <option value="" className={selectBgClass}>— Add Conflict —</option>
+                      {entityConflicts.map((c) => <option key={c._id} value={c._id} className={selectBgClass}>{c.name}</option>)}
+                    </select>
+                    {form.conflicts && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {form.conflicts.split(",").map(s => s.trim()).filter(Boolean).map((id) => (
+                          <span key={id} className="px-2 py-0.5 bg-red-500/10 text-red-300 text-[10px] rounded-md border border-red-500/20 flex items-center gap-1">
+                            {entityConflicts.find(c => c._id === id)?.name || id}
+                            <button type="button" onClick={() => update("conflicts", form.conflicts.split(",").map(s => s.trim()).filter(s => s !== id).join(", "))} className="hover:text-white">×</button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* ═══════ Right Panel - Quick Stats ═══════ */}

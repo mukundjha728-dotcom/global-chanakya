@@ -48,7 +48,7 @@ export function generateSeoMetadata({
     type,
     siteName,
     locale,
-    ...(imageUrl ? { images: [{ url: imageUrl, width: 1200, height: 630, alt: safeTitle }] } : {}),
+    ...(imageUrl ? { images: [{ url: imageUrl, alt: safeTitle }] } : {}),
   };
 
   if (type === "article") {

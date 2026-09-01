@@ -19,7 +19,7 @@ import { ArrowLeft, Clock, Eye, Calendar, Tag, Crown, TrendingUp, Crosshair, New
 import { SITE_URL } from "@/constants";
 import AdUnit, { InArticleAd, SidebarAd } from "@/components/ads/AdUnit";
 
-import { generateBlogJsonLd, sanitizeOgImageUrl } from "@/lib/seo/generateBlogJsonLd";
+import { generateArticleSchema, sanitizeOgImageUrl } from "@/lib/seo/generateBlogJsonLd";
 
 // Global cache across requests
 const getCachedBlog = unstable_cache(
@@ -146,7 +146,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
     return `<h${level} id="${id}"${attrs} style="scroll-margin-top: 100px;">${text}</h${level}>`;
   });
 
-  const jsonLd = generateBlogJsonLd(blog);
+  const jsonLd = generateArticleSchema(blog);
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">

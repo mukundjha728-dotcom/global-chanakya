@@ -84,6 +84,10 @@ function BlogCard({ blog, variant = "default", isViral = false }: { blog: Trendi
               {blog.title}
             </h3>
             <div className="mt-auto flex items-center justify-between text-[9px] sm:text-[10px] text-[var(--secondary)] uppercase tracking-[0.14em] font-bold">
+              <span className="flex items-center gap-1.5 text-white/60">
+                <Eye className="w-3.5 h-3.5" />
+                {formatViews(blog.analytics?.views ?? 0)}
+              </span>
               <span>{new Date(blog.publishAt).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" })}</span>
             </div>
           </div>
