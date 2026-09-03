@@ -47,7 +47,8 @@ export default async function TopicHubPage({ params }: { params: Promise<{ slug:
   const relatedEntities = await EntityService.getContextualRelatedEntities("topics", data.entity._id);
 
   // Determine structured data
-  const isProfile = ["Leader", "Organization"].includes("Topic");
+  const typeStr = "Topic" as string;
+  const isProfile = ["Leader", "Organization"].includes(typeStr);
   
   const structuredData = {
     "@context": "https://schema.org",
@@ -56,7 +57,7 @@ export default async function TopicHubPage({ params }: { params: Promise<{ slug:
     description: data.entity.description || `Intelligence hub for ${data.entity.name}`,
     url: `${SITE_URL}/topics/${decodedSlug}`,
     mainEntity: isProfile ? {
-      "@type": "Topic" === "Leader" ? "Person" : "Organization",
+      "@type": typeStr === "Leader" ? "Person" : "Organization",
       name: data.entity.name,
       description: data.entity.description,
       ...(data.entity.featuredImage ? { image: data.entity.featuredImage } : {})

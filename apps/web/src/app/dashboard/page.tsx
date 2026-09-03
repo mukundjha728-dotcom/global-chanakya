@@ -74,7 +74,7 @@ export default async function DashboardPage() {
               <div className="space-y-4">
                 {feed.map((item) => (
                   <div key={item.id} className="p-5 rounded-xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.04] transition-colors group relative overflow-hidden">
-                    {item.meta?.severity === "critical" && <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />}
+                    { (item.meta as any)?.severity === "critical" && <div className="absolute top-0 left-0 w-1 h-full bg-red-500" />}
                     
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 bg-white/5 px-2 py-1 rounded">

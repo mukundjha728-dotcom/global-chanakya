@@ -47,7 +47,8 @@ export default async function RegionHubPage({ params }: { params: Promise<{ slug
   const relatedEntities = await EntityService.getContextualRelatedEntities("regions", data.entity._id);
 
   // Determine structured data
-  const isProfile = ["Leader", "Organization"].includes("Region");
+  const typeStr = "Region" as string;
+  const isProfile = ["Leader", "Organization"].includes(typeStr);
   
   const structuredData = {
     "@context": "https://schema.org",
@@ -56,7 +57,7 @@ export default async function RegionHubPage({ params }: { params: Promise<{ slug
     description: data.entity.description || `Intelligence hub for ${data.entity.name}`,
     url: `${SITE_URL}/regions/${decodedSlug}`,
     mainEntity: isProfile ? {
-      "@type": "Region" === "Leader" ? "Person" : "Organization",
+      "@type": typeStr === "Leader" ? "Person" : "Organization",
       name: data.entity.name,
       description: data.entity.description,
       ...(data.entity.featuredImage ? { image: data.entity.featuredImage } : {})

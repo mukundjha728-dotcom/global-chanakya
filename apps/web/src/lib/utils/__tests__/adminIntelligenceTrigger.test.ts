@@ -57,13 +57,13 @@ describe("Admin Intelligence Run Trigger", () => {
 
   it("rejects unauthorized access", async () => {
     mockAuth.mockResolvedValue(null);
-    const response: any = await POST();
+    const response: any = await POST({} as any, {} as any);
     expect(response.status).toBe(401);
   });
 
   it("rejects non-admin users", async () => {
     mockAuth.mockResolvedValue({ user: { role: "editor" } });
-    const response: any = await POST();
+    const response: any = await POST({} as any, {} as any);
     expect(response.status).toBe(401);
   });
 
@@ -72,7 +72,7 @@ describe("Admin Intelligence Run Trigger", () => {
     // Simulate lock already exists
     mockRedisSetNx.mockResolvedValue(null);
     
-    const response: any = await POST();
+    const response: any = await POST({} as any, {} as any);
     const data = await response.json();
     
     expect(data.success).toBe(false);
@@ -101,8 +101,8 @@ describe("Admin Intelligence Run Trigger", () => {
 
 
 
-    const res = await POST({} as any);
-    const data = await res.json();
+    const res = await POST({} as any, {} as any);
+    const data = await (res as any).json();
 
     expect(data.success).toBe(true);
     expect(data.status).toBe("SUCCESS");

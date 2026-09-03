@@ -47,7 +47,8 @@ export default async function OrganizationHubPage({ params }: { params: Promise<
   const relatedEntities = await EntityService.getContextualRelatedEntities("organizations", data.entity._id);
 
   // Determine structured data
-  const isProfile = ["Leader", "Organization"].includes("Organization");
+  const typeStr = "Organization" as string;
+  const isProfile = ["Leader", "Organization"].includes(typeStr);
   
   const structuredData = {
     "@context": "https://schema.org",
@@ -56,7 +57,7 @@ export default async function OrganizationHubPage({ params }: { params: Promise<
     description: data.entity.description || `Intelligence hub for ${data.entity.name}`,
     url: `${SITE_URL}/organizations/${decodedSlug}`,
     mainEntity: isProfile ? {
-      "@type": "Organization" === "Leader" ? "Person" : "Organization",
+      "@type": typeStr === "Leader" ? "Person" : "Organization",
       name: data.entity.name,
       description: data.entity.description,
       ...(data.entity.featuredImage ? { image: data.entity.featuredImage } : {})

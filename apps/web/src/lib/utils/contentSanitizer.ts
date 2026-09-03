@@ -1,6 +1,6 @@
 export function sanitizeInternalCitations(content: string | undefined | null): string {
   if (!content) return content || "";
-  const artifactRegex = /:antCitation\s*\[.*?\]\s*\{.*?\}/gs;
+  const artifactRegex = /:antCitation\s*\[.*?\]\s*\{.*?\}/g;
   return content.replace(artifactRegex, "");
 }
 
