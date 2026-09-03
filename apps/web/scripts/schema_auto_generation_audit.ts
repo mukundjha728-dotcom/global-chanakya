@@ -64,7 +64,7 @@ async function runAudit() {
         const $ = cheerio.load(html);
         const scripts = $('script[type="application/ld+json"]');
         
-        let schemaGraphs = [];
+        let schemaGraphs: any[] = [];
         scripts.each((_, el) => {
           try {
             const parsed = JSON.parse($(el).html() || "{}");
@@ -112,7 +112,7 @@ async function runAudit() {
           errors.push("No application/ld+json found");
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       errors.push(`Fetch failed: ${err.message}`);
     }
 

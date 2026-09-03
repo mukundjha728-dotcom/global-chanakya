@@ -22,10 +22,10 @@ async function fetchWithTimeout(url: string, options: any = {}) {
 }
 
 async function run() {
-  await mongoose.connect(MONGODB_URI);
+  await mongoose.connect(MONGODB_URI as string);
   console.log("Connected to MongoDB.");
 
-  const Blog = mongoose.connection.db.collection("blogs");
+  const Blog = mongoose.connection.db!.collection("blogs");
   const publishedBlogs = await Blog.find({ status: 'published' }).toArray();
 
   console.log(`Found ${publishedBlogs.length} published blogs in DB.`);
@@ -89,7 +89,7 @@ async function run() {
           let foundBlogPosting = false;
           jsonLdScripts.each((_, el) => {
             try {
-              const json = JSON.parse($(el).html());
+              const json = JSON.parse($(el).html() || "{}");
               const arr = Array.isArray(json) ? json : json['@graph'] ? json['@graph'] : [json];
               for (const item of arr) {
                 if (item['@type'] === 'BlogPosting' || item['@type'] === 'Article' || item['@type'] === 'NewsArticle') {

@@ -21,17 +21,17 @@ async function dumpArtifacts() {
   for (const blog of affectedBlogs) {
     if (blog.content) {
       const matches = blog.content.match(regex);
-      if (matches) matches.forEach(m => allMatches.add(m));
+      if (matches) matches.forEach((m: any) => allMatches.add(m));
     }
     if (blog.markdown) {
       const matches = blog.markdown.match(regex);
-      if (matches) matches.forEach(m => allMatches.add(m));
+      if (matches) matches.forEach((m: any) => allMatches.add(m));
     }
   }
 
   console.log(`Found ${allMatches.size} unique antCitation artifacts.`);
   console.log("Samples:");
-  allMatches.forEach(m => console.log(m));
+  allMatches.forEach((m: any) => console.log(m));
 
   // Also try to find any variation just matching "antCitation"
   const generalRegex = /.{0,10}antCitation.{0,50}/g;
@@ -39,12 +39,12 @@ async function dumpArtifacts() {
   for (const blog of affectedBlogs) {
     if (blog.content) {
       const matches = blog.content.match(generalRegex);
-      if (matches) matches.forEach(m => allGeneral.add(m));
+      if (matches) matches.forEach((m: any) => allGeneral.add(m));
     }
   }
   
   console.log("\nGeneral context samples:");
-  allGeneral.forEach(m => console.log(m));
+  allGeneral.forEach((m: any) => console.log(m));
 
   process.exit(0);
 }

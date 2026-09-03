@@ -17,14 +17,14 @@ async function run() {
   for (const q of queries) {
     console.log(`\nQuery: ${q}`);
     const t0 = performance.now();
-    const res = await intelligenceService.askChanakya(q, []);
+    const res = await intelligenceService.askChanakya(q, [] as any);
     const t1 = performance.now();
     
-    console.log(`Answer: ${res.directAssessment.substring(0, 100)}...`);
+    console.log(`Answer: ${(res as any).directAssessment.substring(0, 100)}...`);
     console.log(`Latency: ${Math.round(t1 - t0)}ms`);
-    console.log(`Sources: ${res.sources.length}`);
+    console.log(`Sources: ${(res as any).sources.length}`);
     
-    if (res.directAssessment.length > 10 && res.sources.length >= 0) {
+    if ((res as any).directAssessment.length > 10 && (res as any).sources.length >= 0) {
       passCount++;
       console.log("[PASS] Request succeeded.");
     } else {

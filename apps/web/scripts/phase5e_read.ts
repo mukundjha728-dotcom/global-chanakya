@@ -18,7 +18,7 @@ const targetSlugs = [
 
 async function run() {
     await mongoose.connect(MONGODB_URI as string);
-    const Blog = mongoose.connection.db.collection("blogs");
+    const Blog = mongoose.connection.db!.collection("blogs");
     
     const articles = await Blog.find({ slug: { $in: targetSlugs } }).toArray();
     fs.writeFileSync(`${ARTIFACT_DIR}\\phase5e_pilot_articles.json`, JSON.stringify(articles, null, 2));

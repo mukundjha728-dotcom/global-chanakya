@@ -16,8 +16,8 @@ async function checkIndex() {
       process.exit(1);
     }
     
-    console.log(`Status: ${vectorIndex.status}`);
-    if (vectorIndex.status !== "READY") {
+    console.log(`Status: ${(vectorIndex as any).status}`);
+    if ((vectorIndex as any).status !== "READY") {
       console.log("❌ 'vector_index' is NOT READY.");
       process.exit(1);
     }

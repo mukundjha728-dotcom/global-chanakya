@@ -20,7 +20,7 @@ async function run() {
     await mongoose.connect(MONGODB_URI as string);
     console.log("Connected to MongoDB.");
 
-    const Blog = mongoose.connection.db.collection("blogs");
+    const Blog = mongoose.connection.db!.collection("blogs");
     const doc = await Blog.findOne({ slug: TARGET_SLUG });
     
     if (!doc) {

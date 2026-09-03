@@ -14,7 +14,7 @@ async function runAudit() {
   
   // Taxonomy Check
   const taxonomies = ["Category", "Topic", "Country", "Region", "Leader", "Conflict", "Organization"];
-  const taxResults = {};
+  const taxResults: Record<string, any> = {};
   for (const tax of taxonomies) {
     const model = mongoose.models[tax];
     const items = await model.find({}).lean();
@@ -35,8 +35,8 @@ async function runAudit() {
     archived: archived.length,
     taxonomies: taxResults,
     explain: {
-      topicStage: explainTopic.queryPlanner?.winningPlan?.stage || explainTopic.queryPlanner?.winningPlan?.inputStage?.stage,
-      executionTimeMillis: explainTopic.executionStats?.executionTimeMillis
+      topicStage: (explainTopic as any).queryPlanner?.winningPlan?.stage || (explainTopic as any).queryPlanner?.winningPlan?.inputStage?.stage,
+      executionTimeMillis: (explainTopic as any).executionStats?.executionTimeMillis
     }
   }, null, 2));
   

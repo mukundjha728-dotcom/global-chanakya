@@ -14,7 +14,7 @@ async function updateIndexes() {
   // Find old index
   const oldIndex = indexes.find(i => i.name === "blogId_1_chunkIndex_1" || (i.key.blogId === 1 && i.key.chunkIndex === 1 && Object.keys(i.key).length === 2));
   
-  if (oldIndex) {
+  if (oldIndex && oldIndex.name) {
     console.log(`Dropping old index: ${oldIndex.name}`);
     await collection.dropIndex(oldIndex.name);
   }

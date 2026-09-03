@@ -26,8 +26,8 @@ async function run() {
       for (const idx of indexes) {
         if (idx.name === "vector_index") {
           found = true;
-          console.log(`[Attempt ${attempts}] Index status: ${idx.status}`);
-          if (idx.status === "READY") {
+          console.log(`[Attempt ${attempts}] Index status: ${(idx as any).status}`);
+          if ((idx as any).status === "READY") {
             isReady = true;
           }
         }

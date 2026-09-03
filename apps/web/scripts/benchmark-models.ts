@@ -36,7 +36,7 @@ async function runBenchmark() {
         const end = Date.now();
         const latency = end - start;
         console.log(`✅ Success in ${latency}ms`);
-        console.log(`Tokens: Input ${result.metadata?.promptTokens} | Output ${result.metadata?.completionTokens}`);
+        console.log(`Tokens: Input ${(result as any).metadata?.promptTokens} | Output ${(result as any).metadata?.completionTokens}`);
         // Basic quality check by length of directAssessment
         const responseData = result.data as any;
         console.log(`Direct Assessment Length: ${responseData.directAssessment?.length || 0} chars`);

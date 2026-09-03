@@ -57,7 +57,7 @@ async function run() {
     await mongoose.connect(MONGODB_URI as string);
     console.log("Connected to MongoDB");
 
-    const Blog = mongoose.connection.db.collection("blogs");
+    const Blog = mongoose.connection.db!.collection("blogs");
     
     const allBlogs = await Blog.find({ isDeleted: { $ne: true } }).toArray();
     const publishedBlogs = allBlogs.filter(b => b.status === 'published');

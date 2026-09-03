@@ -21,9 +21,9 @@ async function runAudit() {
   const originalGet = redisCache.get.bind(redisCache);
   const originalDelete = redisCache.delete.bind(redisCache);
 
-  redisCache.set = (async (key: string, value: any, ttl?: number, opts?: any) => {
+  redisCache.set = (async (key: string, value: any, ttl?: number) => {
     if (key.includes("worker:lock")) {
-      if (opts?.NX && mockLockState[key]) return null;
+      if (mockLockState[key]) return null;
       mockLockState[key] = value;
       return "OK";
     }
@@ -31,13 +31,13 @@ async function runAudit() {
       mockStatusState[key] = value;
       return "OK";
     }
-    return originalSet(key, value, ttl, opts as any);
+    return originalSet(key, value, ttl);
   }) as any;
 
   redisCache.delete = async (key: string) => {
     if (key.includes("worker:lock")) {
       delete mockLockState[key];
-      return 1;
+      return;
     }
     return originalDelete(key);
   };
@@ -63,13 +63,13 @@ async function runAudit() {
     console.log(`\n--- Intercepted Cycle ${cycleCount} ---`);
     if (cycleCount === 1) {
       console.log("Simulating Cycle 1 (SUCCESS)...");
-      return { fetched: 5, duplicates: 3, inserted: 2, normalized: 5, failed: 0, providersHealthy: 3, providersFailed: 0 };
+      return { fetched: 5, duplicates: 3, inserted: 2, normalized: 5, failed: 0, providersHealthy: 3, providersFailed: 0, published: 0, pending: 0, archived: 0, status: "ok", error: null };
     } else if (cycleCount === 2) {
       console.log("Simulating Cycle 2 (FAILURE - Groq Timeout)...");
       throw new Error("Artificial Groq Timeout");
     } else {
       console.log("Simulating Cycle 3 (RECOVERY SUCCESS)...");
-      return { fetched: 1, duplicates: 0, inserted: 1, normalized: 1, failed: 0, providersHealthy: 3, providersFailed: 0 };
+      return { fetched: 1, duplicates: 0, inserted: 1, normalized: 1, failed: 0, providersHealthy: 3, providersFailed: 0, published: 0, pending: 0, archived: 0, status: "ok", error: null };
     }
   };
 
@@ -83,8 +83,8 @@ async function runAudit() {
   console.log("\n[TEST 3] Testing Redis Distributed Lock (Simulating process 2)...");
   setTimeout(async () => {
     console.log("Worker B (Simulated Process) trying to acquire lock...");
-    const acquired = await redisCache.set("intelligence:worker:lock", "worker-B", 1, { NX: true });
-    if (!acquired) {
+    const acquired = await (redisCache as any).setNX("intelligence:worker:lock", "worker-B", 1);
+    if (acquired !== "OK") {
       console.log("Worker B correctly failed to acquire lock! Redis locking works.");
     } else {
       console.log("Worker B acquired lock (Cycle 1 finished fast). This proves Redis lock doesn't collide improperly. (Expires in 1s)");

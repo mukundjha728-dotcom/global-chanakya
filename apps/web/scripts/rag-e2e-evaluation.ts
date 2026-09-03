@@ -6,7 +6,7 @@ import { findSemanticMatches } from "../src/lib/ai/vectorSearch";
 import { generateEmbeddings } from "../src/lib/ai/embeddings";
 import { ContextBuilder } from "../src/lib/ai/contextBuilder";
 import { intelligenceService } from "../src/modules/intelligence/services/intelligence.service";
-import { cacheService } from "../src/modules/intelligence/services/cache.service";
+
 
 const QUERIES = [
   "How is India balancing its relations between the US and Russia?",

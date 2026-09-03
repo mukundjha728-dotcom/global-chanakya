@@ -41,7 +41,7 @@ async function run() {
     await mongoose.connect(MONGODB_URI as string);
     console.log("Connected to MongoDB.");
 
-    const Blog = mongoose.connection.db.collection("blogs");
+    const Blog = mongoose.connection.db!.collection("blogs");
     const allPublished = await Blog.find({ status: "published" }).toArray();
     
     const baselineRaw = fs.readFileSync(`${ARTIFACT_DIR}\\seo_phase5d_content_baseline.json`, 'utf8');
