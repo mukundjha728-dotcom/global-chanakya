@@ -680,11 +680,16 @@ CRITICAL CONSTRAINTS:
         run.completedCategories++;
       } else {
         const { countries, leaders, conflicts } = await this.mapEntities(seo);
+        const cleanText = article.htmlContent.replace(/<[^>]*>?/gm, '');
+        const wordCount = cleanText.split(/\s+/).filter(w => w.length > 0).length;
+        const readingTime = Math.max(1, Math.ceil(wordCount / 200));
+
         const blog = await BlogService.createBlog({
           title: seo.title,
           slug: seo.slug,
           excerpt: seo.excerpt,
           content: article.htmlContent,
+          readingTime,
           category,
           reportType: candidate.reportType,
           tags: seo.tags,

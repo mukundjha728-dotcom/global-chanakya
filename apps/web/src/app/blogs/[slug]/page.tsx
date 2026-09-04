@@ -84,7 +84,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     canonicalUrl: blog.seo?.canonicalUrl || `${SITE_URL}/blogs/${blog.slug}`,
     imageUrl: sanitizeOgImageUrl(blog.ogImage || blog.featuredImage),
     type: "article",
-    authorName: blog.author?.name || "Global Chanakya Editorial",
+    authorName: blog.isSystemGenerated ? "Global Chanakya Editorial" : blog.author?.name || "Global Chanakya Editorial",
     publishedTime: blog.publishAt ? new Date(blog.publishAt).toISOString() : undefined,
     modifiedTime: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
     robots: blog.seo?.robots,
@@ -157,7 +157,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
       <BlogClientTracker 
         title={blog.title} 
         category={blog.category} 
-        author={blog.author?.name || "Global Chanakya Editorial"} 
+        author={blog.isSystemGenerated ? "Global Chanakya Editorial" : blog.author?.name || "Global Chanakya Editorial"} 
         slug={blog.slug}
         isLoggedIn={!!session}
       />
@@ -194,10 +194,10 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
           <div className="flex flex-wrap items-center gap-6 mt-10 pt-8 border-t border-[var(--border)] text-[12px] font-bold uppercase tracking-widest text-[var(--muted)]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-sm bg-[var(--surface)] intel-border flex items-center justify-center text-[14px] text-white shadow-[0_0_10px_rgba(255,255,255,0.05)]">
-                {(blog.author?.name || "G")[0].toUpperCase()}
+                {(blog.isSystemGenerated ? "G" : (blog.author?.name || "G"))[0].toUpperCase()}
               </div>
               <div className="flex flex-col gap-0.5">
-                <span className="text-white">{blog.author?.name || "Global Chanakya Editorial"}</span>
+                <span className="text-white">{blog.isSystemGenerated ? "Global Chanakya Editorial" : blog.author?.name || "Global Chanakya Editorial"}</span>
                 <span className="text-[10px] text-[var(--gold)]">Lead Analyst</span>
               </div>
             </div>

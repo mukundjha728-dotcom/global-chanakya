@@ -15,8 +15,8 @@ export async function GET() {
       .lean();
 
     const generateRssItem = (blog: any) => {
-      const authorEmail = blog.author?.email || "editorial@globalchanakya.com";
-      const authorName = blog.author?.name || "Global Chanakya Editorial";
+      const authorEmail = blog.isSystemGenerated ? "editorial@globalchanakya.com" : blog.author?.email || "editorial@globalchanakya.com";
+      const authorName = blog.isSystemGenerated ? "Global Chanakya Editorial" : blog.author?.name || "Global Chanakya Editorial";
       
       let enclosure = "";
       if (blog.featuredImage) {
