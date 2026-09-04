@@ -427,7 +427,10 @@ export class BlogPublishingEngine {
         }
       });
       
-      const formatFacts = (facts: any[]) => facts.map((f: any) => `Fact: ${f.claim || f.fact || ''}\nEvidence: ${f.supportingEvidence || f.context || ''}\nSource: ${(f.sourceUrls || []).join(', ')}`).join('\n\n');
+      // NOTE: Source URLs are intentionally excluded from the fact context.
+      // Passing raw URLs to the model causes it to dump them verbatim as plain text
+      // inside article paragraphs. Citations are handled separately at the DB level.
+      const formatFacts = (facts: any[]) => facts.map((f: any) => `Fact: ${f.claim || f.fact || ''}\nEvidence: ${f.supportingEvidence || f.context || ''}`).join('\n\n');
       
       const contextSlice = `
 HIGHLY RELEVANT FACTS:
@@ -456,12 +459,19 @@ Your section is: ${section.headerText}.
 Target word count for this section: ~${section.targetWordCount} words.
 Write 6 to 8 long, well-developed analytical paragraphs. Each paragraph must be at least 80 words. Do NOT invent facts. Use only the provided evidence.
 Do NOT include an "in conclusion", "to summarize", "in summary", or "overall" opener or closer.
+CRITICAL: Do NOT write any raw URLs or hyperlinks in the article body. Never include http:// or https:// links in the text. Do not cite sources by URL. Write prose only.
 Return ONLY raw HTML starting with <h2> and ending with </p>. Do NOT return JSON. Do NOT add any markdown fences or code blocks.`,
             userPrompt: `Topic: ${candidate.title}\n\nContext for this section:\n${contextSlice}`,
             maxTokens: 8000
           });
           
-          sectionRes = { htmlContent: rawHtml.trim() };
+          // Post-process: strip any raw URLs the model may have written despite instructions.
+          // Matches bare URLs in text nodes (href= attributes in <a> tags are preserved).
+          const strippedHtml = rawHtml
+            .replace(/(?<!["'=])(https?:\/\/[^\s<>"'\)]+)/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+          sectionRes = { htmlContent: strippedHtml };
 
           const cleanTextForRetry = sectionRes.htmlContent.replace(/<[^>]*>?/gm, '');
           const actualWordsForRetry = cleanTextForRetry.split(/\s+/).filter((w: string) => w.length > 0).length;
