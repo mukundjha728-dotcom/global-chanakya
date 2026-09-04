@@ -91,5 +91,36 @@ export const redis = {
       return;
     }
     localCache.delete(key);
+  },
+
+  /**
+   * Atomically increment an integer key by 1, initialising to 0 if missing.
+   * Returns the value AFTER incrementing.
+   */
+  async incr(key: string): Promise<number> {
+    if (redisClient) {
+      return redisClient.incr(key);
+    }
+    // In-memory fallback
+    const cached = localCache.get(key);
+    const current = cached ? (cached.value as number) : 0;
+    const next = current + 1;
+    localCache.set(key, { value: next, expiresAt: Date.now() + 1000 * 60 * 60 * 24 });
+    return next;
+  },
+
+  /**
+   * Set a TTL (in seconds) on an existing key.
+   * No-op in the in-memory fallback (expiry is set at creation).
+   */
+  async expire(key: string, seconds: number): Promise<void> {
+    if (redisClient) {
+      await redisClient.expire(key, seconds);
+    }
+    // In-memory: just extend the TTL on whatever is already stored
+    const cached = localCache.get(key);
+    if (cached) {
+      cached.expiresAt = Date.now() + seconds * 1000;
+    }
   }
 };
