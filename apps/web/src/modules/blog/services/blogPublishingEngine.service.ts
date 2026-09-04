@@ -144,7 +144,28 @@ export class BlogPublishingEngine {
         status: { $in: ["QUEUED", "RUNNING", "IDLE"] }
       }).sort({ createdAt: -1 });
 
-      if (!run || run.status === "IDLE" || run.status === "COMPLETED") {
+      // Auto-expire stale runs:
+      // (a) isDryRun mismatch — a dry-run audit left a QUEUED/RUNNING run that blocks real publishing
+      // (b) No remaining PENDING/RETRYING categories — run is exhausted but never marked COMPLETED
+      // (c) A RUNNING run older than the lock TTL — orphaned by a crashed worker
+      if (run) {
+        const hasPending = run.categoryResults.some((c: any) => c.status === "PENDING" || c.status === "RETRYING");
+        const isOrphaned = run.status === "RUNNING" && 
+          (Date.now() - new Date(run.updatedAt || run.createdAt).getTime()) > (LOCK_TTL_SECONDS * 1000);
+
+        if (run.isDryRun !== isDryRun || !hasPending || isOrphaned) {
+          console.warn(
+            `[BlogPublishingEngine] Auto-expiring stale run ${run.runId} ` +
+            `(isDryRunMismatch=${run.isDryRun !== isDryRun}, hasPending=${hasPending}, isOrphaned=${isOrphaned})`
+          );
+          run.status = "COMPLETED";
+          run.completedAt = new Date();
+          await run.save();
+          run = null as any;
+        }
+      }
+
+      if (!run) {
         const systemAuthorId = process.env.SYSTEM_BLOG_AUTHOR_ID;
         if (!systemAuthorId || !mongoose.Types.ObjectId.isValid(systemAuthorId)) {
           throw new Error("CRITICAL: SYSTEM_BLOG_AUTHOR_ID is missing or invalid.");
@@ -171,10 +192,6 @@ export class BlogPublishingEngine {
           }))
         });
         await run.save();
-      }
-
-      if (run.isDryRun !== isDryRun) {
-        throw new Error(`Active run isDryRun=${run.isDryRun} but request isDryRun=${isDryRun}.`);
       }
 
       const nextCategory = run.categoryResults.find((c: any) => c.status === "PENDING" || c.status === "RETRYING");

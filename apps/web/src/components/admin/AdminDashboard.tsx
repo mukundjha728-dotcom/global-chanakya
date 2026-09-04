@@ -59,8 +59,10 @@ export default function AdminDashboard({ stats }: { stats: Stats }) {
                   <card.icon className="w-5 h-5" />
                 </div>
               </div>
-              <p className={`text-5xl font-black bg-gradient-to-br ${card.gradient} text-transparent bg-clip-text drop-shadow-sm`}>
-                {card.value.toLocaleString()}
+              {/* suppressHydrationWarning: toLocaleString is locale-sensitive; explicit "en-US"
+                  keeps server and client output identical regardless of system locale. */}
+              <p className={`text-5xl font-black bg-gradient-to-br ${card.gradient} text-transparent bg-clip-text drop-shadow-sm`} suppressHydrationWarning>
+                {card.value.toLocaleString("en-US")}
               </p>
             </div>
           ))}

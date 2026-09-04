@@ -2,10 +2,12 @@
 import React, { useState, useEffect } from "react";
 import { Filter, Search, User, FileText, Calendar, Activity } from "lucide-react";
 
+// Static mock data — DO NOT use new Date() / Date.now() at module level.
+// Runtime timestamps differ between SSR and client hydration, causing React #418.
 const MOCK_AUDITS = [
-  { id: "al_1", user: "mukun@example.com", action: "CREATE", entity: "Conflict", entityId: "c_123", date: new Date().toISOString() },
-  { id: "al_2", user: "editor@example.com", action: "UPDATE", entity: "Blog", entityId: "b_456", date: new Date(Date.now() - 3600000).toISOString() },
-  { id: "al_3", user: "system", action: "PUBLISH", entity: "Region", entityId: "r_789", date: new Date(Date.now() - 7200000).toISOString() },
+  { id: "al_1", user: "mukun@example.com", action: "CREATE", entity: "Conflict", entityId: "c_123", date: "2026-01-01T00:00:00.000Z" },
+  { id: "al_2", user: "editor@example.com", action: "UPDATE", entity: "Blog", entityId: "b_456", date: "2025-12-31T23:00:00.000Z" },
+  { id: "al_3", user: "system", action: "PUBLISH", entity: "Region", entityId: "r_789", date: "2025-12-31T22:00:00.000Z" },
 ];
 
 export default function AuditLogDashboard() {

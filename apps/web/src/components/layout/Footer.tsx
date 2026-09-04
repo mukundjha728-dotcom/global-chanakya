@@ -1,6 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 
+// currentYear is computed at server render time. It matches the client at any reasonable
+// page load time (same UTC date). suppressHydrationWarning is intentional here: the year
+// is genuinely time-dependent and cannot meaningfully differ between SSR and hydration
+// within the same page request.
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -87,7 +91,7 @@ export default function Footer() {
 
         {/* Bottom Strip */}
         <div className="border-t border-[#111827] py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-[var(--muted)] tracking-wide">
+          <p className="text-xs text-[var(--muted)] tracking-wide" suppressHydrationWarning>
             © {currentYear} Global Chanakya Intelligence. All rights reserved.
           </p>
           <div className="flex items-center gap-2 px-3 py-1.5 rounded bg-[#111827]/50 border border-[#111827] text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--muted)]">

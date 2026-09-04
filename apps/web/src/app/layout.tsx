@@ -8,6 +8,9 @@ import Script from "next/script";
 import { ConditionalShell } from "@/components/layout/ConditionalShell";
 import { Providers } from "@/components/layout/Providers";
 import { CSPostHogProvider } from "@/components/providers/PostHogProvider";
+import { AdSenseScript } from "@/components/layout/AdSenseScript";
+import CookieConsent from "@/components/CookieConsent";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION as SITE_DESC } from "@/constants";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,8 +23,6 @@ const lora = Lora({
   subsets: ["latin"],
   display: "swap",
 });
-
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION as SITE_DESC } from "@/constants";
 
 export const viewport: Viewport = {
   themeColor: "#0B1020",
@@ -133,35 +134,13 @@ const jsonLd = [
     "@context": "https://schema.org",
     "@type": "ItemList",
     "itemListElement": [
-      {
-        "@type": "SiteNavigationElement",
-        "position": 1,
-        "name": "Reports",
-        "url": `${SITE_URL}/blogs`
-      },
-      {
-        "@type": "SiteNavigationElement",
-        "position": 2,
-        "name": "About Us",
-        "url": `${SITE_URL}/about`
-      },
-      {
-        "@type": "SiteNavigationElement",
-        "position": 3,
-        "name": "Breaking Intel",
-        "url": `${SITE_URL}/breaking`
-      },
-      {
-        "@type": "SiteNavigationElement",
-        "position": 4,
-        "name": "Methodology",
-        "url": `${SITE_URL}/methodology`
-      }
+      { "@type": "SiteNavigationElement", "position": 1, "name": "Reports", "url": `${SITE_URL}/blogs` },
+      { "@type": "SiteNavigationElement", "position": 2, "name": "About Us", "url": `${SITE_URL}/about` },
+      { "@type": "SiteNavigationElement", "position": 3, "name": "Breaking Intel", "url": `${SITE_URL}/breaking` },
+      { "@type": "SiteNavigationElement", "position": 4, "name": "Methodology", "url": `${SITE_URL}/methodology` },
     ]
   }
 ];
-
-import CookieConsent from "@/components/CookieConsent";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
@@ -171,13 +150,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <meta name="google-adsense-account" content="ca-pub-3046817657353243" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
-        <Script
-          id="google-adsense"
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3046817657353243"
-          crossOrigin="anonymous"
-          strategy="afterInteractive"
-        />
+        {/* AdSense is conditionally loaded via AdSenseScript — skipped on admin routes
+            to prevent the BHK (Buy with Google) widget from logging a missing merchantId
+            warning on /gc-control-9x7k where no merchant credentials are configured. */}
 
         <Script
           id="json-ld-org"
@@ -199,9 +174,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             </Providers>
           </ThemeProvider>
         </CSPostHogProvider>
+        {/* AdSense is intentionally skipped on /gc-control-9x7k admin routes.
+            See AdSenseScript for rationale. */}
+        <AdSenseScript />
       </body>
     </html>
   );
 }
-
-
