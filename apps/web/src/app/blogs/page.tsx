@@ -14,6 +14,10 @@ export async function generateMetadata({
 }) {
   const resolvedParams = await searchParams;
   const category = resolvedParams.category as string | undefined;
+  const search = resolvedParams.search as string | undefined;
+  const tag = resolvedParams.tag as string | undefined;
+
+  const hasFilters = !!(search || tag || category);
 
   let canonical = "/blogs";
   if (category) {
@@ -35,6 +39,7 @@ export async function generateMetadata({
     alternates: {
       canonical,
     },
+    ...(hasFilters ? { robots: { index: false, follow: false } } : {}),
   };
 }
 

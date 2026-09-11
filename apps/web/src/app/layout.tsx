@@ -110,7 +110,7 @@ const jsonLd = [
       "https://twitter.com/globalchanakya",
       "https://linkedin.com/company/globalchanakya",
     ],
-    foundingDate: "2024",
+    foundingDate: "2026",
     areaServed: "Worldwide",
     knowsAbout: ["Geopolitics", "Strategic Intelligence", "Foreign Policy", "Defence"],
   },

@@ -193,13 +193,20 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
 
           <div className="flex flex-wrap items-center gap-6 mt-10 pt-8 border-t border-[var(--border)] text-[12px] font-bold uppercase tracking-widest text-[var(--muted)]">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-sm bg-[var(--surface)] intel-border flex items-center justify-center text-[14px] text-white shadow-[0_0_10px_rgba(255,255,255,0.05)]">
-                {(blog.isSystemGenerated ? "G" : (blog.author?.name || "G"))[0].toUpperCase()}
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-white">{blog.isSystemGenerated ? "Global Chanakya Editorial" : blog.author?.name || "Global Chanakya Editorial"}</span>
-                <span className="text-[10px] text-[var(--gold)]">Lead Analyst</span>
-              </div>
+              <Link href={`/author/${blog.author?.authorSlug || 'global-chanakya-editorial'}`} className="flex items-center gap-3 group">
+                <div className="w-10 h-10 rounded-sm bg-[var(--surface)] intel-border flex items-center justify-center text-[14px] text-white shadow-[0_0_10px_rgba(255,255,255,0.05)] group-hover:border-[var(--gold)] transition-colors overflow-hidden">
+                  {blog.author?.avatar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={blog.author.avatar} alt={blog.author?.name || "Global Chanakya Editorial"} className="w-full h-full object-cover" />
+                  ) : (
+                    (blog.isSystemGenerated ? "G" : (blog.author?.name || "G"))[0].toUpperCase()
+                  )}
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-white group-hover:text-[var(--gold)] transition-colors">{blog.isSystemGenerated ? "Global Chanakya Editorial" : blog.author?.name || "Global Chanakya Editorial"}</span>
+                  <span className="text-[10px] text-[var(--gold)]">{blog.author?.role === 'editor' ? 'Lead Analyst / Editor' : 'Lead Analyst'}</span>
+                </div>
+              </Link>
             </div>
             <div className="w-px h-8 bg-[var(--border)] hidden sm:block"></div>
             <span className="flex items-center gap-2"><Calendar className="w-4 h-4 text-[var(--secondary)]" /> {publishDate}</span>
@@ -228,6 +235,30 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
               className="article-body" 
               dangerouslySetInnerHTML={{ __html: sanitizedContent }} 
             />
+
+            {/* Citations */}
+            {blog.citations && blog.citations.length > 0 && (
+              <div className="mt-12 pt-8 border-t border-[var(--border)]">
+                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">Sources & References</h3>
+                <ul className="space-y-3">
+                  {blog.citations.map((citation: any, idx: number) => (
+                    <li key={idx} className="flex items-start gap-2 text-[15px] leading-relaxed">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--gold)] mt-2 shrink-0" />
+                      <div>
+                        {citation.url ? (
+                          <a href={citation.url} target="_blank" rel="noopener noreferrer" className="text-[var(--cyan)] hover:underline font-medium break-all">
+                            {citation.source}
+                          </a>
+                        ) : (
+                          <span className="text-white font-medium">{citation.source}</span>
+                        )}
+                        {citation.type && <span className="text-[var(--muted)] ml-2 text-xs uppercase tracking-wider">[{citation.type}]</span>}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Ad: After article content */}
             <InArticleAd slot="auto" />
