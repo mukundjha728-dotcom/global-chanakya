@@ -14,7 +14,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-6">
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-10 lg:gap-14 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-14 mb-20">
           
           {/* Column 1: Brand Block */}
           <div className="lg:col-span-2 flex flex-col">
@@ -30,20 +30,20 @@ export default function Footer() {
                 <span className="text-[28px] font-bold tracking-[-0.03em] text-white">
                   Global Chanakya
                 </span>
-                <span className="text-[11px] font-bold text-[#D4AF37] tracking-[0.22em] uppercase">
+                <span className="text-[11px] font-bold text-[var(--gold)] tracking-[0.22em] uppercase">
                   Intelligence
                 </span>
               </div>
             </Link>
             <p className="text-sm text-[var(--muted)] leading-[1.7] mb-6">
-              Independent geopolitical analysis for policymakers, analysts, and strategic thinkers.
+              Independent geopolitical intelligence, strategic analysis and research on the developments reshaping global power.
             </p>
             <div className="flex items-center gap-4">
               <a 
                 href="https://www.instagram.com/globalchanaky?stkn=MTRwaDFxaTl0dHRpMw==" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-10 h-10 rounded-full bg-[#111827] border border-[#1E293B] flex items-center justify-center text-[var(--muted)] hover:text-[#D4AF37] hover:border-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all duration-300 group"
+                className="w-10 h-10 rounded-full bg-[var(--surface)] border border-[rgba(255,255,255,0.1)] flex items-center justify-center text-[var(--muted)] hover:text-[var(--gold-hover)] hover:border-[var(--gold-hover)] hover:bg-[var(--gold)]/10 transition-all duration-300 group"
                 aria-label="Follow us on Instagram"
               >
                 <Instagram className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
@@ -51,50 +51,35 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Column 2: Strategic Hubs */}
+          {/* Column 2: Explore */}
           <div className="flex flex-col gap-5">
-            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Strategic Hubs</h4>
+            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Explore</h4>
             <ul className="flex flex-col gap-3">
-              <li><Link href="/breaking" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Breaking Intel</Link></li>
-              <li><Link href="/blogs" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">All Reports</Link></li>
-            </ul>
-            <div className="mt-4">
-              <a href="https://www.launchory.app/startups/global-chanakya?ref=badge" target="_blank" rel="noopener noreferrer">
-                <img src="https://www.launchory.app/api/badge/global-chanakya?theme=dark" alt="Featured on Launchory" width="240" height="54" />
-              </a>
-            </div>
-          </div>
-
-          {/* Column 3: Trust & Ethics */}
-          <div className="flex flex-col gap-5">
-            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Trust & Ethics</h4>
-            <ul className="flex flex-col gap-3">
-              <li><Link href="/source-verification" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Source Verification</Link></li>
-              <li><Link href="/methodology" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Methodology</Link></li>
-              <li><Link href="/editorial-policy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Editorial Policy</Link></li>
-              <li><Link href="/fact-checking" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Fact Checking</Link></li>
-              <li><Link href="/contributor-policy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Contributor Policy</Link></li>
+              <li><Link href="/intelligence" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Intelligence</Link></li>
+              <li><Link href="/blogs" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Reports</Link></li>
+              <li><Link href="/topics" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Topics</Link></li>
             </ul>
           </div>
 
-          {/* Column 4: Company */}
+          {/* Column 3: Company */}
           <div className="flex flex-col gap-5">
             <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Company</h4>
             <ul className="flex flex-col gap-3">
-              <li><Link href="/about" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">About Us</Link></li>
-              <li><Link href="/contact" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Contact</Link></li>
-              <li><Link href="/careers" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Careers</Link></li>
+              <li><Link href="/about" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">About</Link></li>
+              <li><Link href="/careers" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Careers</Link></li>
+              <li><Link href="/contact" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Contact</Link></li>
             </ul>
           </div>
 
-          {/* Column 5: Legal & Resources */}
+          {/* Column 4: Standards */}
           <div className="flex flex-col gap-5">
-            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Legal</h4>
+            <h4 className="text-white text-sm font-bold uppercase tracking-[0.06em]">Standards</h4>
             <ul className="flex flex-col gap-3">
-              <li><Link href="/privacy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/terms" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Terms of Service</Link></li>
-              <li><Link href="/disclaimer" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Disclaimer</Link></li>
-              <li><Link href="/cookie-policy" className="text-sm text-[var(--muted)] hover:text-[#D4AF37] transition-colors">Cookie Policy</Link></li>
+              <li><Link href="/methodology" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Methodology</Link></li>
+              <li><Link href="/source-verification" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Source Verification</Link></li>
+              <li><Link href="/editorial-policy" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Editorial Policy</Link></li>
+              <li><Link href="/privacy" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Privacy</Link></li>
+              <li><Link href="/terms" className="text-sm text-[var(--muted)] hover:text-[var(--gold)] transition-colors">Terms</Link></li>
             </ul>
           </div>
           

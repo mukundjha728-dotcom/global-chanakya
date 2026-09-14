@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function SignUpPage() {
   return (
-    <div className="min-h-screen pt-32 pb-20 px-6 flex items-center justify-center bg-black">
+    <div className="min-h-screen pt-32 pb-20 px-6 flex items-center justify-center bg-[var(--bg)]">
       <div className="w-full max-w-md">
         <Suspense fallback={<div className="text-white text-center">Loading...</div>}>
           <SignUpForm />

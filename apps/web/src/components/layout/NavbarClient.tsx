@@ -20,9 +20,11 @@ interface NavbarClientProps {
 }
 
 const navLinks = [
+  { label: "Home", href: "/" },
+  { label: "Intelligence", href: "/intelligence" },
   { label: "Reports", href: "/blogs" },
+  { label: "Topics", href: "/topics" },
   { label: "About", href: "/about" },
-  { label: "Contact", href: "/contact" },
 ];
 
 export default function NavbarClient({ session }: NavbarClientProps) {
@@ -32,6 +34,16 @@ export default function NavbarClient({ session }: NavbarClientProps) {
   const pathname = usePathname();
   const isAdmin = session?.user?.role === "admin";
 
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   useEffect(() => {
     if (!profileOpen) return;
     const close = () => setProfileOpen(false);
@@ -40,7 +52,7 @@ export default function NavbarClient({ session }: NavbarClientProps) {
   }, [profileOpen]);
 
   return (
-    <nav className="sticky top-0 z-50 w-full h-20 backdrop-blur-xl bg-[var(--bg)]/90 border-b border-[var(--border)] flex items-center transition-all duration-300">
+    <nav className={`sticky top-0 z-50 w-full backdrop-blur-xl bg-[#07111F]/90 border-b border-[rgba(255,255,255,0.1)] flex items-center transition-all duration-300 ${scrolled ? 'h-16' : 'h-20'}`}>
       <div className="w-full max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between">
         
         {/* Left: Logo */}
@@ -50,7 +62,7 @@ export default function NavbarClient({ session }: NavbarClientProps) {
             alt="Global Chanakya"
             width={48}
             height={48}
-            className="w-8 h-8 md:w-12 md:h-12 rounded-lg md:rounded-xl group-hover:scale-105 transition-transform duration-300"
+            className={`rounded-lg md:rounded-xl group-hover:scale-105 transition-transform duration-300 ${scrolled ? 'w-8 h-8 md:w-10 md:h-10' : 'w-8 h-8 md:w-12 md:h-12'}`}
           />
           <div className="flex flex-col leading-none gap-0.5 md:gap-1">
             <span className="text-[16px] md:text-[28px] font-bold tracking-[-0.03em] text-white">

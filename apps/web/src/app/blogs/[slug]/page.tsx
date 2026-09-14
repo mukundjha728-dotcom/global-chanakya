@@ -183,7 +183,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             )}
           </div>
 
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-[-0.02em] text-white mb-6 max-w-4xl">
+          <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-extrabold leading-[1.1] tracking-[-0.02em] text-white mb-6 max-w-4xl">
             {blog.title}
           </h1>
 
@@ -239,7 +239,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             {/* Citations */}
             {blog.citations && blog.citations.length > 0 && (
               <div className="mt-12 pt-8 border-t border-[var(--border)]">
-                <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">Sources & References</h3>
+                <h3 className="font-heading text-xl font-bold text-white mb-4 flex items-center gap-2">Sources & References</h3>
                 <ul className="space-y-3">
                   {blog.citations.map((citation: any, idx: number) => (
                     <li key={idx} className="flex items-start gap-2 text-[15px] leading-relaxed">
@@ -288,14 +288,14 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             {/* Bottom Suggestions / Related Blogs */}
             {relatedBlogs.length > 0 && (
               <div className="mt-16 pt-12 border-t border-[var(--border)]">
-                <h3 className="text-[18px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-8">
+                <h3 className="font-heading text-[18px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-8">
                   <Newspaper className="w-5 h-5 text-[var(--cyan)]" /> Suggested Intelligence
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {relatedBlogs.map((rb: any) => (
                     <Link key={rb._id} href={`/blogs/${rb.slug}`} className="glass-card p-5 rounded-sm hover:-translate-y-1 transition-transform group flex flex-col gap-3 border border-[var(--border)] hover:border-[var(--gold)]/50">
                       <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--cyan)]">{rb.category}</span>
-                      <h4 className="text-[16px] font-bold text-white leading-snug group-hover:text-[var(--gold)] transition-colors line-clamp-2">
+                      <h4 className="font-heading text-[16px] font-bold text-white leading-snug group-hover:text-[var(--gold)] transition-colors line-clamp-2">
                         {rb.title}
                       </h4>
                       <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--muted)] flex items-center gap-2 mt-auto pt-2">
@@ -313,7 +313,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             {/* TOC */}
             {toc.length > 0 && (
               <div className="glass-card rounded-sm p-6 shrink-0">
-                <h3 className="text-[12px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-6 border-b border-[var(--border)] pb-4">
+                <h3 className="font-heading text-[12px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-6 border-b border-[var(--border)] pb-4">
                   <Crosshair className="w-4 h-4 text-[var(--gold)]" /> Executive Summary
                 </h3>
                 <nav className="flex flex-col gap-3">
@@ -333,14 +333,14 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             {/* Related Reports */}
             {relatedBlogs.length > 0 && (
               <div className="glass-card rounded-sm p-6 shrink-0">
-                <h3 className="text-[12px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-6 border-b border-[var(--border)] pb-4">
+                <h3 className="font-heading text-[12px] font-bold uppercase tracking-widest text-white flex items-center gap-2 mb-6 border-b border-[var(--border)] pb-4">
                   <Newspaper className="w-4 h-4 text-[var(--cyan)]" /> Related Intelligence
                 </h3>
                 <div className="flex flex-col gap-5">
                   {relatedBlogs.map((rb: any) => (
                     <Link key={rb._id} href={`/blogs/${rb.slug}`} className="group flex flex-col gap-2">
                       <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--cyan)]">{rb.category}</span>
-                      <h4 className="text-[14px] font-bold text-white leading-snug group-hover:text-[var(--gold)] transition-colors line-clamp-2">
+                      <h4 className="font-heading text-[14px] font-bold text-white leading-snug group-hover:text-[var(--gold)] transition-colors line-clamp-2">
                         {rb.title}
                       </h4>
                       <span className="text-[11px] font-bold uppercase tracking-widest text-[var(--muted)] flex items-center gap-2 mt-1">
@@ -368,6 +368,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
         }
         .article-body p { margin-bottom: 1.6em; color: var(--text); }
         .article-body h2 { 
+          font-family: var(--font-heading), sans-serif;
           font-size: 1.8em; 
           font-weight: 800; 
           color: white !important; 
@@ -376,7 +377,7 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
           border-bottom: 1px solid var(--border); 
           padding-bottom: 0.5em; 
         }
-        .article-body h3 { font-size: 1.4em; font-weight: 700; color: white !important; margin-top: 1.8em; margin-bottom: 0.8em; }
+        .article-body h3 { font-family: var(--font-heading), sans-serif; font-size: 1.4em; font-weight: 700; color: white !important; margin-top: 1.8em; margin-bottom: 0.8em; }
         .article-body a { color: var(--gold) !important; text-decoration: none; border-bottom: 1px solid var(--gold); transition: all 0.2s; }
         .article-body a:hover { opacity: 0.8; }
         .article-body blockquote {

@@ -20,8 +20,11 @@ export async function generateMetadata({
   }
   return {
     title: `${author.name} | Global Chanakya`,
-    description: author.bio || `Articles by ${author.name}`,
+    description: author.bio || `Articles by ${author.name} on Global Chanakya — geopolitical intelligence and strategic analysis.`,
     robots: { index: true, follow: true },
+    alternates: {
+      canonical: `https://www.globalchanakya.in/author/${resolvedParams.slug}`,
+    },
   };
 }
 

@@ -1,26 +1,29 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #0B1020;
-  --surface: #111827;
-  --elevated: #172033;
-  --gold: #D4AF37;
+  --bg: #07111F;
+  --surface: #0B1728;
+  --elevated: #162334;
+  --gold: #C9A227;
+  --gold-hover: #E0B83F;
   --blue: #2563EB;
   --cyan: #06B6D4;
   --danger: #DC2626;
   --text: #F8FAFC;
   --muted: #94A3B8;
-  --border: #1E293B;
+  --border: rgba(255, 255, 255, 0.1);
 }
 
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--text);
   --font-sans: var(--font-inter);
+  --font-heading: var(--font-space-grotesk);
   
   --color-surface: var(--surface);
   --color-elevated: var(--elevated);
   --color-gold: var(--gold);
+  --color-gold-hover: var(--gold-hover);
   --color-blue: var(--blue);
   --color-cyan: var(--cyan);
   --color-danger: var(--danger);

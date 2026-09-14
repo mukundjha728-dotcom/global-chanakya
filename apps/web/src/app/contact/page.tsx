@@ -14,7 +14,7 @@ export default function ContactPage() {
             <div className="w-1.5 h-1.5 rounded-full bg-[var(--cyan)] animate-pulse" />
             Secure Communications
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold mb-6 text-white tracking-tight">Contact <span className="bg-gradient-to-r from-[var(--gold)] to-yellow-200 text-transparent bg-clip-text">Desk</span></h1>
+          <h1 className="font-heading text-4xl md:text-6xl font-extrabold mb-6 text-white tracking-tight">Contact <span className="bg-gradient-to-r from-[var(--gold)] to-yellow-200 text-transparent bg-clip-text">Desk</span></h1>
           <p className="text-white/80 max-w-xl text-lg md:text-xl font-medium leading-[1.7]">
             Reach out to our editorial board, report tips, or contact our support team. All communications are strictly confidential.
           </p>
@@ -57,7 +57,7 @@ export default function ContactPage() {
               {/* Subtle Glow */}
               <div className="absolute top-0 right-0 w-64 h-64 bg-[var(--cyan)]/5 blur-[100px] rounded-full pointer-events-none" />
               
-              <h3 className="text-2xl font-bold text-white mb-8 relative z-10 tracking-tight">Send a Secure Message</h3>
+              <h3 className="font-heading text-2xl font-bold text-white mb-8 relative z-10 tracking-tight">Send a Secure Message</h3>
               
               <form action="https://api.web3forms.com/submit" method="POST" className="space-y-6 relative z-10">
                 <input type="hidden" name="access_key" value="e723b223-d3dc-4b8b-b284-c93a5e0d999b" />

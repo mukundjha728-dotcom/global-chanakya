@@ -70,7 +70,7 @@ export default function SearchContent() {
             <Search className="w-4 h-4" />
             Global Search
           </div>
-          <h1 className="text-4xl lg:text-6xl font-extrabold leading-[1] tracking-[-0.03em] text-white mb-6">
+          <h1 className="font-heading text-4xl lg:text-6xl font-extrabold leading-[1] tracking-[-0.03em] text-white mb-6">
             Search <span className="text-[var(--gold)]">Intelligence</span>
           </h1>
           
@@ -117,7 +117,7 @@ export default function SearchContent() {
                     <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--cyan)] mb-2">
                       {blog.category}
                     </span>
-                    <h4 className="text-white font-bold text-lg line-clamp-1 group-hover:text-[var(--gold)] transition-colors mb-1">
+                    <h4 className="font-heading text-white font-bold text-lg line-clamp-1 group-hover:text-[var(--gold)] transition-colors mb-1">
                       {blog.title}
                     </h4>
                     <p className="text-[var(--secondary)] text-sm line-clamp-2 leading-[1.6]">

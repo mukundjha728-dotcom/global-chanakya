@@ -48,14 +48,14 @@ export default function SignUpForm() {
   };
 
   return (
-    <div className="bg-gray-900 border border-white/10 p-8 md:p-10 rounded-3xl shadow-2xl">
+    <div className="glass-card border border-[var(--border)] p-8 md:p-10 rounded-3xl shadow-2xl bg-[var(--surface)]/30">
       <div className="flex items-center gap-4 mb-8">
-        <div className="p-3 bg-rose-500/10 rounded-xl border border-rose-500/30">
-          <Shield className="w-7 h-7 text-rose-500" />
+        <div className="p-3 bg-[var(--gold)]/10 rounded-xl border border-[var(--gold)]/30 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
+          <Shield className="w-7 h-7 text-[var(--gold)]" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-white">Create Account</h2>
-          <p className="text-gray-400 text-sm">Join the Global Chanakya network.</p>
+          <h2 className="font-heading text-2xl font-bold text-white tracking-tight">Create Account</h2>
+          <p className="text-[var(--muted)] text-sm mt-1 font-bold uppercase tracking-[0.14em]">Join the Network</p>
         </div>
       </div>
 
@@ -66,7 +66,7 @@ export default function SignUpForm() {
             posthog.capture("user_signed_up", { method: "google" });
             signIn("google", { callbackUrl });
           }}
-          className="flex items-center justify-center gap-2 py-3 border border-white/10 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium text-gray-300"
+          className="flex items-center justify-center gap-2 py-3 border border-[var(--border)] bg-[var(--elevated)] rounded-xl hover:border-[var(--gold)]/50 text-white transition-colors text-sm font-bold uppercase tracking-widest"
         >
           <Mail className="w-4 h-4" /> Google
         </button>
@@ -75,61 +75,61 @@ export default function SignUpForm() {
             posthog.capture("user_signed_up", { method: "github" });
             signIn("github", { callbackUrl });
           }}
-          className="flex items-center justify-center gap-2 py-3 border border-white/10 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium text-gray-300"
+          className="flex items-center justify-center gap-2 py-3 border border-[var(--border)] bg-[var(--elevated)] rounded-xl hover:border-[var(--gold)]/50 text-white transition-colors text-sm font-bold uppercase tracking-widest"
         >
           <Github className="w-4 h-4" /> GitHub
         </button>
       </div>
 
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-px bg-white/10 flex-1" />
-        <span className="text-xs text-gray-500 uppercase tracking-wider">or register with email</span>
-        <div className="h-px bg-white/10 flex-1" />
+        <div className="h-px bg-[var(--border)] flex-1" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">or register with email</span>
+        <div className="h-px bg-[var(--border)] flex-1" />
       </div>
 
-      {error && <p className="text-rose-400 text-sm mb-4 text-center">{error}</p>}
+      {error && <p className="text-[var(--danger)] text-sm mb-4 text-center">{error}</p>}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Full Name</label>
+          <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-[0.14em] mb-1.5">Full Name</label>
           <input
             type="text" required value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-rose-500/50"
+            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-[var(--cyan)] focus:border-[var(--cyan)] transition-all"
             placeholder="Your name"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+          <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-[0.14em] mb-1.5">Email</label>
           <input
             type="email" required value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-rose-500/50"
-            placeholder="you@example.com"
+            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-[var(--cyan)] focus:border-[var(--cyan)] transition-all"
+            placeholder="agent@globalchanakya.in"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+          <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-[0.14em] mb-1.5">Password</label>
           <input
             type="password" required minLength={8} value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-rose-500/50"
+            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-[var(--cyan)] focus:border-[var(--cyan)] transition-all"
             placeholder="Min 8 characters"
           />
         </div>
 
         <button
           type="submit" disabled={loading}
-          className="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3.5 rounded-xl transition-colors mt-2 flex items-center justify-center gap-2 group disabled:opacity-60"
+          className="w-full bg-[var(--gold)] hover:bg-yellow-400 text-[var(--bg)] font-extrabold uppercase tracking-[0.06em] text-sm py-3.5 rounded-xl transition-colors mt-2 flex items-center justify-center gap-2 group disabled:opacity-60 shadow-[0_0_20px_rgba(212,175,55,0.2)]"
         >
           {loading ? "Creating account..." : "Create Account"}
           {!loading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
         </button>
       </form>
 
-      <p className="text-center text-sm text-gray-500 mt-6">
+      <p className="text-center text-sm text-[var(--muted)] mt-6 font-medium">
         Already have an account?{" "}
-        <Link href={`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="text-rose-400 hover:text-rose-300 font-medium">
+        <Link href={`/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`} className="text-[var(--cyan)] hover:text-blue-300 transition-colors font-bold">
           Sign in
         </Link>
       </p>

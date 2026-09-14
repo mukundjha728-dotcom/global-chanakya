@@ -107,7 +107,7 @@ export default async function BlogsPage({
               ) : null}
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-extrabold mb-4 text-white leading-tight tracking-tight drop-shadow-md">
+            <h1 className="font-heading text-4xl md:text-5xl font-extrabold mb-4 text-white leading-tight tracking-tight drop-shadow-md">
               {trending ? "Most Read Reports" : category ? `${category} Intelligence` : "Strategic Reports"}
             </h1>
             <p className="text-base md:text-lg text-white/80 font-medium">
@@ -170,7 +170,7 @@ export default async function BlogsPage({
             <div className="w-16 h-16 rounded-2xl bg-[var(--surface)] border border-[var(--border)] flex items-center justify-center mb-6 shadow-sm">
               <Newspaper className="w-8 h-8 text-[var(--cyan)]" />
             </div>
-            <h2 className="text-2xl font-bold text-white mb-3">
+            <h2 className="font-heading text-2xl font-bold text-white mb-3">
               {category ? `No ${category} reports yet` : "No reports published yet"}
             </h2>
             <p className="text-base text-white/70 max-w-md mb-8 leading-[1.6]">
@@ -224,7 +224,7 @@ export default async function BlogsPage({
                 </div>
 
                 <div className="flex flex-col flex-1 p-5 md:p-6 lg:p-7">
-                  <h3 className="font-bold text-white text-lg md:text-xl leading-[1.3] mb-3 group-hover:text-[var(--gold)] transition-colors line-clamp-2">
+                  <h3 className="font-heading font-bold text-white text-lg md:text-xl leading-[1.3] mb-3 group-hover:text-[var(--gold)] transition-colors line-clamp-2">
                     {blog.title}
                   </h3>
                   <p className="text-xs md:text-sm text-white/75 leading-[1.6] line-clamp-3 flex-1 mb-5 md:mb-6">

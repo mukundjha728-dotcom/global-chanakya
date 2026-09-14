@@ -32,71 +32,71 @@ export default function SignInForm() {
   };
 
   return (
-    <div className="bg-gray-900 border border-white/10 p-8 rounded-3xl shadow-2xl">
+    <div className="glass-card border border-[var(--border)] p-8 rounded-3xl shadow-2xl bg-[var(--surface)]/30">
       <div className="flex justify-center mb-6">
-        <div className="p-3 bg-rose-500/10 rounded-full border border-rose-500/30">
-          <Lock className="w-6 h-6 text-rose-500" />
+        <div className="p-3 bg-[var(--gold)]/10 rounded-full border border-[var(--gold)]/30 shadow-[0_0_15px_rgba(212,175,55,0.15)]">
+          <Lock className="w-6 h-6 text-[var(--gold)]" />
         </div>
       </div>
-      <h2 className="text-2xl font-bold text-center mb-2">Access Intelligence</h2>
-      <p className="text-gray-400 text-center text-sm mb-8">Sign in to your Global Chanakya account.</p>
+      <h2 className="font-heading text-2xl font-bold text-center mb-2 text-white">Access Intelligence</h2>
+      <p className="text-[var(--muted)] text-center text-sm mb-8">Sign in to your Global Chanakya account.</p>
 
-      {error && <p className="text-rose-500 text-sm text-center mb-4">{error}</p>}
+      {error && <p className="text-[var(--danger)] text-sm text-center mb-4">{error}</p>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+          <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-[0.14em] mb-1.5">Email</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all"
-            placeholder="agent@globalchanakya.com"
+            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-[var(--cyan)] focus:border-[var(--cyan)] transition-all"
+            placeholder="agent@globalchanakya.in"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+          <label className="block text-[10px] font-bold text-[var(--muted)] uppercase tracking-[0.14em] mb-1.5">Password</label>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-rose-500/50 transition-all"
+            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-[var(--cyan)] focus:border-[var(--cyan)] transition-all"
             placeholder="••••••••"
           />
         </div>
         
         <div className="flex items-center justify-between text-sm mt-2">
-          <label className="flex items-center gap-2 text-gray-400">
-            <input type="checkbox" className="rounded bg-black border-white/20 text-rose-500 focus:ring-rose-500/50" />
+          <label className="flex items-center gap-2 text-[var(--muted)]">
+            <input type="checkbox" className="rounded bg-[var(--bg)] border-[var(--border)] text-[var(--gold)] focus:ring-[var(--gold)]/50" />
             Remember me
           </label>
-          <Link href="/auth/forgot-password" className="text-rose-400 hover:text-rose-300">Forgot password?</Link>
+          <Link href="/auth/forgot-password" className="text-[var(--gold)] hover:text-yellow-200 transition-colors">Forgot password?</Link>
         </div>
 
-        <button type="submit" className="w-full bg-rose-600 text-white font-semibold py-3 rounded-xl hover:bg-rose-700 transition-colors mt-6">
+        <button type="submit" className="w-full bg-[var(--gold)] text-[var(--bg)] text-sm font-extrabold uppercase tracking-[0.06em] py-3.5 rounded-xl hover:bg-yellow-400 transition-colors mt-6 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
           Sign In
         </button>
       </form>
 
       <div className="mt-6 flex items-center justify-center gap-4">
-        <div className="h-px bg-white/10 flex-1"></div>
-        <span className="text-xs text-gray-500 uppercase tracking-wider">Or continue with</span>
-        <div className="h-px bg-white/10 flex-1"></div>
+        <div className="h-px bg-[var(--border)] flex-1"></div>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)]">Or continue with</span>
+        <div className="h-px bg-[var(--border)] flex-1"></div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mt-6">
-        <button onClick={() => signIn("google", { callbackUrl })} className="flex items-center justify-center gap-2 py-2.5 border border-white/10 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
+        <button onClick={() => signIn("google", { callbackUrl })} className="flex items-center justify-center gap-2 py-2.5 border border-[var(--border)] bg-[var(--elevated)] rounded-xl hover:border-[var(--gold)]/50 text-white transition-colors text-sm font-bold uppercase tracking-widest">
           <Mail className="w-4 h-4" /> Google
         </button>
-        <button onClick={() => signIn("github", { callbackUrl })} className="flex items-center justify-center gap-2 py-2.5 border border-white/10 rounded-xl hover:bg-white/5 transition-colors text-sm font-medium">
+        <button onClick={() => signIn("github", { callbackUrl })} className="flex items-center justify-center gap-2 py-2.5 border border-[var(--border)] bg-[var(--elevated)] rounded-xl hover:border-[var(--gold)]/50 text-white transition-colors text-sm font-bold uppercase tracking-widest">
           <Github className="w-4 h-4" /> GitHub
         </button>
       </div>
 
-      <p className="text-center text-sm text-gray-500 mt-8">
-        Need access? <Link href="/auth/signup" className="text-rose-400 hover:text-rose-300 font-medium">Apply for an account</Link>
+      <p className="text-center text-sm text-[var(--muted)] mt-8">
+        Need access? <Link href="/auth/signup" className="text-[var(--cyan)] hover:text-blue-300 font-bold transition-colors">Apply for an account</Link>
       </p>
     </div>
   );

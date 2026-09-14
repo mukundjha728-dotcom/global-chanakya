@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Lora } from "next/font/google";
+import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import Navbar from "@/components/layout/Navbar";
@@ -18,8 +18,8 @@ const inter = Inter({
   display: "swap",
 });
 
-const lora = Lora({
-  variable: "--font-lora",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-space-grotesk",
   subsets: ["latin"],
   display: "swap",
 });
@@ -162,7 +162,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         />
         <script async src="https://news.google.com/swg/js/v1/publisher.js"></script>
       </head>
-      <body className={`${inter.variable} ${lora.variable} font-sans antialiased leading-[1.8] w-full overflow-x-hidden`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased leading-[1.8] w-full overflow-x-hidden bg-[#07111F] text-[#F8FAFC]`}>
         <CookieConsent />
         <CSPostHogProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
