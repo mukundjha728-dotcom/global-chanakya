@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Instagram } from "lucide-react";
 
 // currentYear is computed at server render time. It matches the client at any reasonable
 // page load time (same UTC date). suppressHydrationWarning is intentional here: the year
@@ -34,9 +35,20 @@ export default function Footer() {
                 </span>
               </div>
             </Link>
-            <p className="text-sm text-[var(--muted)] leading-[1.7]">
+            <p className="text-sm text-[var(--muted)] leading-[1.7] mb-6">
               Independent geopolitical analysis for policymakers, analysts, and strategic thinkers.
             </p>
+            <div className="flex items-center gap-4">
+              <a 
+                href="https://www.instagram.com/globalchanaky?stkn=MTRwaDFxaTl0dHRpMw==" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-[#111827] border border-[#1E293B] flex items-center justify-center text-[var(--muted)] hover:text-[#D4AF37] hover:border-[#D4AF37] hover:bg-[#D4AF37]/10 transition-all duration-300 group"
+                aria-label="Follow us on Instagram"
+              >
+                <Instagram className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+              </a>
+            </div>
           </div>
 
           {/* Column 2: Strategic Hubs */}
