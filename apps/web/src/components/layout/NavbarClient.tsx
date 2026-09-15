@@ -5,7 +5,8 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LogOut, Menu, X, LayoutDashboard, Search, User } from "lucide-react";
 import { useState, useEffect } from "react";
-import SearchModal from "../shared/SearchModal";
+import dynamic from "next/dynamic";
+const SearchModal = dynamic(() => import("../shared/SearchModal"));
 import { logoutAction } from "@/app/actions";
 import LiveUpdatesButton from "../notifications/LiveUpdatesButton";
 
@@ -272,10 +273,12 @@ export default function NavbarClient({ session }: NavbarClientProps) {
       )}
 
       {/* Search Modal */}
-      <SearchModal 
-        isOpen={isSearchOpen} 
-        onClose={() => setIsSearchOpen(false)} 
-      />
+      {isSearchOpen && (
+        <SearchModal 
+          isOpen={isSearchOpen} 
+          onClose={() => setIsSearchOpen(false)} 
+        />
+      )}
     </nav>
   );
 }

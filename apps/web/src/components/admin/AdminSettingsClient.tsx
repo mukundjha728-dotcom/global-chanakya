@@ -115,7 +115,7 @@ export default function AdminSettingsClient({ user }: { user: AdminUser }) {
             <div className="flex flex-col items-center text-center relative z-10">
               {user.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.image} alt="" className="w-20 h-20 rounded-full border-2 border-[var(--gold)]/50 p-1 mb-4 shadow-[0_0_15px_rgba(212,175,55,0.2)]" />
+                <img loading="lazy" src={user.image} alt="" className="w-20 h-20 rounded-full border-2 border-[var(--gold)]/50 p-1 mb-4 shadow-[0_0_15px_rgba(212,175,55,0.2)]" />
               ) : (
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--gold)] to-yellow-600 flex items-center justify-center text-black font-extrabold text-2xl mb-4 shadow-[0_0_15px_rgba(212,175,55,0.3)]">
                   {user.name?.[0]?.toUpperCase()}

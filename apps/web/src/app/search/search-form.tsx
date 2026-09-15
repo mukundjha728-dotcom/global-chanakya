@@ -105,7 +105,7 @@ export default function SearchContent() {
                   {/* Thumbnail */}
                   <div className="relative w-24 h-24 shrink-0 rounded-xl overflow-hidden border border-[var(--border)]/50 hidden sm:block">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <img loading="lazy"
                       src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
                       alt={blog.title}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

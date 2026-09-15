@@ -541,7 +541,7 @@ export default function WriteArticleClient({ authorId }: { authorId: string }) {
                 />
                 {form.featuredImage && (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={form.featuredImage} alt="preview" className="mt-3 rounded-xl h-40 w-auto object-cover border border-white/10 shadow-lg" />
+                  <img loading="lazy" src={form.featuredImage} alt="preview" className="mt-3 rounded-xl h-40 w-auto object-cover border border-white/10 shadow-lg" />
                 )}
               </div>
             </div>

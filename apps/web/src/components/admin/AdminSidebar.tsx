@@ -123,7 +123,7 @@ export default function AdminSidebar({ user }: { user: { name?: string; email?: 
             <div className="absolute inset-0 bg-[var(--cyan)]/20 blur-md rounded-full" />
             {user.image ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.image} alt="" className="relative z-10 w-9 h-9 rounded-full ring-2 ring-[var(--cyan)]/40" />
+              <img loading="lazy" src={user.image} alt="" className="relative z-10 w-9 h-9 rounded-full ring-2 ring-[var(--cyan)]/40" />
             ) : (
               <div className="relative z-10 w-9 h-9 rounded-full bg-[var(--cyan)]/20 border border-[var(--cyan)]/40 flex items-center justify-center text-[var(--cyan)] font-bold text-sm">
                 {user.name?.[0]?.toUpperCase()}

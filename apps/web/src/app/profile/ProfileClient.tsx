@@ -184,7 +184,7 @@ export default function ProfileClient() {
               <div className="w-16 h-16 rounded-full bg-[var(--surface)] intel-border flex items-center justify-center text-xl font-bold text-white shadow-lg overflow-hidden relative">
                 {user.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                  <img loading="lazy" src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                 ) : (
                   user.name?.[0]?.toUpperCase() || "U"
                 )}
@@ -308,7 +308,7 @@ export default function ProfileClient() {
                       {blog.featuredImage && (
                         <div className="w-full sm:w-32 h-24 shrink-0 rounded overflow-hidden">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img 
+                          <img loading="lazy"
                             src={blog.featuredImage} 
                             alt={blog.title} 
                             className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-300"

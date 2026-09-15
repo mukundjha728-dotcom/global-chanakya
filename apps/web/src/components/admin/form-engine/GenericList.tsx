@@ -229,7 +229,7 @@ export default function GenericList({ schema }: { schema: EntitySchema }) {
                         <div className="flex items-center gap-3">
                           {item.featuredImage || item.flagUrl || item.imageUrl ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img
+                            <img loading="lazy"
                               src={item.featuredImage || item.flagUrl || item.imageUrl}
                               alt=""
                               className="w-10 h-10 rounded-lg object-cover border border-[var(--border)] shrink-0"

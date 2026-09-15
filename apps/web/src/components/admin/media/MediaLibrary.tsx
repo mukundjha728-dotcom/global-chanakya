@@ -119,7 +119,7 @@ export default function MediaLibrary() {
             {filteredAssets.map(asset => (
               <div key={asset.id} className="group relative bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden hover:border-[var(--gold)]/50 transition-colors">
                 <div className="aspect-square bg-[var(--bg)] relative">
-                  <img src={asset.url} alt={asset.altText} className="w-full h-full object-cover" />
+                  <img loading="lazy" src={asset.url} alt={asset.altText} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-center items-center gap-3">
                     <button onClick={() => navigator.clipboard.writeText(asset.url)} className="flex items-center gap-2 text-sm font-medium text-white hover:text-[var(--gold)] bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm">
                       <LinkIcon className="w-4 h-4" /> Copy URL

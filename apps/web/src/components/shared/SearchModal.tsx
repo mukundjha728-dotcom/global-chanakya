@@ -117,7 +117,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   {/* Thumbnail */}
                   <div className="relative w-20 h-20 shrink-0 rounded-lg overflow-hidden border border-[var(--border)]/50 hidden sm:block">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <img loading="lazy"
                       src={blog.featuredImage || "/images/fallback-geopolitics.jpg"}
                       alt={blog.title}
                       className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"

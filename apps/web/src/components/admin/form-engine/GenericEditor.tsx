@@ -545,7 +545,7 @@ export default function GenericEditor({
             {value && (
               <div className="relative w-full h-48 rounded-lg overflow-hidden border border-[var(--border)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={value} alt="media" className="w-full h-full object-cover" />
+                <img loading="lazy" src={value} alt="media" className="w-full h-full object-cover" />
                 <button
                   onClick={() => handleFieldChange(field.name, "")}
                   className="absolute top-2 right-2 bg-black/60 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-500 transition-colors"
