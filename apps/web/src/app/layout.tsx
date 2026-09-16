@@ -160,7 +160,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
           strategy="beforeInteractive"
         />
-        <script async src="https://news.google.com/swg/js/v1/publisher.js"></script>
+        <Script 
+          src="https://news.google.com/swg/js/v1/publisher.js" 
+          strategy="lazyOnload" 
+        />
       </head>
       <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased leading-[1.8] w-full overflow-x-hidden bg-[#07111F] text-[#F8FAFC]`}>
         <CookieConsent />

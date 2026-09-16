@@ -244,7 +244,7 @@ export default async function PlatformSeoArticle({ params }: Props) {
             {blog.featuredImage && (
               <div className="mb-12 aspect-video w-full rounded-sm overflow-hidden intel-border relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img fetchpriority="high" src={blog.featuredImage} alt={blog.title} className="w-full h-full object-cover" />
+                <img fetchPriority="high" src={blog.featuredImage} alt={blog.title} className="w-full h-full object-cover" />
               </div>
             )}
 

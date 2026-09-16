@@ -44,15 +44,16 @@ export class BlogService {
     { revalidate: 300, tags: ['blogs'] }
   );
 
-  static getBlogsByCategory = unstable_cache(
-    async (category: string, limit: number = 4) => {
-      const data = await BlogRepository.getBlogsByCategory(category, limit);
-      return JSON.parse(JSON.stringify(data));
-    },
-    ['blogs-category'],
-    { revalidate: 300, tags: ['blogs'] }
-  );
-
+  static getBlogsByCategory = (category: string, limit: number = 4) => {
+    return unstable_cache(
+      async () => {
+        const data = await BlogRepository.getBlogsByCategory(category, limit);
+        return JSON.parse(JSON.stringify(data));
+      },
+      [`blogs-category-${category}-${limit}`],
+      { revalidate: 300, tags: ['blogs'] }
+    )();
+  };
   static getMostViewedBlog = unstable_cache(
     async () => {
       const data = await BlogRepository.getMostViewed();

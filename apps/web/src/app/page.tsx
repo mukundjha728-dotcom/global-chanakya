@@ -209,14 +209,8 @@ export default async function Home() {
   // Trigger demand-driven refresh safely in the background
   ensureFreshLiveIntelligence().catch(err => console.error("[Home] Demand refresh error:", err));
   
-  const theatresPromise = BlogService.getActiveCategories().then(async (categories) => {
-    const map = await Promise.all(
-      categories.map(async (category) => {
-        const blogs = await BlogService.getBlogsByCategory(category, 4);
-        return { category, blogs };
-      })
-    );
-    return { theatres: categories, categoryBlogsMap: map };
+  const theatresPromise = BlogService.getActiveCategories().then((categories) => {
+    return { theatres: categories };
   });
 
   const [
@@ -233,7 +227,7 @@ export default async function Home() {
     theatresPromise
   ]);
 
-  const { theatres, categoryBlogsMap } = theatresData;
+  const { theatres } = theatresData;
 
   const liveEvents = rawLiveEvents.map((event: any) => ({
     id: event.slug,
@@ -321,10 +315,16 @@ export default async function Home() {
                     </span>
                   </div>
                   <Link href={`/blogs/${featuredBlog.slug}`} className="flex-1 relative flex flex-col p-6 md:p-8 justify-end">
-                    <div
-                      className="absolute inset-0 bg-cover bg-center opacity-40 group-hover:opacity-50 transition-all duration-700 group-hover:scale-105"
-                      style={{ backgroundImage: `url('${featuredBlog.featuredImage || "/images/fallback-geopolitics.jpg"}')` }}
-                    />
+                    <div className="absolute inset-0 opacity-40 group-hover:opacity-50 transition-all duration-700 group-hover:scale-105">
+                      <Image
+                        src={featuredBlog.featuredImage || "/images/fallback-geopolitics.jpg"}
+                        alt={featuredBlog.title || "Geopolitical Intelligence"}
+                        fill
+                        priority
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="object-cover"
+                      />
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg)] via-[var(--bg)]/80 to-transparent" />
                     
                     <div className="relative z-10 flex flex-col">
