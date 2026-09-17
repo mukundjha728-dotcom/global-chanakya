@@ -59,7 +59,7 @@ export class EntityService {
     };
   }
 
-  static async getEntityArticles(relationshipField: string, entityId: string, limit: number = 10, skip: number = 0) {
+  static async getEntityArticles(relationshipField: string, entityId: string, limit: number = 500, skip: number = 0) {
     await dbConnect();
     const articles = await Blog.find({
       [relationshipField]: new mongoose.Types.ObjectId(entityId),

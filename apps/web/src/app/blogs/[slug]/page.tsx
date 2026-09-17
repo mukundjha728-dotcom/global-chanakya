@@ -42,27 +42,98 @@ const getCachedBlog = unstable_cache(
 );
 
 const getCachedRelatedBlogs = unstable_cache(
-  async (blogId: string, category: string) => {
+  async (blog: any) => {
     await dbConnect();
     
-    const latestBlogs = await Blog.find({
-      status: "published",
-      _id: { $ne: blogId },
-      category: category
-    }).sort({ publishAt: -1 }).limit(4).lean();
+    // Collect all semantic relationship IDs
+    const relatedEntityIds = [
+      ...(blog.topics?.map((t: any) => t._id || t) || []),
+      ...(blog.countries?.map((c: any) => c._id || c) || []),
+      ...(blog.leaders?.map((l: any) => l._id || l) || []),
+      ...(blog.regions?.map((r: any) => r._id || r) || []),
+      ...(blog.conflicts?.map((c: any) => c._id || c) || [])
+    ].filter(Boolean);
 
-    const latestIds = latestBlogs.map(b => b._id);
+    let semanticBlogs: any[] = [];
 
-    const mostViewedBlogs = await Blog.find({
-      status: "published",
-      _id: { $ne: blogId, $nin: latestIds },
-      category: category
-    }).sort({ "analytics.views": -1 }).limit(2).lean();
+    // Find blogs sharing these semantic entities
+    if (relatedEntityIds.length > 0) {
+      const query = {
+        status: "published",
+        _id: { $ne: blog._id },
+        $or: [
+          { topics: { $in: relatedEntityIds } },
+          { countries: { $in: relatedEntityIds } },
+          { leaders: { $in: relatedEntityIds } },
+          { regions: { $in: relatedEntityIds } },
+          { conflicts: { $in: relatedEntityIds } },
+          { tags: { $in: blog.tags || [] } }
+        ]
+      };
+      
+      const newest = await Blog.find(query).sort({ publishAt: -1 }).limit(4).lean();
+      const oldest = await Blog.find(query).sort({ publishAt: 1 }).limit(4).lean();
+      
+      const map = new Map();
+      [...newest, ...oldest].forEach(b => map.set(b._id.toString(), b));
+      semanticBlogs = Array.from(map.values()).slice(0, 6);
+    }
 
-    const related = [...latestBlogs, ...mostViewedBlogs];
+    const semanticIds = semanticBlogs.map(b => b._id);
+    const needMore = 6 - semanticBlogs.length;
+
+    let fallbackBlogs: any[] = [];
+    if (needMore > 0) {
+      // Fallback to category if we don't have enough semantic matches
+      fallbackBlogs = await Blog.find({
+        status: "published",
+        _id: { $ne: blog._id, $nin: semanticIds },
+        category: blog.category
+      })
+      .sort({ publishAt: -1 })
+      .limit(needMore)
+      .lean();
+    }
+
+    const related = [...semanticBlogs, ...fallbackBlogs];
     return JSON.parse(JSON.stringify(related));
   },
   ["related-blogs-cache-v2"],
+  { revalidate: 3600, tags: ["blogs"] }
+);
+
+const getCachedAdjacentBlogs = unstable_cache(
+  async (blog: any) => {
+    await dbConnect();
+    // Use publishAt or createdAt for chronological sorting
+    const dateQuery = blog.publishAt || blog.createdAt;
+    
+    // Find the next older article in the same category
+    const prev = await Blog.findOne({
+      status: "published",
+      category: blog.category,
+      $or: [
+        { publishAt: { $lt: dateQuery } },
+        { publishAt: dateQuery, _id: { $lt: blog._id } }
+      ]
+    }).sort({ publishAt: -1, _id: -1 }).select("slug title category").lean();
+
+    // Find the next newer article in the same category
+    const next = await Blog.findOne({
+      status: "published",
+      category: blog.category,
+      $or: [
+        { publishAt: { $gt: dateQuery } },
+        { publishAt: dateQuery, _id: { $gt: blog._id } }
+      ]
+    }).sort({ publishAt: 1, _id: 1 }).select("slug title category").lean();
+
+    return {
+      prev: prev ? JSON.parse(JSON.stringify(prev)) : null,
+      next: next ? JSON.parse(JSON.stringify(next)) : null
+    };
+  },
+  ["adjacent-blogs-cache-v1"],
   { revalidate: 3600, tags: ["blogs"] }
 );
 
@@ -130,7 +201,10 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
   }
 
   // Get related blogs from cache
-  const relatedBlogs = await getCachedRelatedBlogs(blog._id.toString(), blog.category);
+  const relatedBlogs = await getCachedRelatedBlogs(blog);
+  
+  // Get adjacent blogs for chronological crawl paths
+  const adjacentBlogs = await getCachedAdjacentBlogs(blog);
 
   const readTime = Math.max(1, calculateReadingTime(blog.content.replace(/<[^>]*>/g, "")));
   const publishDate = formatDate(blog.publishAt, "long");
@@ -263,11 +337,45 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
             {/* Ad: After article content */}
             <InArticleAd slot="auto" />
 
-            {/* Tags */}
-            {blog.tags && blog.tags.length > 0 && (
+            {/* Entity Hub Links */}
+            {(blog.topics?.length > 0 || blog.countries?.length > 0 || blog.regions?.length > 0 || blog.leaders?.length > 0 || blog.conflicts?.length > 0) && (
               <div className="mt-16 pt-8 border-t border-[var(--border)] flex flex-wrap gap-3">
                 <div className="w-full flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[var(--secondary)] mb-2">
-                  <Tag className="w-3.5 h-3.5" /> Tracked Topics
+                  <Tag className="w-3.5 h-3.5" /> Related Analysis Hubs
+                </div>
+                {blog.topics?.map((entity: any) => (
+                  <Link key={entity._id || entity.slug} href={`/topics/${entity.slug}`} className="px-4 py-2 rounded-sm intel-border bg-[var(--surface)] text-[var(--secondary)] text-[12px] font-bold uppercase tracking-widest hover:text-[var(--gold)] hover:border-[var(--gold)] transition-colors">
+                    {entity.name} (Topic)
+                  </Link>
+                ))}
+                {blog.countries?.map((entity: any) => (
+                  <Link key={entity._id || entity.slug} href={`/countries/${entity.slug}`} className="px-4 py-2 rounded-sm intel-border bg-[var(--surface)] text-[var(--secondary)] text-[12px] font-bold uppercase tracking-widest hover:text-[var(--gold)] hover:border-[var(--gold)] transition-colors">
+                    {entity.name} (Country)
+                  </Link>
+                ))}
+                {blog.regions?.map((entity: any) => (
+                  <Link key={entity._id || entity.slug} href={`/regions/${entity.slug}`} className="px-4 py-2 rounded-sm intel-border bg-[var(--surface)] text-[var(--secondary)] text-[12px] font-bold uppercase tracking-widest hover:text-[var(--gold)] hover:border-[var(--gold)] transition-colors">
+                    {entity.name} (Region)
+                  </Link>
+                ))}
+                {blog.leaders?.map((entity: any) => (
+                  <Link key={entity._id || entity.slug} href={`/leaders/${entity.slug}`} className="px-4 py-2 rounded-sm intel-border bg-[var(--surface)] text-[var(--secondary)] text-[12px] font-bold uppercase tracking-widest hover:text-[var(--gold)] hover:border-[var(--gold)] transition-colors">
+                    {entity.name} (Leader)
+                  </Link>
+                ))}
+                {blog.conflicts?.map((entity: any) => (
+                  <Link key={entity._id || entity.slug} href={`/conflicts/${entity.slug}`} className="px-4 py-2 rounded-sm intel-border bg-[var(--surface)] text-[var(--secondary)] text-[12px] font-bold uppercase tracking-widest hover:text-[var(--gold)] hover:border-[var(--gold)] transition-colors">
+                    {entity.name} (Conflict)
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {/* Tags */}
+            {blog.tags && blog.tags.length > 0 && (
+              <div className="mt-8 pt-8 border-t border-[var(--border)] flex flex-wrap gap-3">
+                <div className="w-full flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[var(--secondary)] mb-2">
+                  <Tag className="w-3.5 h-3.5" /> Tracked Tags
                 </div>
                 {blog.tags.map((tag: string) => (
                   <Link key={tag} href={`/blogs?tag=${encodeURIComponent(tag)}`} className="px-4 py-2 rounded-sm intel-border bg-[var(--surface)] text-[var(--secondary)] text-[12px] font-bold uppercase tracking-widest hover:text-[var(--gold)] hover:border-[var(--gold)] transition-colors">
@@ -284,6 +392,33 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
               isLoggedIn={!!session}
               commentsEnabled={blog.commentsEnabled !== false}
             />
+
+            {/* Chronological Discovery / Prev & Next */}
+            {(adjacentBlogs.prev || adjacentBlogs.next) && (
+              <div className="mt-12 pt-8 border-t border-[var(--border)] flex flex-col sm:flex-row justify-between gap-4">
+                {adjacentBlogs.prev ? (
+                  <Link href={`/blogs/${adjacentBlogs.prev.slug}`} className="flex-1 glass-card p-5 rounded-sm border border-[var(--border)] hover:border-[var(--gold)]/50 group flex flex-col items-start text-left transition-colors">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)] mb-2 flex items-center gap-1.5">
+                      <ArrowLeft className="w-3.5 h-3.5" /> Previous in {blog.category}
+                    </span>
+                    <span className="font-heading text-[15px] font-bold text-white group-hover:text-[var(--gold)] transition-colors line-clamp-2 leading-snug">
+                      {adjacentBlogs.prev.title}
+                    </span>
+                  </Link>
+                ) : <div className="flex-1" />}
+                
+                {adjacentBlogs.next ? (
+                  <Link href={`/blogs/${adjacentBlogs.next.slug}`} className="flex-1 glass-card p-5 rounded-sm border border-[var(--border)] hover:border-[var(--gold)]/50 group flex flex-col items-end text-right transition-colors">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--muted)] mb-2 flex items-center gap-1.5">
+                      Next in {blog.category} <ArrowLeft className="w-3.5 h-3.5 rotate-180" />
+                    </span>
+                    <span className="font-heading text-[15px] font-bold text-white group-hover:text-[var(--gold)] transition-colors line-clamp-2 leading-snug">
+                      {adjacentBlogs.next.title}
+                    </span>
+                  </Link>
+                ) : <div className="flex-1" />}
+              </div>
+            )}
 
             {/* Bottom Suggestions / Related Blogs */}
             {relatedBlogs.length > 0 && (

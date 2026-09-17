@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import dbConnect from '@/lib/mongoose';
 import { Blog } from '@/lib/models/Blog';
+import { User } from '@/lib/models/User';
 import { SITE_URL } from '@/constants';
 
 import { getStaticSitemaps } from '@/modules/seo/sitemap-static';
@@ -13,7 +14,11 @@ export const revalidate = 3600;
 export async function generateSitemaps() {
   try {
     await dbConnect();
-    const count = await Blog.countDocuments({ status: 'published', contentType: { $ne: 'platform-seo' } });
+    const count = await Blog.countDocuments({ 
+      status: 'published', 
+      contentType: { $ne: 'platform-seo' },
+      'seo.robots': { $not: /noindex/i }
+    });
     const blogSitemaps = Math.ceil(count / BLOGS_PER_SITEMAP);
     
     const chunks = [
@@ -24,7 +29,8 @@ export async function generateSitemaps() {
       { id: 'regions' },
       { id: 'leaders' },
       { id: 'conflicts' },
-      { id: 'organizations' }
+      { id: 'organizations' },
+      { id: 'authors' }
     ];
 
     for (let i = 0; i < blogSitemaps; i++) {
@@ -67,13 +73,35 @@ export default async function sitemap({
   if (id === 'conflicts') return getEntitySitemaps('Conflict', 'conflicts', 'conflicts');
   if (id === 'organizations') return getEntitySitemaps('Organization', 'organizations', 'organizations');
 
+  if (id === 'authors') {
+    try {
+      const authors = await User.find({ authorSlug: { $exists: true, $ne: null } })
+        .select('authorSlug updatedAt')
+        .lean();
+
+      return authors.map((author: any) => ({
+        url: `${SITE_URL}/author/${author.authorSlug}`,
+        lastModified: author.updatedAt || new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.6,
+      }));
+    } catch (e) {
+      console.error("Error generating authors sitemap:", e);
+      return [];
+    }
+  }
+
   // Handle blog pagination (id starts with 'blogs-')
   if (id.startsWith('blogs-')) {
     const chunkIndex = parseInt(id.replace('blogs-', ''), 10) || 0;
     const skip = chunkIndex * BLOGS_PER_SITEMAP;
     
     try {
-      const blogs = await Blog.find({ status: 'published', contentType: { $ne: 'platform-seo' } })
+      const blogs = await Blog.find({ 
+        status: 'published', 
+        contentType: { $ne: 'platform-seo' },
+        'seo.robots': { $not: /noindex/i }
+      })
         .select('slug updatedAt publishAt')
         .sort({ publishAt: -1 })
         .skip(skip)
