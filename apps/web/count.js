@@ -1,0 +1,1 @@
+require('mongoose').connect('mongodb://localhost:27017/global-chanakya').then(() => require('./src/lib/models/Blog').Blog.distinct('category', { status: 'published', contentType: { \$ne: 'platform-seo' } })).then(c => console.log('count:', c.length)).catch(console.error).finally(() => process.exit(0));
