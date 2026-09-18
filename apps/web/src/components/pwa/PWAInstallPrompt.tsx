@@ -61,6 +61,20 @@ export function PWAInstallPrompt() {
     };
   }, []);
 
+  // Auto-hide popup after 3 seconds if no manual instruction is showing
+  useEffect(() => {
+    let hideTimer: ReturnType<typeof setTimeout>;
+    if (showPrompt && !showManualInstruction) {
+      hideTimer = setTimeout(() => {
+        setShowPrompt(false);
+        sessionStorage.setItem("gc_pwa_prompt_dismissed", "true");
+      }, 3000);
+    }
+    return () => {
+      if (hideTimer) clearTimeout(hideTimer);
+    };
+  }, [showPrompt, showManualInstruction]);
+
   const handlePrimaryClick = async () => {
     if (showManualInstruction) {
       // "Got It" clicked
