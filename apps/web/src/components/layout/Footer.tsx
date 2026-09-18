@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Linkedin } from "lucide-react";
+import { Instagram, Linkedin, Twitter } from "lucide-react";
 
 // currentYear is computed at server render time. It matches the client at any reasonable
 // page load time (same UTC date). suppressHydrationWarning is intentional here: the year
@@ -56,6 +56,15 @@ export default function Footer() {
                 aria-label="Follow us on LinkedIn"
               >
                 <Linkedin className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+              </a>
+              <a 
+                href="https://x.com/GChanakyaIntel" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-[var(--surface)] border border-[rgba(255,255,255,0.1)] flex items-center justify-center text-[var(--muted)] hover:text-[var(--gold-hover)] hover:border-[var(--gold-hover)] hover:bg-[var(--gold)]/10 transition-all duration-300 group"
+                aria-label="Follow us on X"
+              >
+                <Twitter className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
               </a>
             </div>
           </div>
