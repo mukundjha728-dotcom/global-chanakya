@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
-import { auth } from "@/auth";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 
@@ -25,14 +24,14 @@ import { generateArticleSchema, sanitizeOgImageUrl } from "@/lib/seo/generateBlo
 const getCachedBlog = unstable_cache(
   async (slug: string) => {
     await dbConnect();
-    const blog = await Blog.findOne({ slug, contentType: { $ne: "platform-seo" } })
+    const blog = await Blog.findOne({ slug, status: "published", contentType: { $ne: "platform-seo" } })
       .populate("author", "name authorSlug bio expertise socialLinks avatar")
       .populate("categoryId", "name slug")
       .populate("organizations", "name slug")
       .lean();
     return blog ? JSON.parse(JSON.stringify(blog)) : null;
   },
-  ["blog-detail-cache"],
+  ["blog-detail-cache-v3"],
   { revalidate: 3600, tags: ["blogs"] }
 );
 
@@ -148,15 +147,6 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
   const blog = await getBlogData(decodedSlug);
   if (!blog) notFound();
 
-  // Defer auth check until after blog is loaded from cache
-  const session = await auth();
-  const isAdmin = session?.user?.role === "admin";
-  
-  // Security check: if not published and not admin, return 404
-  if (blog.status !== "published" && !isAdmin) {
-    notFound();
-  }
-
   // Fetch related and adjacent concurrently with primitive cache keys
   const dateStr = (blog.publishAt || blog.createdAt).toString();
   
@@ -227,7 +217,6 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
         category={blog.category} 
         author={blog.isSystemGenerated ? "Global Chanakya Editorial" : blog.author?.name || "Global Chanakya Editorial"} 
         slug={blog.slug}
-        isLoggedIn={!!session}
       />
       <ReadingProgress />
 

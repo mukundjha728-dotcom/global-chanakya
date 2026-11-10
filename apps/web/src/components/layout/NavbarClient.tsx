@@ -5,13 +5,14 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { LogOut, Menu, X, LayoutDashboard, Search, User } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import dynamic from "next/dynamic";
 const SearchModal = dynamic(() => import("../shared/SearchModal"));
 import { logoutAction } from "@/app/actions";
 import LiveUpdatesButton from "../notifications/LiveUpdatesButton";
 
 interface NavbarClientProps {
-  session: {
+  session?: {
     user?: {
       name?: string | null;
       email?: string | null;
@@ -27,7 +28,9 @@ const navLinks = [
   { label: "About", href: "/about" },
 ];
 
-export default function NavbarClient({ session }: NavbarClientProps) {
+export default function NavbarClient({ session: initialSession }: NavbarClientProps = {}) {
+  const { data: clientSession } = useSession();
+  const session = clientSession || initialSession;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);

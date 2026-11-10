@@ -2,13 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import posthog from "posthog-js";
+import { useSession } from "next-auth/react";
 
 interface TrackerProps {
   title: string;
   category: string;
   author: string;
   slug: string;
-  isLoggedIn: boolean;
+  isLoggedIn?: boolean;
 }
 
 export default function BlogClientTracker({
@@ -16,12 +17,17 @@ export default function BlogClientTracker({
   category,
   author,
   slug,
-  isLoggedIn,
+  isLoggedIn: initialIsLoggedIn,
 }: TrackerProps) {
+  const { data: session } = useSession();
+  const isLoggedIn = initialIsLoggedIn ?? !!session?.user;
+
   const trackedInitial = useRef(false);
   const lastActivityTime = useRef(Date.now());
   const idleTimeout = useRef<NodeJS.Timeout | null>(null);
   const isIdle = useRef(false);
+  const lastPingTime = useRef(Date.now());
+  const lastProgress = useRef(0);
   
   const getDeviceType = () => {
     if (typeof window === "undefined") return "unknown";
@@ -29,6 +35,14 @@ export default function BlogClientTracker({
     if (width < 768) return "mobile";
     if (width < 1024) return "tablet";
     return "desktop";
+  };
+
+  const calculateProgress = () => {
+    if (typeof window === "undefined") return 0;
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    return scrollHeight > 0 
+      ? Math.min(100, Math.round((window.scrollY / scrollHeight) * 100)) 
+      : 100;
   };
 
   useEffect(() => {
@@ -65,13 +79,12 @@ export default function BlogClientTracker({
       if (idleTimeout.current) clearTimeout(idleTimeout.current);
       idleTimeout.current = setTimeout(() => {
         isIdle.current = true;
-      }, 30000); // 30 seconds idle
+      }, 45000); // 45 seconds idle
     };
 
     const events = ["mousedown", "keydown", "scroll", "touchstart"];
     events.forEach(e => window.addEventListener(e, handleActivity, { passive: true }));
     
-    // Initial setup
     handleActivity();
 
     return () => {
@@ -80,33 +93,57 @@ export default function BlogClientTracker({
     };
   }, [isLoggedIn]);
 
-  // Setup periodic ping
+  // Setup periodic ping (throttled to 60s) and send on page leave
   useEffect(() => {
     if (!isLoggedIn) return;
 
+    const sendProgressPing = (keepalive = false) => {
+      const now = Date.now();
+      const timeSpent = Math.max(1, Math.round((now - lastPingTime.current) / 1000));
+      const progressPercentage = calculateProgress();
+      lastPingTime.current = now;
+      lastProgress.current = progressPercentage;
+
+      const payload = JSON.stringify({
+        isPing: true,
+        progressPercentage,
+        timeSpent,
+        resumePoint: typeof window !== "undefined" ? Math.round(window.scrollY) : 0,
+        deviceType: getDeviceType()
+      });
+
+      try {
+        fetch(`/api/blogs/${slug}/view`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+          keepalive
+        }).catch(() => {});
+      } catch (err) {
+        // Ignore network errors on unload
+      }
+    };
+
+    // Periodic ping every 60s instead of 15s to save CPU
     const interval = setInterval(() => {
-      // Don't ping if tab is hidden or user is idle
       if (document.hidden || isIdle.current) return;
+      sendProgressPing(false);
+    }, 60000);
 
-      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const progressPercentage = scrollHeight > 0 
-        ? Math.min(100, Math.round((window.scrollY / scrollHeight) * 100)) 
-        : 100;
+    // Save progress on tab change / exit
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        sendProgressPing(true);
+      }
+    };
 
-      fetch(`/api/blogs/${slug}/view`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          isPing: true,
-          progressPercentage,
-          timeSpent: 15, // 15 seconds since last ping
-          resumePoint: Math.round(window.scrollY),
-          deviceType: getDeviceType()
-        })
-      }).catch(() => {});
-    }, 15000);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      sendProgressPing(true);
+    };
   }, [slug, isLoggedIn]);
 
   return null;

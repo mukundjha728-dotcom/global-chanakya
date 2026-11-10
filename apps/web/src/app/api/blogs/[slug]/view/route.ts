@@ -33,13 +33,13 @@ export async function POST(
 
     let blog;
     if (isPing) {
-      blog = await Blog.findOne({ slug, status: "published", contentType: { $ne: "platform-seo" } }).lean();
+      blog = await Blog.findOne({ slug, status: "published", contentType: { $ne: "platform-seo" } }).select("_id").lean();
     } else {
       const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
       const ua = request.headers.get("user-agent") || "unknown";
       const isBot = /bot|crawler|spider|crawling|googlebot|bingbot|yandex|baiduspider|twitterbot|facebookexternalhit|whatsapp|telegram/i.test(ua);
 
-      blog = await Blog.findOne({ slug, status: "published", contentType: { $ne: "platform-seo" } }).lean();
+      blog = await Blog.findOne({ slug, status: "published", contentType: { $ne: "platform-seo" } }).select("_id analytics.views").lean();
       
       if (blog && !isBot) {
         // Implement Deduplication using redis
@@ -55,7 +55,7 @@ export async function POST(
             { slug, status: "published", contentType: { $ne: "platform-seo" } },
             { $inc: { "analytics.views": 1 } },
             { new: true, timestamps: false }
-          ).lean();
+          ).select("_id analytics.views").lean();
           
           await redis.set(dedupKey, "1", "EX", 3600); // 1 hour deduplication
         }
@@ -66,29 +66,32 @@ export async function POST(
       return NextResponse.json({ error: "Blog not found" }, { status: 404 });
     }
 
-    const session = await auth();
-    const userId = session?.user?.id || session?.user?.email;
+    // Only decrypt session if this is a ping tracking reading history
+    if (isPing) {
+      const session = await auth();
+      const userId = session?.user?.id || session?.user?.email;
 
-    if (userId) {
-      const isCompleted = progressPercentage >= 95;
+      if (userId) {
+        const isCompleted = progressPercentage >= 95;
 
-      await ReadingHistory.findOneAndUpdate(
-        { user: userId, blog: blog._id },
-        { 
-          $set: { 
-            lastInteractionAt: new Date(),
-            deviceType
+        await ReadingHistory.findOneAndUpdate(
+          { user: userId, blog: blog._id },
+          { 
+            $set: { 
+              lastInteractionAt: new Date(),
+              deviceType
+            },
+            $max: { 
+              progressPercentage,
+              resumePoint
+            },
+            $inc: { sessionDuration: timeSpent },
+            // Only set completed to true if it reaches 95%
+            ...(isCompleted ? { $set: { completed: true, lastInteractionAt: new Date(), deviceType } } : {})
           },
-          $max: { 
-            progressPercentage,
-            resumePoint
-          },
-          $inc: { sessionDuration: timeSpent },
-          // Only set completed to true if it reaches 95%
-          ...(isCompleted ? { $set: { completed: true, lastInteractionAt: new Date(), deviceType } } : {})
-        },
-        { upsert: true, new: true }
-      );
+          { upsert: true, new: true }
+        );
+      }
     }
 
     return NextResponse.json({ 

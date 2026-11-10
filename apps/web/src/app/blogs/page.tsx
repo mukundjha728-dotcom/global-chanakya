@@ -59,15 +59,16 @@ const getCachedBlogs = unstable_cache(
     if (trending) query.isTrending = true;
 
     const blogs = await Blog.find(query)
-      .select("-content")
+      .select("title slug excerpt category featuredImage isTrending publishAt analytics.views author")
       .sort({ publishAt: -1 })
+      .limit(30)
       .populate("author", "name")
       .lean();
       
     // Serialize to remove ObjectIds and Dates for Next.js cache
     return JSON.parse(JSON.stringify(blogs)) as any[];
   },
-  ["blogs-list-cache"],
+  ["blogs-list-cache-v3"],
   { revalidate: 3600, tags: ["blogs"] }
 );
 

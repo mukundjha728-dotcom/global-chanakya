@@ -11,7 +11,7 @@ import type { TrendingBlog } from "@/lib/trending";
 import { BannerAd } from "@/components/ads/AdUnit";
 import dbConnect from "@/lib/mongoose";
 
-export const revalidate = 60;
+export const revalidate = 300;
 
 const methodologyPillars = [
   {
