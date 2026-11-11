@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Heart, Bookmark, MessageCircle, Share2, Send, X, Loader2, LogIn } from "lucide-react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 
 interface Comment {
   _id: string;
@@ -18,7 +19,7 @@ interface BlogActionsProps {
   slug: string;
   initialLikes: number;
   initialBookmarks: number;
-  isLoggedIn: boolean;
+  isLoggedIn?: boolean;
   commentsEnabled: boolean;
 }
 
@@ -26,9 +27,11 @@ export default function BlogActions({
   slug,
   initialLikes,
   initialBookmarks,
-  isLoggedIn,
+  isLoggedIn: initialIsLoggedIn,
   commentsEnabled,
 }: BlogActionsProps) {
+  const { data: session } = useSession();
+  const isLoggedIn = initialIsLoggedIn ?? !!session?.user;
   const [liked, setLiked] = useState(false);
   const [likes, setLikes] = useState(initialLikes);
   const [bookmarked, setBookmarked] = useState(false);

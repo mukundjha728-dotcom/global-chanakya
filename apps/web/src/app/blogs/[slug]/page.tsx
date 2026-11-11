@@ -354,7 +354,6 @@ export default async function BlogPage({ params }: { params: Promise<{ slug: str
               slug={blog.slug}
               initialLikes={blog.analytics?.likes || 0}
               initialBookmarks={blog.analytics?.bookmarks || 0}
-              isLoggedIn={!!session}
               commentsEnabled={blog.commentsEnabled !== false}
             />
 
